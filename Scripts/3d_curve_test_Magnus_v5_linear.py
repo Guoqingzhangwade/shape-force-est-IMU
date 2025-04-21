@@ -321,7 +321,7 @@ def set_equal_axis(ax):
 ##############################################################################
 
 if __name__=="__main__":
-    np.random.seed(23)
+    np.random.seed(44)
 
     # 1) True shape: 5 param => [m0, m1, m2, m3, m4]
     #    kappa_x(s) = m0 + m1*s
