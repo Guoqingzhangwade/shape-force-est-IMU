@@ -17,7 +17,7 @@ from scipy.linalg import expm
 import matplotlib.pyplot as plt
 
 # ---------- global parameters ----------
-np.random.seed(24)
+np.random.seed(128)
 STATE_DIM  = 5
 IMU_POS    = np.array([0.25, 0.50, 0.75])      # along arclength
 L_PHYS     = 100.0                             # mm  (only for translation)
@@ -26,7 +26,7 @@ GAMMA      = 20                                 # PoE subdivisions
 
 # ground truth & initial guess
 TRUE_M = np.array([1.0, 0.2, 1.5, 0.5, 1.7])
-TRUE_M = np.random.uniform(-2,2,5)
+TRUE_M = np.random.uniform(-3,3,5)
 INIT_M = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
 
 # process / measurement noise

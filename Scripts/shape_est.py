@@ -201,6 +201,7 @@ def compute_q_R_derivative(R_matrix):
     """
     # Ensure the rotation matrix is valid
     rot = R.from_matrix(R_matrix)
+    ipdb.set_trace()
     q = rot.as_quat(scalar_first=True)  # [w, x, y, z]
     q = q / np.linalg.norm(q)  # Normalize the quaternion
 
