@@ -1,20 +1,19 @@
-"""Cosserat‑rod statics model for a **single‑segment** TDCR.
-   • Supports arbitrary tendon count (default = 4).
+"""Cosserat-rod statics model for a **single-segment** TDCR.
+   • Supports arbitrary tendon count (default = 4).
    • Solves force & moment equilibrium via shooting + SciPy.
 """
 from __future__ import annotations
 import numpy as np
-from numpy.linalg import solve, svd
+from numpy.linalg import solve, svd, norm
 from scipy.integrate import solve_ivp
 from scipy.optimize import least_squares
-from typing import Sequence
+from typing import Sequence, Union
 from utils import hat, unit, block33_to_mat
-from numpy.linalg import solve, svd, norm
 
 E3 = np.array([0.0, 0.0, 1.0])  # backbone tangential basis
 
 class CosseratRodModel:
-    """Static Cosserat rod for tendon‑driven CR (single segment)."""
+    """Static Cosserat rod for tendon-driven CR (single segment)."""
 
     def __init__(self,
                  length: float = 0.1,
@@ -121,10 +120,10 @@ class CosseratRodModel:
                            f_ext: np.ndarray | None = None,
                            l_ext: np.ndarray | None = None,
                            guess: np.ndarray | None = None,
-                           return_states: bool = False):
+                           return_states: bool = False,
+                           s_eval: Union[None, Sequence[float]] = None):
         """Solve static equilibrium for given tendon *tensions* τ (N).
-
-        Returns tip frame T ∈ SE(3).  If *return_states* is True the
+        Returns tip frame T ∈ SE(3).  If *return_states* is True the
         complete discretised backbone states are also returned.
         """
         tau = np.asarray(tau, dtype=float).ravel()
@@ -141,9 +140,10 @@ class CosseratRodModel:
             y0[12:15] = v0
             y0[15:18] = u0
             sol = solve_ivp(self._ode, (0, self.L), y0,
+                            t_eval=s_eval,
                             args=(tau,), max_step=self.L/self.N,
                             rtol=1e-6, atol=1e-8)
-            yL = sol.y[:,-1]
+            yL = sol.y[:,-1] # state at s=L
             R = yL[3:12].reshape(3,3)
             vL = yL[12:15]
             uL = yL[15:18]
@@ -174,6 +174,7 @@ class CosseratRodModel:
         y0[3:12] = np.eye(3).reshape(-1)
         y0[12:15] = v0_opt; y0[15:18] = u0_opt
         traj = solve_ivp(self._ode, (0, self.L), y0, args=(tau,),
+                         t_eval=s_eval,
                          max_step=self.L/self.N, rtol=1e-6, atol=1e-8)
 
         yL = traj.y[:,-1]
