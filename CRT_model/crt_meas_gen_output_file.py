@@ -25,6 +25,7 @@ Author: Guoqing Zhang, 2025-05-20
 from __future__ import annotations
 import numpy as np, argparse, json, datetime
 from numpy.random import default_rng
+import ipdb
 
 # --------------------------------------------------------------------------- #
 # Quaternion helpers                                                          #
@@ -46,15 +47,51 @@ def quat_mul(q1: np.ndarray, q2: np.ndarray) -> np.ndarray:
         w1*y2 - x1*z2 + y1*w2 + z1*x2,
         w1*z2 + x1*y2 - y1*x2 + z1*w2 ])
 
+# def rotmat_to_quat(R: np.ndarray) -> np.ndarray:
+#     """Convert 3×3 rotation matrix to scalar-first quaternion."""
+#     w = np.sqrt(1.0 + np.trace(R)) / 2.0
+#     if w < 1e-8:          # numerical edge
+#         return np.array([1.,0.,0.,0.])
+#     x = (R[2,1] - R[1,2]) / (4*w)
+#     y = (R[0,2] - R[2,0]) / (4*w)
+#     z = (R[1,0] - R[0,1]) / (4*w)
+#     return np.array([w,x,y,z])
+
 def rotmat_to_quat(R: np.ndarray) -> np.ndarray:
-    """Convert 3×3 rotation matrix to scalar-first quaternion."""
-    w = np.sqrt(1.0 + np.trace(R)) / 2.0
-    if w < 1e-8:          # numerical edge
-        return np.array([1.,0.,0.,0.])
-    x = (R[2,1] - R[1,2]) / (4*w)
-    y = (R[0,2] - R[2,0]) / (4*w)
-    z = (R[1,0] - R[0,1]) / (4*w)
-    return np.array([w,x,y,z])
+    """Convert 3×3 rotation matrix to scalar-first quaternion [w, x, y, z]."""
+    m00, m01, m02 = R[0]
+    m10, m11, m12 = R[1]
+    m20, m21, m22 = R[2]
+
+    trace = m00 + m11 + m22
+
+    if trace > 0:
+        S = np.sqrt(trace + 1.0) * 2  # S=4*w
+        w = 0.25 * S
+        x = (m21 - m12) / S
+        y = (m02 - m20) / S
+        z = (m10 - m01) / S
+    elif (m00 > m11) and (m00 > m22):
+        S = np.sqrt(1.0 + m00 - m11 - m22) * 2  # S=4*x
+        w = (m21 - m12) / S
+        x = 0.25 * S
+        y = (m01 + m10) / S
+        z = (m02 + m20) / S
+    elif m11 > m22:
+        S = np.sqrt(1.0 + m11 - m00 - m22) * 2  # S=4*y
+        w = (m02 - m20) / S
+        x = (m01 + m10) / S
+        y = 0.25 * S
+        z = (m12 + m21) / S
+    else:
+        S = np.sqrt(1.0 + m22 - m00 - m11) * 2  # S=4*z
+        w = (m10 - m01) / S
+        x = (m02 + m20) / S
+        y = (m12 + m21) / S
+        z = 0.25 * S
+
+    q = np.array([w, x, y, z])
+    return q / np.linalg.norm(q)
 
 # --------------------------------------------------------------------------- #
 # Main                                                                        #
@@ -79,8 +116,10 @@ def main():
     N, n_disks = T_gt.shape[:2]
 
     # ------------------- sensor locations -----------------------------------
-    s_locations = np.array([0.30, 0.65, 1.00])     # normalised arclength
+    s_locations = np.array([12.0/39, 25.0/39, 1.00])     # normalised arclength
     idx_sensor = np.round(s_locations * (n_disks-1)).astype(int)  # indices
+
+    # ipdb.set_trace()
 
     # ------------------- allocate measurement arrays ------------------------
     tau_meas = np.empty_like(tau_gt)
@@ -106,6 +145,7 @@ def main():
             q_noise = quat_from_axis_angle(axis, angle)
 
             q_meas[k, j] = quat_mul(q_noise, q_gt)   # measurement = noise ⊗ GT
+            q_meas[k, j] /= np.linalg.norm(q_meas[k, j])
 
     # ------------------- save ------------------------------------------------
     meta_meas = {

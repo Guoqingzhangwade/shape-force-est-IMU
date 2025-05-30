@@ -54,11 +54,10 @@ def states_to_frames(traj_y: np.ndarray) -> np.ndarray:
     T = np.eye(4)[None, ...].repeat(n_pts, axis=0)          # (n_pts, 4, 4)
     T[:, :3, 3] = traj_y[0:3, :].T
 
-    # ---- simple example: orientation as 3×3 R(s) in rows 6:15 ----
+    # ---- simple example: orientation as 3×3 R(s) in rows 3:12 ----
     # (comment out if your model already gives 4×4 frames)
-    if traj_y.shape[0] >= 15:
-        R_flat = traj_y[6:15, :].T.reshape(n_pts, 3, 3)
-        T[:, :3, :3] = R_flat
+    R_flat = traj_y[3:12, :].T.reshape(n_pts, 3, 3)
+    T[:, :3, :3] = R_flat
 
     return T
 
@@ -81,7 +80,7 @@ def git_hash() -> str | None:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n",          type=int,   default=100,
+    parser.add_argument("--n",          type=int,   default=10,
                         help="number of valid samples to generate")
     parser.add_argument("--outfile",    type=str,   default="tdcr_gt_samples.npz")
     parser.add_argument("--seed",       type=int,   default=None,

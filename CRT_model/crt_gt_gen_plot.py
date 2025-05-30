@@ -63,10 +63,11 @@ def main():
     )
 
     shapes_xyz: list[np.ndarray] = []
-    n_target = 10
+    tip_frames: list[np.ndarray] = []
+    n_target = 5
 
     while len(shapes_xyz) < n_target:
-        τ          = sample_tensions(n_tendon=rod.n_tendon, τ_max=4.0)
+        τ = sample_tensions(n_tendon=rod.n_tendon, τ_max=4.0)
         f_ext, l_ext = sample_tip_wrench()
 
         try:
@@ -76,30 +77,49 @@ def main():
                 l_ext=l_ext,
                 return_states=True
             )
-            # centre-line positions p(s) are rows 0:3 of traj.y
+            # Centre-line positions p(s)
             p = traj.y[0:3, :].T   # shape (N_pts, 3)
             shapes_xyz.append(p)
 
+            # Extract tip frame T_tip
+            yL = traj.y[:, -1]
+            T_tip = np.eye(4)
+            T_tip[0:3, 0:3] = yL[3:12].reshape(3, 3)
+            T_tip[0:3, 3] = yL[0:3]
+            tip_frames.append(T_tip)
+
         except RuntimeError:
-            # non-converged shooting → discard and resample
             continue
 
     print(f"Generated {len(shapes_xyz)} valid configurations.")
 
-    # --- plot all shapes in one figure -------------------------------------
-    fig = plt.figure(figsize=(6, 6))
-    ax  = fig.add_subplot(111, projection="3d")
+    # --- plot all shapes and tip frames in one figure ----------------------
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_subplot(111, projection="3d")
 
-    for p in shapes_xyz:
+    for p, T in zip(shapes_xyz, tip_frames):
         ax.plot(p[:, 0], p[:, 1], p[:, 2], lw=0.8, alpha=0.75)
+
+        # Plot tip frame as coordinate axes
+        origin = T[0:3, 3]
+        x_axis = T[0:3, 0]
+        y_axis = T[0:3, 1]
+        z_axis = T[0:3, 2]
+        scale = 0.01  # Length of axis lines
+
+        ax.quiver(*origin, *(scale * x_axis), color='r', linewidth=0.8)
+        ax.quiver(*origin, *(scale * y_axis), color='g', linewidth=0.8)
+        ax.quiver(*origin, *(scale * z_axis), color='b', linewidth=0.8)
 
     ax.set_xlabel("x [m]")
     ax.set_ylabel("y [m]")
     ax.set_zlabel("z [m]")
-    ax.set_title("100 random static configurations of a 4-tendon TDCR")
-    ax.set_box_aspect([1, 1, 1])  # equal axes
+    ax.set_title("50 random static configurations of a 4-tendon TDCR with tip frames")
+    ax.set_box_aspect([1, 1, 1])  # equal aspect ratio
     plt.tight_layout()
     plt.show()
+
+
 
 
 if __name__ == "__main__":

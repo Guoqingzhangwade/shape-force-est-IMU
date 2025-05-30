@@ -72,6 +72,17 @@ def fwd_rotation(m, s, e3):
     T[:3, 3] *= 1          # scale translation once
     return T[:3, :3]
 
+def forward_kinematics_multiple(m, s_values):
+    rots = []
+    poss = []
+    for s in s_values:
+        T_s = np.eye(4); h = s/GAMMA
+        for k in range(1, GAMMA+1):
+            T_s = T_s @ expm(magnus_psi(k*h, h, m, e3))
+        rots.append(T_s[:3,:3])
+        poss.append(T_s[:3,3])
+    return rots, poss
+
 def q_xyzw_to_wxyz(q):
     x, y, z, w = q
     return np.array([w, x, y, z])
@@ -345,6 +356,68 @@ def jac_analy(q_meas, m, s, gamma, e3):
 
     return dtheta_dm
 
+##############################################################################
+# 5) Plot
+##############################################################################
+
+def plot_3d_curves(m_true, m_est, s_values):
+    s_dense = np.linspace(0,1,100)
+    rots_true, pos_true = forward_kinematics_multiple(m_true, s_dense)
+    rots_est,  pos_est  = forward_kinematics_multiple(m_est,  s_dense)
+    pos_true = np.array(pos_true)
+    pos_est  = np.array(pos_est)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot(pos_true[:,0], pos_true[:,1], pos_true[:,2],
+            color='blue', label='True shape')
+    ax.plot(pos_est[:,0],  pos_est[:,1],  pos_est[:,2],
+            color='green', linestyle='--', label='Est shape')
+
+    rotsT, posT = forward_kinematics_multiple(m_true, s_values)
+    rotsE, posE = forward_kinematics_multiple(m_est,  s_values)
+    for (s_i, R_t, p_t, R_e, p_e) in zip(s_values, rotsT, posT, rotsE, posE):
+        plot_frame(ax, p_t, R_t, f'True s={s_i}', 'blue')
+        plot_frame(ax, p_e, R_e, f'Est s={s_i}', 'green')
+
+    ax.set_xlabel('X(mm)')
+    ax.set_ylabel('Y(mm)')
+    ax.set_zlabel('Z(mm)')
+    ax.legend()
+    set_equal_axis(ax)
+    plt.show()
+
+def plot_frame(ax, origin, R, label=None, color='black'):
+    scale = 5.0
+    x_axis = R[:,0]*scale
+    y_axis = R[:,1]*scale
+    z_axis = R[:,2]*scale
+    ax.quiver(origin[0], origin[1], origin[2],
+              x_axis[0], x_axis[1], x_axis[2],
+              color=color)
+    ax.quiver(origin[0], origin[1], origin[2],
+              y_axis[0], y_axis[1], y_axis[2],
+              color=color)
+    ax.quiver(origin[0], origin[1], origin[2],
+              z_axis[0], z_axis[1], z_axis[2],
+              color=color)
+    if label:
+        ax.text(origin[0], origin[1], origin[2], label, color=color)
+
+def set_equal_axis(ax):
+    xlims = ax.get_xlim3d()
+    ylims = ax.get_ylim3d()
+    zlims = ax.get_zlim3d()
+    spans = [xlims[1]-xlims[0], ylims[1]-ylims[0], zlims[1]-zlims[0]]
+    max_span = max(spans)
+    x_center = 0.5*(xlims[0]+xlims[1])
+    y_center = 0.5*(ylims[0]+ylims[1])
+    z_center = 0.5*(zlims[0]+zlims[1])
+    ax.set_xlim3d([x_center - max_span/2, x_center + max_span/2])
+    ax.set_ylim3d([y_center - max_span/2, y_center + max_span/2])
+    ax.set_zlim3d([z_center - max_span/2, z_center + max_span/2])
+
+
 # ---------- generate synthetic IMU data ----------
 meas = []
 for _ in range(NUM_STEPS):
@@ -387,6 +460,8 @@ for k in range(NUM_STEPS):
     est_hist.append(m_est.copy())
 
 est_hist = np.array(est_hist)      # length = NUM_STEPS+1
+
+plot_3d_curves(TRUE_M, m_est, IMU_POS)
 
 # ---------- plot ----------
 t = np.arange(NUM_STEPS + 1)

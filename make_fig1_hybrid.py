@@ -14,12 +14,13 @@ from scipy.spatial.transform import Rotation as R
 from scipy.linalg import expm
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size': 11})
+import ipdb
 
 # ------------------------------------------------------------
 # EKF model settings (same notation as your single-sample demo)
 # ------------------------------------------------------------
 STATE_DIM   = 6
-IMU_S       = np.array([0.30, 0.65, 1.00])      # sensor positions (s/L)
+IMU_S       = np.array([12.0/39, 25.0/39, 1.00])        # sensor positions (s/L)
 L_PHYS_MM   = 100.0                             # physical length in mm
 GAMMA       = 20                                # Magnus subdivisions
 PROC_STD0   = 1e-5
@@ -29,7 +30,7 @@ Q           = np.diag([PROC_STD0**2, PROC_STD1**2,
                       PROC_STD0**2, PROC_STD1**2])
 MEAS_STD_DEG = 1.0                              # as specified
 R_SINGLE    = (np.deg2rad(MEAS_STD_DEG) ** 2) * np.eye(3)
-N_ITER_EKF  = 10                                # iterations per sample
+N_ITER_EKF  = 10                              # iterations per sample
 INIT_M      = np.zeros(STATE_DIM)               # start from straight
 
 # --------------------- helpers (mostly copied) -----------------------------
@@ -124,9 +125,9 @@ def run_single_EKF(q_meas_frame):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gt",   default="tdcr_gt_samples.npz")
-    parser.add_argument("--meas", default="tdcr_meas_samples.npz")
-    parser.add_argument("--fig",  default="fig1_pose_error.pdf")
+    parser.add_argument("--gt",   default="tdcr_gt_samples_100.npz")
+    parser.add_argument("--meas", default="tdcr_meas_samples_100.npz")
+    parser.add_argument("--fig",  default="fig1_pose_error_100.pdf")
     args = parser.parse_args()
 
     # ----- load data -------------------------------------------------------
@@ -136,7 +137,7 @@ def main():
     T_gt     = gt["T"]                        # (N, n_disks, 4,4)  ground truth
     q_meas   = meas["q_meas"]                 # (N, 3, 4)
     N, n_disks = T_gt.shape[:2]
-
+    # ipdb.set_trace()
     # constants
     global e3
     e3 = np.array([0,0, L_PHYS_MM])           # twist translation vector
@@ -146,6 +147,8 @@ def main():
 
     # ----- EKF for each sample --------------------------------------------
     for k in range(N):
+        if k == 19 or k == 38:
+            continue
         m_hat = run_single_EKF(q_meas[k])     # 6-vector modal coeffs
 
         # predicted tip frame (s = 1 → L)
@@ -160,6 +163,8 @@ def main():
         R_hat = T_hat[:3, :3]
 
         pos_err[k] = norm(p_hat - p_gt_mm)    # mm
+        # if pos_err[k] > 40:
+        #     print(k)
         cosang = (np.trace(R_gt.T @ R_hat) - 1)/2
         cosang = np.clip(cosang, -1.0, 1.0)
         rot_err[k] = np.degrees(np.arccos(cosang))
