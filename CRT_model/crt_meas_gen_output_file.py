@@ -98,8 +98,8 @@ def rotmat_to_quat(R: np.ndarray) -> np.ndarray:
 # --------------------------------------------------------------------------- #
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gt",    default="tdcr_gt_samples.npz")
-    parser.add_argument("--out",   default="tdcr_meas_samples.npz")
+    parser.add_argument("--gt",    default="tdcr_gt_samples_10.npz")
+    parser.add_argument("--out",   default="tdcr_meas_samples_10.npz")
     parser.add_argument("--tau-noise", type=float, default=0.02, help="σ_τ  [N]")
     parser.add_argument("--ori-noise", type=float, default=np.deg2rad(1.0),
                         help="σ_θ  [rad]")

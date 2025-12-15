@@ -202,8 +202,6 @@ def measurement_jacobian(m, s_vals, q_obs, *, gamma=26, L=100.0):
     H_blocks, y_blocks = [], []
     R_pred, _ = forward_kinematics_multiple(m, s_vals, gamma=gamma, L=L)
     q_pred = [R.from_matrix(Rp).as_quat() for Rp in R_pred]
-    if q_pred[3] <0:
-        q_pred = -q_pred
 
     for i,(q_m,q_p,Rp) in enumerate(zip(q_obs, q_pred, R_pred)):
         θ   = quat_error(q_m, q_p)                 # residual 3×1

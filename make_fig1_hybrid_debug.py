@@ -177,18 +177,7 @@ def main():
 
     ipdb.set_trace()
 
-    # ---------- plot -----------------------------------------------------------
-    fig = plt.figure(figsize=(6,5))
-    ax = fig.add_subplot(111, projection='3d')
-    ax.plot(p_gt_mm[0], p_gt_mm[1], p_gt_mm[2], 'k-', lw=2, label='Ground truth')
-    ax.plot(p_hat_mm[0], p_hat_mm[1], p_hat_mm[2], 'r--', lw=2, label='EKF estimate')
-
-
-    ax.set_xlabel('X [mm]'); ax.set_ylabel('Y [mm]'); ax.set_zlabel('Z [mm]')
-    ax.set_title('Single sample backbone - GT vs. EKF')
-    ax.legend(loc='upper left')
-    ax.view_init(elev=20, azim=-60)
-    plt.tight_layout()
+ 
 
 if __name__ == "__main__":
     main()

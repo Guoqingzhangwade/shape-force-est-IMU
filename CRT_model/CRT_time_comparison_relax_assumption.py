@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import least_squares
 from cosserat_rod_model import CosseratRodModel
 from pck_models import pck0_inverse_2d_ls_value, pck2_inverse_2d_ls_value, compute_external_wrench
+from scipy.integrate import solve_ivp
 
 # -------------------------------------------------------------
 # Simplified in-plane Cosserat rod: no shear, no torsion

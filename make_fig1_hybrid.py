@@ -125,9 +125,9 @@ def run_single_EKF(q_meas_frame):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gt",   default="tdcr_gt_samples_100.npz")
-    parser.add_argument("--meas", default="tdcr_meas_samples_100.npz")
-    parser.add_argument("--fig",  default="fig1_pose_error_100.pdf")
+    parser.add_argument("--gt",   default="tdcr_gt_samples_10.npz")
+    parser.add_argument("--meas", default="tdcr_meas_samples_10.npz")
+    parser.add_argument("--fig",  default="fig1_pose_error_10.pdf")
     args = parser.parse_args()
 
     # ----- load data -------------------------------------------------------
@@ -147,8 +147,8 @@ def main():
 
     # ----- EKF for each sample --------------------------------------------
     for k in range(N):
-        if k == 19 or k == 38:
-            continue
+        # if k == 19 or k == 38:
+        #     continue
         m_hat = run_single_EKF(q_meas[k])     # 6-vector modal coeffs
 
         # predicted tip frame (s = 1 → L)

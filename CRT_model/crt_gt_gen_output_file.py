@@ -82,8 +82,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--n",          type=int,   default=10,
                         help="number of valid samples to generate")
-    parser.add_argument("--outfile",    type=str,   default="tdcr_gt_samples.npz")
-    parser.add_argument("--seed",       type=int,   default=None,
+    parser.add_argument("--outfile",    type=str,   default="tdcr_gt_samples_10.npz")
+    parser.add_argument("--seed",       type=int,   default=22,
                         help="set RNG seed for repeatability")
     args = parser.parse_args()
 

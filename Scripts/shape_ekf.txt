@@ -1,0 +1,29 @@
+| **2** | **`quat_error` / residual sign** – you use<br>`residual = -compute_theta(...)`, but the Jacobian `H_i` is built **without** that minus sign.  The product `K@residual` therefore nudges the state in the opposite direction for every update. | Produces the “quick dive to a wrong constant offset” behaviour you saw earlier. | Delete the leading minus:  ```residual =  compute_theta(q_meas, m_pred, s, 20)``` **OR** pre-multiply `H_i` by –1 (but do *only one* of those). |
+| **3** | **`twist_matrix(dkappa, 0)` is wrong** in `compute_R_m_derivative`.<br>You call `twist_matrix(dkappa, np.zeros(3))`, but `twist_matrix` expects the **constant translation column** `e3`.  Setting it to zero deletes half the derivative (and can flip its sign for m₄). | The analytic ∂R/∂m becomes biased, so the 9×9 KF gain cancels the true curvature components. | Replace by<br>```python
+deta_1_dmi = twist_matrix(dkappa_1_dmi, e3*0)  # keep e3
+deta_2_dmi = twist_matrix(dkappa_2_dmi, e3*0)
+```<br>*(If you really want no translation derivative, cut only the **last column** after the twist is built, not before.)* |
+| **4** | **Process noise matrix `Q` is diagonal-block but you add it to `P` every step** – OK – *but* its magnitude is 1–3 orders smaller than your measurement noise (`σ≈0.01 rad`). | Filter becomes model-driven; if the initial guess is off-bias it can never walk back. | Try<br>`PROCESS_NOISE_STD_0th = 0.5` (and scale the others ×5). |
+| **5** | **Finite-difference check uses `delta=1e-7` but `theta≈10-2`.**  The numerical gradient suffers cancellation, so you may be approving a derivative that is actually wrong. | You might have missed a sign error (see item 2). | Use `delta = 1e-5` or compute the *relative* difference per-entry. |
+| **6** | **Quaternion noise generation** – you add a *rotation vector* to a **quaternion** directly:  `q_meas = R.from_quat(q_true) * noise_rotation`.  That is fine, but then you normalise and maybe flip sign.  Good.  *However* you forgot to **normalise after addition** for the *test* inside `validate_theta_m_derivative`. | Inconsistent norms sneak in, spoiling the derivative test. | Ensure<br>`q_meas /= np.linalg.norm(q_meas)` *after* the rot-vec noise is applied. |
+| **7** | **`phi_func` basis order** – you put `[1,s,s²]` blocks for each bending direction and twist.  If you meant *0-th, 1-st, 2-nd* order polynomials **per axis**, the mapping to modal indices (0,3,6) etc. is correct.  If not, double-check: index 0 currently affects x-bending, index 1 affects the *same* axis with a linear term, etc. | Might just be intentional, but check the mapping against your paper. | — |
+
+---
+
+### After the patches
+
+1. Run `validate_theta_m_derivative(...)` again – the relative error should drop below **1 e-3** without tuning `delta`.  
+2. The filter trace should now glide from the `[1.3,1.3,…]` initial guess toward the nine true coefficients and stay there.  
+3. If convergence is still *slow but unbiased*, increase `PROCESS_NOISE_STD_*` another factor 2.  
+4. If it becomes *noisy*, lower them or raise `MEASUREMENT_NOISE_STD`.
+
+---
+
+### One final simplification
+
+Once items 1–3 are fixed you can **delete** all the numerical‐FD code; the analytic Jacobian alone is now trustworthy:
+
+```python
+# -- inside the EKF loop --
+residual = compute_theta(q_meas, m_pred, s, 20)
+H_i      = compute_theta_m_derivative(q_meas, R_pred, m_pred, s, 20)

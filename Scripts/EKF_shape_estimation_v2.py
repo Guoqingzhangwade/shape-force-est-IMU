@@ -61,6 +61,7 @@ def forward_kinematics_multiple(m: np.ndarray, s_values, *, gamma: int = 10, L: 
 
 # Compute measurement Jacobian and EKF update
 
+
 def rotation_matrix_to_axis_angle(R):
     angle = np.arccos(np.clip((np.trace(R) - 1) / 2, -1.0, 1.0))
     if np.isclose(angle, 0):
