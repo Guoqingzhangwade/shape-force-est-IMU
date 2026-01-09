@@ -63,7 +63,7 @@ class CosseratRodModel:
         # Tendon unit directions pb_dot_i in body frame
         pb_dot = [u_hat @ ri + v for ri in self.r]
 
-        # A_i matrices Eq.(15) Rao2021
+        # A_i matrices Eq.(15) Rucker2011-TRO
         A = [-tau_i / norm(pb_dot_i)**3 * hat(pb_dot_i) @ hat(pb_dot_i)
              for tau_i, pb_dot_i in zip(tau, pb_dot)]
         A_total = sum(A)

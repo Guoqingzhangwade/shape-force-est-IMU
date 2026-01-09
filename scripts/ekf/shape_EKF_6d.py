@@ -12,11 +12,27 @@ Author: Guoqing Zhang Date: 5/20/2025
 """
 
 # ---------- libraries ----------
+import os
+import sys
+
 import numpy as np
 from numpy.linalg import inv, norm
 from scipy.spatial.transform import Rotation as R
 from scipy.linalg import expm
 import matplotlib.pyplot as plt
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+SRC = os.path.join(ROOT, "src")
+if SRC not in sys.path:
+    sys.path.insert(0, SRC)
+
+from shape_force_est_imu.ekf import (  # noqa: E402
+    q_fix_sign,
+    quat_mul,
+    rotation_from_poE,
+    theta_from_measurement,
+    numeric_jacobian_theta,
+)
 
 # ---------- global parameters ----------
 np.random.seed(128)
@@ -350,10 +366,11 @@ meas = []
 for _ in range(NUM_STEPS):
     frame = []
     for s in IMU_POS:
-        q_clean = q_xyzw_to_wxyz(R.from_matrix(fwd_rotation(TRUE_M, s, e3)).as_quat())
-        noise   = R.from_rotvec(np.random.randn(3)*np.deg2rad(MEAS_STD_DEG))
-        q_meas  = q_mul(q_xyzw_to_wxyz(noise.as_quat()), q_clean)
-        if q_meas[0] < 0: q_meas = -q_meas
+        R_clean = rotation_from_poE(TRUE_M, s, gamma=GAMMA, L=L_PHYS, model="6d")
+        q_clean = q_fix_sign(R.from_matrix(R_clean).as_quat())
+        noise = R.from_rotvec(np.random.randn(3) * np.deg2rad(MEAS_STD_DEG))
+        q_meas = quat_mul(q_fix_sign(noise.as_quat()), q_clean)
+        q_meas = q_fix_sign(q_meas)
         frame.append(q_meas)
     meas.append(frame)
 
@@ -370,8 +387,12 @@ for k in range(NUM_STEPS):
     H_stack, r_stack = [], []
     for i, s in enumerate(IMU_POS):
         q_meas = meas[k][i]
-        r = -theta(q_meas, m_pred, s)          # residual (z = 0, h = θ)
-        H = jac_num(q_meas, m_pred, s)
+        r = -theta_from_measurement(
+            q_meas, m_pred, s, gamma=GAMMA, L=L_PHYS, model="6d"
+        )
+        H = numeric_jacobian_theta(
+            q_meas, m_pred, s, gamma=GAMMA, L=L_PHYS, model="6d"
+        )
         # H = jac_analy(q_meas, m_pred, s, 10, e3)
         H_stack.append(H)
         r_stack.append(r)
