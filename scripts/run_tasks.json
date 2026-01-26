@@ -1,0 +1,40 @@
+{
+  "tasks": {
+    "gen_inext_1": {
+      "desc": "Generate 1 inextensible GT sample (default ranges)",
+      "command": "python src\\shape_force_est_imu\\crt\\crt_gt_gen_output_file.py --n 1 --outfile artifacts\\data\\tdcr_gt_inext_1.npz --inextensible"
+    },
+    "gen_inext_large_1": {
+      "desc": "Generate 1 inextensible GT sample (force ±2N, moment ±0.2Nm)",
+      "command": "python src\\shape_force_est_imu\\crt\\crt_gt_gen_output_file.py --n 1 --outfile artifacts\\data\\tdcr_gt_inext_large.npz --inextensible --force-range 2.0 --moment-range 0.2"
+    },
+    "gen_inext_5": {
+      "desc": "Generate 5 inextensible GT samples (default ranges)",
+      "command": "python src\\shape_force_est_imu\\crt\\crt_gt_gen_output_file.py --n 5 --outfile artifacts\\data\\tdcr_gt_inext_5.npz --inextensible"
+    },
+    "fit_inext_1": {
+      "desc": "Estimate on tdcr_gt_inext_1.npz (order 2, plot shape & wrench)",
+      "command": "python scripts\\curve\\3d_curve_fit_from_crt_gt.py --npz artifacts\\data\\tdcr_gt_inext_1.npz --sample-idx 0 --order-x 2 --order-y 2 --order-z 2 --plot-sample 0 --compute-wrench --plot-wrench-sample 0"
+    },
+    "fit_inext_5_wrench_all": {
+      "desc": "Estimate on tdcr_gt_inext_5.npz (order 2, plot all wrenches)",
+      "command": "python scripts\\curve\\3d_curve_fit_from_crt_gt.py --npz artifacts\\data\\tdcr_gt_inext_5.npz --order-x 2 --order-y 2 --order-z 2 --compute-wrench --plot-wrench-all"
+    },
+    "fit_inext_large_1": {
+      "desc": "Estimate on tdcr_gt_inext_large.npz (order 2, plot shape & wrench)",
+      "command": "python scripts\\curve\\3d_curve_fit_from_crt_gt.py --npz artifacts\\data\\tdcr_gt_inext_large.npz --sample-idx 0 --order-x 2 --order-y 2 --order-z 2 --plot-sample 0 --compute-wrench --plot-wrench-sample 0"
+    },
+    "config_run_gt": {
+      "desc": "Run GT generation from scripts/config/gt_config.json",
+      "command": "python scripts\\run_config.py run-gt"
+    },
+    "config_run_est": {
+      "desc": "Run estimation from scripts/config/est_config.json",
+      "command": "python scripts\\run_config.py run-est"
+    },
+    "config_run_both": {
+      "desc": "Run GT then estimation from config files",
+      "command": "python scripts\\run_config.py run-both"
+    }
+  }
+}

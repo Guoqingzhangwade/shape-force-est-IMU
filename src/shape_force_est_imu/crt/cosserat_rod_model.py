@@ -9,6 +9,7 @@ from scipy.integrate import solve_ivp
 from scipy.optimize import least_squares
 from typing import Sequence, Union
 from utils import hat, unit, block33_to_mat
+import ipdb
 
 E3 = np.array([0.0, 0.0, 1.0])  # backbone tangential basis
 
@@ -21,7 +22,8 @@ class CosseratRodModel:
                  youngs_modulus: float = 60e9,
                  tendon_routing: Sequence[np.ndarray] | None = None,
                  tendon_count: int = 4,
-                 num_disks: int = 20):
+                 num_disks: int = 20,
+                 inextensible: bool = False):
         self.L = length
         self.Ro = backbone_radius
         self.E = youngs_modulus
@@ -44,6 +46,7 @@ class CosseratRodModel:
         self.r = list(tendon_routing)
         self.n_tendon = len(self.r)
         self.N = num_disks  # discrete integration steps
+        self.inextensible = bool(inextensible)
 
     # ------------------------------------------------------------------
     # ODE right‑hand side  y' = f(s, y)
@@ -54,6 +57,8 @@ class CosseratRodModel:
         R   = y[ 3:12].reshape(3,3)
         v   = y[12:15]
         u   = y[15:18]
+        if self.inextensible:
+            v = E3
         u_hat = hat(u)
         v_hat = hat(v)
 
@@ -100,6 +105,8 @@ class CosseratRodModel:
         vu_dot = solve(M66, rhs6)  # 6‑vector [v_dot, u_dot]
         v_dot = vu_dot[:3]
         u_dot = vu_dot[3:]
+        if self.inextensible:
+            v_dot = np.zeros(3)
 
         p_dot = R @ v
         R_dot = R @ u_hat
@@ -121,7 +128,8 @@ class CosseratRodModel:
                            l_ext: np.ndarray | None = None,
                            guess: np.ndarray | None = None,
                            return_states: bool = False,
-                           s_eval: Union[None, Sequence[float]] = None):
+                           s_eval: Union[None, Sequence[float]] = None,
+                           solver_opts: dict | None = None):
         """Solve static equilibrium for given tendon *tensions* τ (N).
         Returns tip frame T ∈ SE(3).  If *return_states* is True the
         complete discretised backbone states are also returned.
@@ -134,6 +142,8 @@ class CosseratRodModel:
         def shoot(x):
             """Residual of tip equilibrium for optimiser."""
             v0, u0 = x[:3], x[3:]
+            if self.inextensible:
+                v0 = E3.copy()
             y0 = np.zeros(18)
             y0[0:3] = 0.0  # p0
             y0[3:12] = np.eye(3).reshape(-1)  # R0
@@ -146,6 +156,8 @@ class CosseratRodModel:
             yL = sol.y[:,-1] # state at s=L
             R = yL[3:12].reshape(3,3)
             vL = yL[12:15]
+            if self.inextensible:
+                vL = E3.copy()
             uL = yL[15:18]
             # internal loads at tip
             n_L = R @ self.Kse @ (vL - E3)
@@ -163,13 +175,20 @@ class CosseratRodModel:
 
         if guess is None:
             guess = np.array([0,0,1, 0,0,0], dtype=float)  # straight
-        sol = least_squares(shoot, guess, xtol=1e-10, ftol=1e-10,
-                             gtol=1e-10, method='lm', max_nfev=500)
+        solver_opts = solver_opts or {}
+        sol = least_squares(shoot, guess,
+                             xtol=solver_opts.get("xtol", 1e-10),
+                             ftol=solver_opts.get("ftol", 1e-10),
+                             gtol=solver_opts.get("gtol", 1e-10),
+                             method=solver_opts.get("method", "lm"),
+                             max_nfev=solver_opts.get("max_nfev", 500))
         if not sol.success or norm(sol.fun) > 1e-6:
             raise RuntimeError(f"Shooting failed: {sol.message}, ‖res‖={norm(sol.fun):.2e}")
 
         # with optimal init, integrate once more & return trajectory
         v0_opt, u0_opt = sol.x[:3], sol.x[3:]
+        if self.inextensible:
+            v0_opt = E3.copy()
         y0 = np.zeros(18)
         y0[3:12] = np.eye(3).reshape(-1)
         y0[12:15] = v0_opt; y0[15:18] = u0_opt

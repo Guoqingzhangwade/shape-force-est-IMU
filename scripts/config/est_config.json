@@ -1,0 +1,17 @@
+{
+  "script": "scripts\\curve\\3d_curve_fit_from_crt_gt.py",
+  "args": {
+    "npz": "{gt_outfile}",
+    "order_x": 2,
+    "order_y": 2,
+    "order_z": 2,
+    "compute_wrench": true,
+    "plot_wrench_all": true,
+    "report_normalized_wrench": true,
+    "report_wrench_stats": true,
+    "E": 60000000000.0,
+    "backbone_radius": 0.0008,
+    "tendon_offset": 0.012,
+    "length": 0.375
+  }
+}

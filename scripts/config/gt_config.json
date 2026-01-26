@@ -1,0 +1,19 @@
+{
+  "script": "src\\shape_force_est_imu\\crt\\crt_gt_gen_output_file.py",
+  "args": {
+    "n": 2,
+    "outfile": "artifacts\\data\\tdcr_gt_inext_2.npz",
+    "inextensible": true,
+    "length": 0.375,
+    "youngs_modulus": 60000000000.0,
+    "backbone_radius": 0.0008,
+    "tendon_offset": 0.012,
+    "num_disks": 20,
+    "tau_max": 4.0,
+    "force_range": 0.4418,
+    "moment_range": 0.0442,
+    "use_scaled_wrench": true,
+    "c_f": 1,
+    "c_m": 1
+  }
+}

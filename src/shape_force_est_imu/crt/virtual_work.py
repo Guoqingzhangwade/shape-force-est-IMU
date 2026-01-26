@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.linalg import expm
+from scipy.linalg import expm, expm_frechet
 
 
 def hat(v):
@@ -127,11 +127,11 @@ def partial_magnus_4th_subinterval(s_start, s_end, m, i_param,
 
 
 def partial_expm(A, dA):
-    expA = expm(A)
-    return expA @ dA
+    _, dExp = expm_frechet(A, dA, compute_expm=True)
+    return dExp
 
 
-def partial_product_of_exponentials(m, s, i_param, gamma,
+def partial_product_of_exponentials(m, s, i_param, gamma, L,
                                     order_x, order_y, order_z):
     d_sub = np.linspace(0.0, s, gamma + 1)
     E_list = []
@@ -156,6 +156,7 @@ def partial_product_of_exponentials(m, s, i_param, gamma,
         for idx in range(j + 1, gamma):
             right = right @ E_list[idx]
         partial_T += left @ dExp_j @ right
+    partial_T[:3, 3] *= L
     return partial_T
 
 
@@ -166,7 +167,7 @@ def body_jacobian_at_s(m, s, gamma, L, order_x, order_y, order_z):
     J = np.zeros((6, n_params))
     for i_param in range(n_params):
         dT = partial_product_of_exponentials(
-            m, s, i_param, gamma, order_x, order_y, order_z
+            m, s, i_param, gamma, L, order_x, order_y, order_z
         )
         Vb_hat = T_inv @ dT
         J[:, i_param] = vee(Vb_hat)
@@ -193,7 +194,7 @@ def cable_jacobian(m, r_list, L, order_x, order_y, order_z, n_int=200):
                     i_param, order_x, order_y, order_z
                 )
                 integrand[idx, i_param] = moment_arm[axis] * (s ** power)
-        J[i_r, :] = L * np.trapz(integrand, s_vals, axis=0)
+        J[i_r, :] = -np.trapezoid(integrand, s_vals, axis=0)
     return J
 
 
