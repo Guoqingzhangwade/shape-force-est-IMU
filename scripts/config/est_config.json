@@ -4,7 +4,7 @@
     "npz": "{gt_outfile}",
     "order_x": 2,
     "order_y": 2,
-    "order_z": 2,
+    "order_z": 1,
     "compute_wrench": true,
     "plot_wrench_all": true,
     "report_normalized_wrench": true,

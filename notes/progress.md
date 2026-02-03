@@ -1,6 +1,6 @@
 # Progress Notes
 
-Date: Today
+Date: 1/26/2026
 
 Summary:
 - Added config-driven workflow for GT generation and estimation (run_config.py + JSON configs).

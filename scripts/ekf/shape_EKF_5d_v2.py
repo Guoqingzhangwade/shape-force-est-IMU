@@ -90,9 +90,7 @@ def q_inv(q):
 def theta(q_meas, m, s):
     """Minimal 3-vector orientation error."""
     q_pred = q_xyzw_to_wxyz(R.from_matrix(fwd_rotation(m, s, e3)).as_quat())
-    if q_pred[0] < 0: q_pred = -q_pred
     q_e = q_mul(q_meas, q_inv(q_pred))
-    if q_e[0] < 0: q_e = -q_e
     return 2*q_e[1:]
 
 def jac_num(q_meas, m, s, eps=1e-6):
@@ -370,7 +368,7 @@ for k in range(NUM_STEPS):
         q_meas = meas[k][i]
         r = -theta(q_meas, m_pred, s)          # residual (z = 0, h = θ)
         H = jac_num(q_meas, m_pred, s)
-        # H = jac_analy(q_meas, m_pred, s, 10, e3)
+        # H = jac_analy(q_meas, m_pred, s, GAMMA, e3)
         H_stack.append(H)
         r_stack.append(r)
     H = np.vstack(H_stack)
