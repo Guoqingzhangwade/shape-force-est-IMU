@@ -124,9 +124,15 @@ def run_single_EKF(q_meas_frame):
 # ---------------------------------------------------------------------------
 
 def main():
+    # Get the script directory and project root for relative paths
+    import os
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(os.path.dirname(script_dir))
+    data_dir = os.path.join(project_root, "artifacts", "data")
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gt",   default="tdcr_gt_samples_10.npz")
-    parser.add_argument("--meas", default="tdcr_meas_samples_10.npz")
+    parser.add_argument("--gt",   default=os.path.join(data_dir, "tdcr_gt_samples_10.npz"))
+    parser.add_argument("--meas", default=os.path.join(data_dir, "tdcr_meas_samples_10.npz"))
     parser.add_argument("--fig",  default="fig1_pose_error_10.pdf")
     args = parser.parse_args()
 
@@ -172,8 +178,8 @@ def main():
     # save quick summary
     print(f"[{datetime.datetime.now().time().isoformat(timespec='seconds')}] "
           f"Computed errors for {N} samples:")
-    print(f"  Position error  mean ± σ : {pos_err.mean():.3f} ± {pos_err.std():.3f} mm")
-    print(f"  Orientation err mean ± σ : {rot_err.mean():.3f} ± {rot_err.std():.3f} deg")
+    print(f"  Position error  mean +/- std : {pos_err.mean():.3f} +/- {pos_err.std():.3f} mm")
+    print(f"  Orientation err mean +/- std : {rot_err.mean():.3f} +/- {rot_err.std():.3f} deg")
 
     # ----- hybrid violin + box plot ---------------------------------------
     fig, ax = plt.subplots(figsize=(3.5,5))
@@ -208,7 +214,7 @@ def main():
     plt.tight_layout()
     plt.savefig(args.fig)
     plt.show()
-    print(f"Figure saved ➜ {args.fig}")
+    print(f"Figure saved -> {args.fig}")
 
 if __name__ == "__main__":
     main()
