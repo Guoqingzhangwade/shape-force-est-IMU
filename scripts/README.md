@@ -29,6 +29,7 @@ Obsolete/experimental scripts are moved to `scripts/archive/`.
 | Path | Contents |
 |---|---|
 | `results/meas_model_compare/` | Figures and LaTeX tables from `gen_comparison_figs.py` |
+| `results/shape_est/` | Output figures from `fig1_shape_ekf_error.py` |
 | `artifacts/data/` | Ground-truth and measurement `.npz` datasets |
 | `artifacts/figures/` | Other saved figures |
 
