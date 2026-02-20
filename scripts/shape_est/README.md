@@ -6,11 +6,13 @@ Generate all publication-ready figures with one command:
 
 ```bash
 # Standard quality (fast, ~5 minutes)
-python generate_publication_figures.py --output-dir ./figures
+python gen_comparison_figs.py
 
 # High quality for final manuscript (slower, ~15 minutes)
-python generate_publication_figures.py --high-quality --output-dir ./figures
+python gen_comparison_figs.py --high-quality
 ```
+
+Output is saved to `results/meas_model_compare/` in the project root.
 
 ## What Gets Generated
 
@@ -36,10 +38,10 @@ python generate_publication_figures.py --high-quality --output-dir ./figures
 ## Command-Line Options
 
 ```bash
-python generate_publication_figures.py [OPTIONS]
+python gen_comparison_figs.py [OPTIONS]
 
 Options:
-  --output-dir DIR          Output directory (default: ./figures)
+  --output-dir DIR          Output directory (default: results/meas_model_compare/)
   --trials N                Number of Monte Carlo trials (default: 10)
   --steps N                 Time steps per trial (default: 100)
   --gamma N                 Integration segments (default: 20)
@@ -54,19 +56,19 @@ Options:
 ### For Initial Draft
 ```bash
 # Quick run with minimal trials
-python generate_publication_figures.py --trials 5 --steps 50
+python gen_comparison_figs.py --trials 5 --steps 50
 ```
 
 ### For Final Manuscript
 ```bash
 # High quality with more trials for tight confidence intervals
-python generate_publication_figures.py --high-quality --trials 30 --save-svg
+python gen_comparison_figs.py --high-quality --trials 30 --save-svg
 ```
 
 ### Custom Configuration
 ```bash
 # Specific parameters
-python generate_publication_figures.py \
+python gen_comparison_figs.py \
   --trials 20 \
   --steps 100 \
   --gamma 30 \
@@ -141,8 +143,8 @@ For figures:
 
 ## Troubleshooting
 
-### ImportError: No module named 'ekf_measurement_compare_v2'
-**Solution**: Run from the same directory as `ekf_measurement_compare_v2.py`
+### ImportError: No module named 'meas_model_compare'
+**Solution**: Run from the same directory as `meas_model_compare.py` (i.e., `scripts/shape_est/`)
 
 ### Figures look different from interactive plots
 **Solution**: This is expected - publication figures use different styling optimized for print
@@ -157,19 +159,19 @@ For figures:
 
 1. **Initial exploration**: Use interactive script
    ```bash
-   python ekf_measurement_compare_v2.py --plot --plot-shape
+   python meas_model_compare.py --plot --plot-shape
    ```
 
 2. **Generate draft figures**: Quick quality
    ```bash
-   python generate_publication_figures.py --trials 10
+   python gen_comparison_figs.py --trials 10
    ```
 
 3. **Review and iterate**: Check figures, adjust parameters if needed
 
 4. **Generate final figures**: High quality
    ```bash
-   python generate_publication_figures.py --high-quality --trials 20
+   python gen_comparison_figs.py --high-quality --trials 20
    ```
 
 5. **Insert into manuscript**: Use PDF files and LaTeX table
@@ -202,4 +204,4 @@ numpy, scipy, matplotlib. Code available at [repository URL].
 ## Contact
 
 For questions about figure generation, see the main comparison script:
-`ekf_measurement_compare_v2.py --help`
+`python meas_model_compare.py --help`

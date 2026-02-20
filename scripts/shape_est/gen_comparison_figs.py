@@ -7,8 +7,8 @@ This script produces high-quality figures suitable for manuscript submission,
 including proper sizing, fonts, and both vector (PDF) and raster (PNG) formats.
 
 Usage:
-    python generate_publication_figures.py --output-dir ./figures
-    python generate_publication_figures.py --trials 20 --high-quality
+    python gen_comparison_figs.py --output-dir ../../results/meas_model_compare
+    python gen_comparison_figs.py --trials 20 --high-quality
 """
 
 import argparse
@@ -21,7 +21,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import sys
 
 # Import from the comparison script
-from ekf_measurement_compare_v2 import (
+from meas_model_compare import (
     build_meas_seq, ekf_so3, ekf_quat, reconstruct_shape_3d,
     summarize
 )
@@ -270,7 +270,8 @@ def main():
     parser = argparse.ArgumentParser(
         description="Generate publication-ready figures for EKF comparison"
     )
-    parser.add_argument("--output-dir", type=str, default="./figures",
+    parser.add_argument("--output-dir", type=str,
+                       default=str(Path(__file__).parent.parent.parent / "results" / "meas_model_compare"),
                        help="Output directory for figures")
     parser.add_argument("--trials", type=int, default=10,
                        help="Number of Monte Carlo trials")
