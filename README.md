@@ -54,7 +54,10 @@ shape-force-est-IMU/
 │   ├── data/                     # Ground-truth & measurement .npz datasets
 │   └── figures/                  # Other saved figures
 │
-└── notes/                        # Development notes
+├── notes/                        # Development notes
+├── progress/                     # Session progress notes (one .md file per work session)
+│   └── TEMPLATE.md               # Copy this to start a new entry
+└── .gitignore
 ```
 
 ---
