@@ -165,10 +165,7 @@ def main():
     if args.seed is not None:
         np.random.seed(args.seed)
 
-    if args.inextensible:
-        from cosserat_rod_model_inextensible import CosseratRodModel
-    else:
-        from cosserat_rod_model import CosseratRodModel
+    from cosserat_rod_model import CosseratRodModel
     tendon_offset = args.tendon_offset
     if args.tendon_radius is not None:
         tendon_offset = args.tendon_radius

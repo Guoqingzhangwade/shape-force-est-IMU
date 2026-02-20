@@ -39,7 +39,7 @@ Obsolete/experimental scripts are moved to `scripts/archive/`.
 
 | Module | Purpose |
 |---|---|
-| `src/shape_force_est_imu/crt/cosserat_rod_model.py` | Cosserat rod forward kinematics |
+| `src/shape_force_est_imu/crt/cosserat_rod_model.py` | Cosserat rod model (inextensible/Kirchhoff by default) |
 | `src/shape_force_est_imu/crt/crt_gt_gen.py` | CRT ground-truth shape/pose generation (in-memory) |
 | `src/shape_force_est_imu/crt/crt_gt_gen_output_file.py` | Save CRT ground-truth datasets to file |
 | `src/shape_force_est_imu/crt/crt_meas_gen_output_file.py` | Generate and save simulated measurement data |
