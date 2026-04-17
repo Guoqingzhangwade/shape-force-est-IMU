@@ -544,35 +544,41 @@ def compute_q_R_derivative_trace_branch(R_matrix: np.ndarray) -> np.ndarray:
         J[0, i, i] = 1.0 / (8.0 * q0)
 
     # ∂q1/∂R
-    J[1, 2, 1] = (1.0 / (4.0 * q0)) - (q1 / (8.0 * q0 ** 2))
-    J[1, 1, 2] = (-1.0 / (4.0 * q0)) - (q1 / (8.0 * q0 ** 2))
+    J[1, 2, 1] = 1.0 / (4.0 * q0)
+    J[1, 1, 2] = -1.0 / (4.0 * q0)
     for i in range(3):
-        J[1, i, i] += (-q1 / (8.0 * q0 ** 2))
+        J[1, i, i] = -q1 / (8.0 * q0 ** 2)
 
     # ∂q2/∂R
-    J[2, 0, 2] = (1.0 / (4.0 * q0)) - (q2 / (8.0 * q0 ** 2))
-    J[2, 2, 0] = (-1.0 / (4.0 * q0)) - (q2 / (8.0 * q0 ** 2))
+    J[2, 0, 2] = 1.0 / (4.0 * q0)
+    J[2, 2, 0] = -1.0 / (4.0 * q0)
     for i in range(3):
-        J[2, i, i] += (-q2 / (8.0 * q0 ** 2))
+        J[2, i, i] = -q2 / (8.0 * q0 ** 2)
 
     # ∂q3/∂R
-    J[3, 1, 0] = (1.0 / (4.0 * q0)) - (q3 / (8.0 * q0 ** 2))
-    J[3, 0, 1] = (-1.0 / (4.0 * q0)) - (q3 / (8.0 * q0 ** 2))
+    J[3, 1, 0] = 1.0 / (4.0 * q0)
+    J[3, 0, 1] = -1.0 / (4.0 * q0)
     for i in range(3):
-        J[3, i, i] += (-q3 / (8.0 * q0 ** 2))
-
+        J[3, i, i] = -q3 / (8.0 * q0 ** 2)
     return sign * J
 
 
 def jac_analy_quat_reference(q_meas_wxyz: np.ndarray, m: np.ndarray, s: float,
                              e3: np.ndarray, gamma: int) -> np.ndarray:
     """
-    Analytic Jacobian of quaternion residual (reference implementation).
+    Analytic Jacobian of quaternion residual.
 
-    Uses chain rule: ∂θ/∂m = ∂θ/∂q̂ @ ∂q̂/∂R @ ∂R/∂m
+    Routes through the SO(3) log Jacobian to avoid Shepperd-branch singularities
+    that occur when the rotation angle exceeds ~120 degrees:
+
+        θ_quat = (2·sin(φ/2) / φ) · r_so3,   r_so3 = log(R_meas @ R_pred^T)
+
+        ∂θ_quat/∂m = Df(r) @ ∂r_so3/∂m
+
+    where Df = (2·sin(φ/2)/φ)·I + (cos(φ/2) − 2·sin(φ/2)/φ)/φ² · r·rᵀ
 
     Args:
-        q_meas_wxyz: Measured quaternion
+        q_meas_wxyz: Measured quaternion [w, x, y, z]
         m: Shape coefficient vector
         s: Arc-length parameter
         e3: Tip force vector
@@ -581,15 +587,38 @@ def jac_analy_quat_reference(q_meas_wxyz: np.ndarray, m: np.ndarray, s: float,
     Returns:
         3 x Nm Jacobian matrix
     """
-    # Chain rule components
-    dtheta_dqhat = compute_dtheta_dqhat(q_meas_wxyz)  # 3 x 4
-    R_pred = fwd_rotation(m, s, e3, gamma)  # 3 x 3
-    dqhat_dR = compute_q_R_derivative_trace_branch(R_pred)  # 4 x 3 x 3
+    # Convert quaternion measurement to rotation matrix
+    R_meas = R.from_quat(q_wxyz_to_xyzw(q_meas_wxyz)).as_matrix()
+
+    # Predicted rotation and SO(3) error
+    R_pred = fwd_rotation(m, s, e3, gamma)
+    R_e = R_meas @ R_pred.T
+    r = so3_log(R_e)          # SO(3) residual (rotation vector)
+    phi = np.linalg.norm(r)
+
+    # Right Jacobian inverse for SO(3) Jacobian
+    Jr_inv = jr_inv_so3(r)
+
+    # ∂R_pred/∂m
     dR_dm = compute_R_m_derivative(m, s, gamma, e3)  # 3 x 3 x Nm
 
-    # Apply chain rule
-    dtheta_dR = np.einsum("ik,kjl->ijl", dtheta_dqhat, dqhat_dR)  # 3 x 3 x 3
-    return np.einsum("ijl,jln->in", dtheta_dR, dR_dm)  # 3 x Nm
+    # SO(3) Jacobian: H_so3[:, p] = -Jr_inv @ vee(skew_part(dR @ R_pred^T))
+    H_so3 = np.zeros((3, m.size))
+    for p in range(m.size):
+        dR = dR_dm[:, :, p]
+        A = dR @ R_pred.T
+        A_skew = 0.5 * (A - A.T)
+        H_so3[:, p] = -Jr_inv @ vee(A_skew)
+
+    # Df: Jacobian of θ_quat = 2·sin(φ/2)·r̂ w.r.t. r
+    if phi < THETA_SMALL_THRESHOLD:
+        Df = np.eye(3)  # small-angle limit: θ_quat ≈ r_so3
+    else:
+        a = 2.0 * np.sin(phi / 2.0) / phi
+        b = (np.cos(phi / 2.0) - 2.0 * np.sin(phi / 2.0) / phi) / (phi ** 2)
+        Df = a * np.eye(3) + b * np.outer(r, r)
+
+    return Df @ H_so3
 
 
 # ========================== SO(3) RESIDUAL ==========================
