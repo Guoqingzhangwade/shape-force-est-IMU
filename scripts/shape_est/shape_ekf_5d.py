@@ -367,8 +367,8 @@ for k in range(NUM_STEPS):
     for i, s in enumerate(IMU_POS):
         q_meas = meas[k][i]
         r = -theta(q_meas, m_pred, s)          # residual (z = 0, h = θ)
-        H = jac_num(q_meas, m_pred, s)
-        # H = jac_analy(q_meas, m_pred, s, GAMMA, e3)
+        # H = jac_num(q_meas, m_pred, s)
+        H = jac_analy(q_meas, m_pred, s, GAMMA, e3)
         H_stack.append(H)
         r_stack.append(r)
     H = np.vstack(H_stack)
