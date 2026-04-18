@@ -13,8 +13,8 @@ Key features:
   - Consistent quaternion sign convention (w >= 0)
 
 Usage examples:
-  python ekf_measurement_compare_v2.py --sweep-all-scales --scale-list "0.1,0.5,1.0,2.0,3.0"
-  python ekf_measurement_compare_v2.py --trials 10 --steps 100 --gamma 20 --plot
+  python meas_model_compare.py --sweep-all-scales --scale-list "0.1,0.5,1.0,2.0,3.0"
+  python meas_model_compare.py --trials 10 --steps 100 --gamma 20 --plot
 """
 
 import argparse
