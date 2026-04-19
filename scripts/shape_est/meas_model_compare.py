@@ -452,6 +452,11 @@ def theta_quat(q_meas_wxyz: np.ndarray, m: np.ndarray, s: float,
     # Error quaternion
     q_e = q_mul(q_meas_wxyz, q_inv(q_pred))
 
+    # Keep the residual on the local shortest-arc branch so it stays
+    # consistent with the SO(3)-based analytic reference Jacobian.
+    if q_e[0] < 0:
+        q_e = -q_e
+
     # Residual is 2 times the vector part
     return 2.0 * q_e[1:]
 
@@ -484,8 +489,12 @@ def jac_num_quat(q_meas_wxyz: np.ndarray, m: np.ndarray, s: float,
     return J
 
 
+# ========================== LEGACY QUATERNION CHAIN-RULE HELPERS ==========================
+
 def compute_dtheta_dqhat(q_meas_wxyz: np.ndarray) -> np.ndarray:
     """
+    Legacy / unused exploratory helper for the older direct quaternion chain rule.
+
     Compute ∂θ/∂q̂ where θ = 2*q_e.vector and q̂ is the unit quaternion.
 
     Args:
@@ -508,6 +517,8 @@ def compute_dtheta_dqhat(q_meas_wxyz: np.ndarray) -> np.ndarray:
 
 def compute_q_R_derivative_trace_branch(R_matrix: np.ndarray) -> np.ndarray:
     """
+    Legacy / unused exploratory helper for the older direct quaternion chain rule.
+
     Compute ∂q/∂R using trace-branch method.
 
     WARNING: This only implements the trace branch of Shepperd's method.
@@ -758,7 +769,9 @@ def ekf_core(meas_seq: List, m_true: np.ndarray, imu_pos: np.ndarray,
              measurement_fn: Callable,
              proc_std0: float = PROCESS_STD_0,
              proc_std1: float = PROCESS_STD_1,
-             init_cov_scale: float = INITIAL_COV_SCALE) -> Dict:
+             init_cov_scale: float = INITIAL_COV_SCALE,
+             P0: np.ndarray = None,
+             nis_burnin: int = 0) -> Dict:
     """
     Core EKF implementation (refactored common code).
 
@@ -776,10 +789,14 @@ def ekf_core(meas_seq: List, m_true: np.ndarray, imu_pos: np.ndarray,
         measurement_fn: Function to compute residuals and Jacobian
         proc_std0: Process noise std for coefficients [k0_x, k0_y, k0]
         proc_std1: Process noise std for coefficients [k1_x, k1_y]
-        init_cov_scale: Initial covariance scaling
+        init_cov_scale: Initial covariance scaling (used only when P0 is None)
+        P0: Initial covariance matrix (5x5).  If provided, overrides init_cov_scale.
+        nis_burnin: Number of initial steps to exclude from post-burn-in NIS stats.
+                    0 means post-burnin == full-horizon (no burn-in skipped).
 
     Returns:
         Dictionary with results: m_est, hist, rmse_*, mae_*, time_*, nis_*
+        Includes both full-horizon and post-burn-in NIS statistics.
     """
     state_dim = m_true.size
 
@@ -792,13 +809,16 @@ def ekf_core(meas_seq: List, m_true: np.ndarray, imu_pos: np.ndarray,
     sigma = np.deg2rad(meas_std_deg)
     R_single = R_scale * (sigma ** 2) * np.eye(3)
 
-    # Initialize state estimate
+    # Initialize state estimate and covariance
     m_est = np.zeros(state_dim)
-    P_est = init_cov_scale * np.eye(state_dim)
+    if P0 is not None:
+        P_est = P0.copy()
+    else:
+        P_est = init_cov_scale * np.eye(state_dim)
 
     # History tracking
     hist = []
-    nis_hist = []  # Normalized Innovation Squared
+    nis_hist = []  # Normalized Innovation Squared (one value per step)
 
     t0 = time.perf_counter()
 
@@ -845,6 +865,14 @@ def ekf_core(meas_seq: List, m_true: np.ndarray, imu_pos: np.ndarray,
     err = hist - m_true
     rmse_t = np.sqrt(np.mean(err ** 2, axis=1))  # RMSE over coefficients at each time
 
+    # Full-horizon NIS stats
+    nis_arr = np.array(nis_hist)
+
+    # Post-burn-in NIS: skip the first nis_burnin steps
+    # If burnin >= steps, fall back to full horizon silently
+    burnin_idx = min(nis_burnin, len(nis_arr) - 1)
+    nis_post = nis_arr[burnin_idx:]
+
     return {
         "m_est": m_est,
         "hist": hist,
@@ -854,14 +882,17 @@ def ekf_core(meas_seq: List, m_true: np.ndarray, imu_pos: np.ndarray,
         "mae_mean": float(np.mean(np.abs(err))),
         "time_total": float(t1 - t0),
         "time_per_step": float((t1 - t0) / len(meas_seq)),
-        "nis_mean": float(np.mean(nis_hist)),
-        "nis_std": float(np.std(nis_hist)),
+        "nis_mean": float(np.mean(nis_arr)),
+        "nis_std": float(np.std(nis_arr)),
+        "nis_mean_postburnin": float(np.mean(nis_post)),
+        "nis_std_postburnin": float(np.std(nis_post)),
     }
 
 
 def ekf_quat(meas_q_seq: List[List[np.ndarray]], m_true: np.ndarray,
              imu_pos: np.ndarray, e3: np.ndarray, gamma: int, mode: str,
-             meas_std_deg: float, R_scale: float = 1.0) -> Dict:
+             meas_std_deg: float, R_scale: float = 1.0,
+             P0: np.ndarray = None, nis_burnin: int = 0) -> Dict:
     """
     EKF with quaternion-based measurement model.
 
@@ -875,6 +906,8 @@ def ekf_quat(meas_q_seq: List[List[np.ndarray]], m_true: np.ndarray,
         mode: "quat_numeric" or "quat_analytic"
         meas_std_deg: Measurement noise std (degrees)
         R_scale: Measurement covariance scaling factor
+        P0: Initial covariance matrix (passed through to ekf_core)
+        nis_burnin: Steps to skip for post-burn-in NIS (passed through to ekf_core)
 
     Returns:
         Dictionary with EKF results
@@ -899,12 +932,13 @@ def ekf_quat(meas_q_seq: List[List[np.ndarray]], m_true: np.ndarray,
         return np.vstack(H_stack), np.hstack(r_stack)
 
     return ekf_core(meas_q_seq, m_true, imu_pos, e3, gamma, meas_std_deg, R_scale,
-                   measurement_fn)
+                   measurement_fn, P0=P0, nis_burnin=nis_burnin)
 
 
 def ekf_so3(meas_R_seq: List[List[np.ndarray]], m_true: np.ndarray,
             imu_pos: np.ndarray, e3: np.ndarray, gamma: int, mode: str,
-            meas_std_deg: float, R_scale: float = 1.0) -> Dict:
+            meas_std_deg: float, R_scale: float = 1.0,
+            P0: np.ndarray = None, nis_burnin: int = 0) -> Dict:
     """
     EKF with SO(3) log-based measurement model.
 
@@ -918,6 +952,8 @@ def ekf_so3(meas_R_seq: List[List[np.ndarray]], m_true: np.ndarray,
         mode: "so3_analytic" or "so3_numeric"
         meas_std_deg: Measurement noise std (degrees)
         R_scale: Measurement covariance scaling factor
+        P0: Initial covariance matrix (passed through to ekf_core)
+        nis_burnin: Steps to skip for post-burn-in NIS (passed through to ekf_core)
 
     Returns:
         Dictionary with EKF results
@@ -931,7 +967,7 @@ def ekf_so3(meas_R_seq: List[List[np.ndarray]], m_true: np.ndarray,
         raise ValueError(f"Invalid mode: {mode}")
 
     return ekf_core(meas_R_seq, m_true, imu_pos, e3, gamma, meas_std_deg, R_scale,
-                   meas_fn)
+                   meas_fn, P0=P0, nis_burnin=nis_burnin)
 
 
 # ========================== DATA GENERATION ==========================
@@ -1003,7 +1039,8 @@ def summarize(results: List[Dict]) -> Dict[str, Tuple[float, float]]:
         Dictionary mapping metric name to (mean, std) tuple
     """
     keys = ["rmse_final", "rmse_mean", "rmse_max", "mae_mean",
-            "time_total", "time_per_step", "nis_mean", "nis_std"]
+            "time_total", "time_per_step", "nis_mean", "nis_std",
+            "nis_mean_postburnin", "nis_std_postburnin"]
     stats = {}
     for k in keys:
         vals = np.array([r[k] for r in results], dtype=float)
@@ -1022,8 +1059,11 @@ def plot_shape_comparison(m_true: np.ndarray, m_est_dict: Dict[str, np.ndarray],
         e3: Tip force vector
         gamma: Number of integration segments
     """
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        print("[plot skipped] matplotlib is not installed.  Run: pip install matplotlib")
+        return
 
     fig = plt.figure(figsize=(15, 10))
 
@@ -1128,7 +1168,7 @@ def print_comparison_table(all_stats: Dict[str, Dict], scale_info: Dict[str, flo
     ]
 
     print("\n" + "=" * 120)
-    print("MEASUREMENT MODEL COMPARISON (mean ± std)")
+    print("MEASUREMENT MODEL COMPARISON (mean +/- std)")
     print("=" * 120)
 
     header = f"{'Metric':<18}"
@@ -1142,7 +1182,7 @@ def print_comparison_table(all_stats: Dict[str, Dict], scale_info: Dict[str, flo
         for method in methods:
             if method in all_stats:
                 mu, sd = all_stats[method][key]
-                line += f" | {mu:>10.4e} ± {sd:<10.2e}"
+                line += f" | {mu:>10.4e} +/- {sd:<10.2e}"
             else:
                 line += f" | {'N/A':<24}"
         print(line)
@@ -1154,6 +1194,345 @@ def print_comparison_table(all_stats: Dict[str, Dict], scale_info: Dict[str, flo
             print(f"  {method}: {scale_info[method]:.2f}")
     print(f"NIS DOF (per step): {nis_dof}")
     print("=" * 120)
+
+
+# ========================== SHAPE BANK + ALPHA SWEEP ==========================
+
+def build_shape_bank(num_shapes: int,
+                     k0_range: Tuple[float, float],
+                     k1_range: Tuple[float, float],
+                     kz_range: Tuple[float, float],
+                     seed: int) -> List[np.ndarray]:
+    """
+    Generate a fixed bank of true shape states for the alpha sweep.
+
+    Each shape is a 5D modal coefficient vector m = [k0_x, k1_x, k0_y, k1_y, k0_z].
+    Coefficients are drawn uniformly from the specified ranges using a fixed seed,
+    so the bank is fully reproducible.
+
+    Args:
+        num_shapes: Number of distinct true shape vectors to generate
+        k0_range: (lo, hi) for k0_x and k0_y (constant curvature)
+        k1_range: (lo, hi) for k1_x and k1_y (linear curvature)
+        kz_range: (lo, hi) for k0_z (torsion)
+        seed: RNG seed for reproducibility
+
+    Returns:
+        List of num_shapes arrays, each of shape (5,)
+    """
+    rng = np.random.RandomState(seed)
+    bank = []
+    for _ in range(num_shapes):
+        m = np.array([
+            rng.uniform(*k0_range),  # k0_x
+            rng.uniform(*k1_range),  # k1_x
+            rng.uniform(*k0_range),  # k0_y
+            rng.uniform(*k1_range),  # k1_y
+            rng.uniform(*kz_range),  # k0_z
+        ])
+        bank.append(m)
+    return bank
+
+
+def build_noise_seeds(num_shapes: int, num_noise_realizations: int,
+                      seed_base: int) -> np.ndarray:
+    """
+    Generate a 2D table of noise seeds for reproducible measurement sequences.
+
+    Seeds are assigned as seed_base + row*num_noise_realizations + col so that
+    every (shape, noise-realization) pair has a unique, fixed seed independent
+    of the alpha value being tested.
+
+    Args:
+        num_shapes: Number of distinct true shapes
+        num_noise_realizations: Number of noise draws per shape
+        seed_base: Integer offset for all seeds
+
+    Returns:
+        Integer array of shape (num_shapes, num_noise_realizations)
+    """
+    return (np.arange(num_shapes * num_noise_realizations, dtype=int)
+            .reshape(num_shapes, num_noise_realizations) + seed_base)
+
+
+# ── Reproducibility note ──────────────────────────────────────────────────────
+# Command used for the filter-consistency and measurement-noise scaling study
+# reported in the manuscript (run from the scripts/shape_est/ directory):
+#
+#   python meas_model_compare.py `
+#     --mode so3_scale_sweep `
+#     --alpha-list "0.1,0.2,0.5,0.8,1.0,1.5,2.0,3.0" `
+#     --num-shapes 10 --num-noise-realizations 3 `
+#     --selected-alpha 1.0 `
+#     --plot-alpha-sweep
+#
+# Settings applied by default (not overridden above):
+#   --imu-pos "0.25,0.50,1.00"   (3-IMU layout, NIS DOF = 9)
+#   --shape-bank-seed 123        (fixed shape bank for reproducibility)
+#   --noise-seed-base 1000       (fixed noise seeds, same across all alpha values)
+#   --nis-burnin 10              (post-burn-in NIS excludes first 10 steps)
+#   --init-cov-diag default      (P0 = diag([1.0, 0.5, 1.0, 0.5, 0.25]),
+#                                 reflecting shape-bank sampling ranges)
+#   --steps 50                   (time steps per run)
+#   --meas-std-deg 0.5           (measurement noise std in degrees)
+#
+# Total runs per alpha: 10 shapes x 3 noise realizations = 30
+# Results saved to: so3_alpha_sweep_results.csv / so3_alpha_sweep_results.json
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+def run_so3_analytic_alpha_sweep(
+        alpha_list: List[float],
+        shape_bank: List[np.ndarray],
+        noise_seeds: np.ndarray,
+        imu_pos: np.ndarray,
+        e3: np.ndarray,
+        gamma: int,
+        steps: int,
+        meas_std_deg: float,
+        alpha_objective: str,
+        nis_dof: int,
+        P0: np.ndarray = None,
+        nis_burnin: int = 0) -> List[Dict]:
+    """
+    Run SO(3)-analytic EKF for a sweep of alpha (R-scale) values.
+
+    Fairness guarantee: measurement sequences are pre-generated ONCE from the
+    fixed (shape_bank, noise_seeds) pairs and then reused identically for every
+    alpha value.  This eliminates sampling noise when comparing alphas.
+
+    Args:
+        alpha_list: Alpha values to sweep
+        shape_bank: Fixed list of true shape vectors (pre-generated)
+        noise_seeds: 2D seed table [num_shapes x num_noise_realizations]
+        imu_pos: IMU arc-length positions
+        e3: Tip force vector
+        gamma: Integration segments
+        steps: Time steps per run
+        meas_std_deg: Measurement noise std (degrees)
+        alpha_objective: Metric key used later for best-alpha selection (informational)
+        nis_dof: Expected NIS degrees of freedom (printed for reference)
+        P0: Initial covariance matrix (5x5). None uses default init_cov_scale*I.
+        nis_burnin: Steps to skip when computing post-burn-in NIS statistics.
+
+    Returns:
+        List of result dicts, one entry per alpha value.
+        NIS stats are reported both for the full horizon and post-burn-in.
+    """
+    num_shapes = len(shape_bank)
+    num_noise_realizations = noise_seeds.shape[1]
+    total_runs = num_shapes * num_noise_realizations
+
+    print(f"\n  Pre-generating {total_runs} measurement sequences "
+          f"({num_shapes} shapes x {num_noise_realizations} noise realizations) ...")
+
+    # --- Pre-generate all measurement sequences (reused across all alphas) ---
+    all_meas_R: List[List] = []
+    for si, m_true in enumerate(shape_bank):
+        noise_row = []
+        for ni in range(num_noise_realizations):
+            seed = int(noise_seeds[si, ni])
+            rng = np.random.RandomState(seed)
+            _, meas_R = build_meas_seq(m_true, imu_pos, e3, gamma, steps, meas_std_deg, rng)
+            noise_row.append(meas_R)
+        all_meas_R.append(noise_row)
+
+    print(f"  Done.  Starting alpha sweep ({len(alpha_list)} values) ...\n")
+
+    sweep_results = []
+
+    for alpha in alpha_list:
+        run_results = []
+
+        for si, m_true in enumerate(shape_bank):
+            for ni in range(num_noise_realizations):
+                meas_R = all_meas_R[si][ni]
+                res = ekf_so3(meas_R, m_true, imu_pos, e3, gamma,
+                              "so3_analytic", meas_std_deg, R_scale=alpha,
+                              P0=P0, nis_burnin=nis_burnin)
+                run_results.append(res)
+
+        stat = summarize(run_results)
+
+        entry = {
+            "alpha":                        alpha,
+            "num_shapes":                   num_shapes,
+            "num_noise_realizations":       num_noise_realizations,
+            "num_total_runs":               total_runs,
+            "imu_layout":                   list(imu_pos),
+            "nis_dof":                      nis_dof,
+            "nis_burnin":                   nis_burnin,
+            "rmse_mean_mean":               stat["rmse_mean"][0],
+            "rmse_mean_std":                stat["rmse_mean"][1],
+            "rmse_final_mean":              stat["rmse_final"][0],
+            "rmse_final_std":               stat["rmse_final"][1],
+            "nis_mean_full_mean":           stat["nis_mean"][0],
+            "nis_mean_full_std":            stat["nis_mean"][1],
+            "nis_std_full_mean":            stat["nis_std"][0],
+            "nis_std_full_std":             stat["nis_std"][1],
+            "nis_mean_postburnin_mean":     stat["nis_mean_postburnin"][0],
+            "nis_mean_postburnin_std":      stat["nis_mean_postburnin"][1],
+            "nis_std_postburnin_mean":      stat["nis_std_postburnin"][0],
+            "nis_std_postburnin_std":       stat["nis_std_postburnin"][1],
+            "time_per_step_mean":           stat["time_per_step"][0],
+            "time_per_step_std":            stat["time_per_step"][1],
+        }
+        sweep_results.append(entry)
+
+        print(f"  alpha={alpha:5.3f}"
+              f" | RMSE_mean={stat['rmse_mean'][0]:.4e} +/- {stat['rmse_mean'][1]:.2e}"
+              f" | RMSE_final={stat['rmse_final'][0]:.4e}"
+              f" | NIS_full={stat['nis_mean'][0]:.2f} +/- {stat['nis_mean'][1]:.2f}"
+              f" | NIS_post(b={nis_burnin})={stat['nis_mean_postburnin'][0]:.2f}"
+              f" +/- {stat['nis_mean_postburnin'][1]:.2f}"
+              f"  (DOF={nis_dof})"
+              f" | {stat['time_per_step'][0]*1e3:.2f} ms/step")
+
+    return sweep_results
+
+
+# ========================== FORMULATION COMPARE ==========================
+
+# Manuscript-ready labels for each of the 4 EKF formulations.
+FORMULATION_LABELS = {
+    "quat_numeric":  "Quat numeric",
+    "quat_analytic": "Quat analytic ref",
+    "so3_analytic":  "SO(3) analytic",
+    "so3_numeric":   "SO(3) numeric",
+}
+FORMULATION_ORDER = ["quat_numeric", "quat_analytic", "so3_analytic", "so3_numeric"]
+
+
+def run_formulation_compare(
+        shape_bank: List[np.ndarray],
+        noise_seeds: np.ndarray,
+        imu_pos: np.ndarray,
+        e3: np.ndarray,
+        gamma: int,
+        steps: int,
+        meas_std_deg: float,
+        alpha: float,
+        P0: np.ndarray,
+        nis_burnin: int) -> Dict[str, Dict]:
+    """
+    Run all 4 EKF formulations on the same fixed (shape_bank, noise_seeds) pairs.
+
+    Fairness guarantee: measurement sequences are pre-generated ONCE and reused
+    identically for every formulation, eliminating sampling noise when comparing.
+
+    Args:
+        shape_bank: Fixed list of true shape vectors.
+        noise_seeds: 2D seed table [num_shapes x num_noise_realizations].
+        imu_pos: IMU arc-length positions.
+        e3: Tip force vector.
+        gamma: Integration segments.
+        steps: Time steps per run.
+        meas_std_deg: Measurement noise std (degrees).
+        alpha: R-scale applied identically to all 4 methods.
+        P0: Initial covariance matrix (5x5).
+        nis_burnin: Steps to skip when computing post-burn-in NIS.
+
+    Returns:
+        Dict mapping method key -> summarize() dict, plus a "rmse_histories" key
+        holding per-method list of per-run RMSE trajectories for optional plotting.
+    """
+    num_shapes = len(shape_bank)
+    num_noise_realizations = noise_seeds.shape[1]
+    total_runs = num_shapes * num_noise_realizations
+
+    print(f"\n  Pre-generating {total_runs} measurement sequences "
+          f"({num_shapes} shapes x {num_noise_realizations} noise realizations) ...")
+
+    # Pre-generate both quaternion and rotation-matrix sequences (used by different methods)
+    all_meas_q: List[List] = []
+    all_meas_R: List[List] = []
+    for si, m_true in enumerate(shape_bank):
+        row_q, row_R = [], []
+        for ni in range(num_noise_realizations):
+            seed = int(noise_seeds[si, ni])
+            rng = np.random.RandomState(seed)
+            meas_q, meas_R = build_meas_seq(m_true, imu_pos, e3, gamma, steps, meas_std_deg, rng)
+            row_q.append(meas_q)
+            row_R.append(meas_R)
+        all_meas_q.append(row_q)
+        all_meas_R.append(row_R)
+
+    print(f"  Done.  Running 4 formulations (alpha={alpha:.3f}) ...\n")
+
+    method_results: Dict[str, List[Dict]] = {k: [] for k in FORMULATION_ORDER}
+    rmse_histories: Dict[str, List[np.ndarray]] = {k: [] for k in FORMULATION_ORDER}
+
+    for si, m_true in enumerate(shape_bank):
+        for ni in range(num_noise_realizations):
+            meas_q = all_meas_q[si][ni]
+            meas_R = all_meas_R[si][ni]
+
+            out_qn = ekf_quat(meas_q, m_true, imu_pos, e3, gamma,
+                              "quat_numeric", meas_std_deg, R_scale=alpha,
+                              P0=P0, nis_burnin=nis_burnin)
+            out_qa = ekf_quat(meas_q, m_true, imu_pos, e3, gamma,
+                              "quat_analytic", meas_std_deg, R_scale=alpha,
+                              P0=P0, nis_burnin=nis_burnin)
+            out_sa = ekf_so3(meas_R, m_true, imu_pos, e3, gamma,
+                             "so3_analytic", meas_std_deg, R_scale=alpha,
+                             P0=P0, nis_burnin=nis_burnin)
+            out_sn = ekf_so3(meas_R, m_true, imu_pos, e3, gamma,
+                             "so3_numeric", meas_std_deg, R_scale=alpha,
+                             P0=P0, nis_burnin=nis_burnin)
+
+            outputs = {
+                "quat_numeric":  out_qn,
+                "quat_analytic": out_qa,
+                "so3_analytic":  out_sa,
+                "so3_numeric":   out_sn,
+            }
+            for key in FORMULATION_ORDER:
+                out = outputs[key]
+                method_results[key].append(out)
+                rmse_histories[key].append(
+                    np.sqrt(np.mean((out["hist"] - m_true) ** 2, axis=1))
+                )
+
+    stats = {k: summarize(v) for k, v in method_results.items()}
+    stats["_rmse_histories"] = rmse_histories  # type: ignore[assignment]
+    return stats
+
+
+def print_formulation_table(
+        stats: Dict[str, Dict],
+        alpha: float,
+        imu_pos: np.ndarray,
+        nis_dof: int,
+        nis_burnin: int) -> None:
+    """Print a manuscript-ready comparison table for the 4 EKF formulations."""
+    w = 120
+    print("\n" + "=" * w)
+    print("FORMULATION COMPARISON  (all 4 methods, fixed matched-model bank)")
+    imu_str = "[" + ", ".join(f"{v:.2f}" for v in imu_pos) + "]"
+    print(f"  alpha={alpha:.3f}  |  IMU={imu_str}  |  NIS DOF={nis_dof}  |  burn-in={nis_burnin} steps")
+    print(f"  Well-tuned filter: NIS_post ~ {nis_dof}  "
+          f"(NIS_full may be inflated by initialisation transient)")
+    print("=" * w)
+    header = (f"{'Method':<22} | {'RMSE_mean':>12} | {'RMSE_final':>12} | "
+              f"{'NIS_full':>9} | {'NIS_post':>9} | {'NIS_post_std':>12} | {'ms/step':>7}")
+    print(header)
+    print("-" * w)
+    for key in FORMULATION_ORDER:
+        s = stats[key]
+        label = FORMULATION_LABELS[key]
+        nis_ratio = s["nis_mean_postburnin"][0] / nis_dof if nis_dof > 0 else float("inf")
+        flag = ""
+        if nis_ratio > 3.0:
+            flag = " (!)"
+        elif nis_ratio < 0.3:
+            flag = " (?)"
+        print(f"{label:<22} | {s['rmse_mean'][0]:12.4e} | {s['rmse_final'][0]:12.4e} | "
+              f"{s['nis_mean'][0]:9.3f} | {s['nis_mean_postburnin'][0]:9.3f} | "
+              f"{s['nis_std_postburnin'][0]:12.3f} | "
+              f"{s['time_per_step'][0]*1e3:7.2f}{flag}")
+    print("=" * w)
+    print("  (!) NIS_post/DOF >> 1: filter likely overconfident (R too small)")
+    print("  (?) NIS_post/DOF << 1: filter likely underconfident (R too large)")
 
 
 # ========================== MAIN ==========================
@@ -1177,13 +1556,24 @@ def validate_inputs(args: argparse.Namespace) -> None:
     if args.meas_std_deg <= 0:
         raise ValueError("meas-std-deg must be positive")
 
-    # Validate scales
-    for name, val in [("quat-num-scale", args.quat_num_scale),
-                      ("quat-ana-scale", args.quat_ana_scale),
-                      ("so3-ana-scale", args.so3_ana_scale),
-                      ("so3-num-scale", args.so3_num_scale)]:
-        if val <= 0:
-            raise ValueError(f"{name} must be positive")
+    if args.mode == "full_compare":
+        # Validate per-method R-scales only when they are used
+        for name, val in [("quat-num-scale", args.quat_num_scale),
+                          ("quat-ana-scale", args.quat_ana_scale),
+                          ("so3-ana-scale", args.so3_ana_scale),
+                          ("so3-num-scale", args.so3_num_scale)]:
+            if val <= 0:
+                raise ValueError(f"{name} must be positive")
+
+    if args.mode in ("so3_scale_sweep", "formulation_compare"):
+        if args.num_shapes <= 0:
+            raise ValueError("num-shapes must be positive")
+        if args.num_noise_realizations <= 0:
+            raise ValueError("num-noise-realizations must be positive")
+
+    if args.mode == "formulation_compare":
+        if args.formulation_alpha <= 0:
+            raise ValueError("formulation-alpha must be positive")
 
 
 def main():
@@ -1207,57 +1597,530 @@ def main():
                    "Estimates modal coefficients m=[k0_x, k1_x, k0_y, k1_y, k0_z] from IMU measurements.",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
+
+    # ── Mode ──────────────────────────────────────────────────────────────────
+    parser.add_argument("--mode",
+                       choices=["full_compare", "so3_scale_sweep", "formulation_compare"],
+                       default="full_compare",
+                       help="Operation mode: "
+                            "'full_compare' – all 4 methods, random per-trial shapes (default); "
+                            "'so3_scale_sweep' – SO(3)-analytic alpha sweep; "
+                            "'formulation_compare' – all 4 methods on a fixed matched-model bank.")
+
+    # ── Shared parameters ─────────────────────────────────────────────────────
+    parser.add_argument("--imu-pos", type=str, default="0.25,0.50,1.00",
+                       help="Comma-separated IMU arc-length positions (default: '0.25,0.50,1.00')")
     parser.add_argument("--trials", type=int, default=5,
-                       help="Number of Monte Carlo trials (default: 5, reduce for faster runs)")
+                       help="(full_compare) Number of Monte Carlo trials (default: 5)")
     parser.add_argument("--steps", type=int, default=50,
-                       help="Number of time steps per trial (default: 50, reduce for faster runs)")
+                       help="Number of time steps per trial/run (default: 50)")
     parser.add_argument("--gamma", type=int, default=10,
-                       help="Number of integration segments (default: 10, increase for accuracy)")
+                       help="Number of integration segments (default: 10)")
     parser.add_argument("--seed-list", type=str, default="11,22,33,44,55,66,77,88,99,111",
-                       help="Comma-separated list of random seeds")
+                       help="(full_compare) Comma-separated seeds for Monte Carlo trials")
     parser.add_argument("--meas-std-deg", type=float, default=0.5,
-                       help="Measurement noise std deviation (degrees)")
+                       help="Measurement noise std deviation in degrees (default: 0.5)")
 
-    # R-scale parameters for each method
+    # ── full_compare-specific parameters (unchanged from original) ────────────
     parser.add_argument("--quat-num-scale", type=float, default=1.0,
-                       help="R-scale for quaternion numeric method")
+                       help="(full_compare) R-scale for quaternion numeric method")
     parser.add_argument("--quat-ana-scale", type=float, default=1.0,
-                       help="R-scale for quaternion analytic method")
+                       help="(full_compare) R-scale for quaternion analytic method")
     parser.add_argument("--so3-ana-scale", type=float, default=1.0,
-                       help="R-scale for SO(3) analytic method")
+                       help="(full_compare) R-scale for SO(3) analytic method")
     parser.add_argument("--so3-num-scale", type=float, default=1.0,
-                       help="R-scale for SO(3) numeric method")
-
-    # Sweep parameters
+                       help="(full_compare) R-scale for SO(3) numeric method")
     parser.add_argument("--sweep-all-scales", action="store_true",
-                       help="Sweep R-scale for all 4 methods to find optimal values")
+                       help="(full_compare) Sweep R-scale for all 4 methods to find optimal values")
     parser.add_argument("--scale-list", type=str, default="0.1,0.2,0.5,0.8,1.0,1.5,2.0,3.0",
-                       help="Comma-separated list of R-scales to sweep")
+                       help="(full_compare) Comma-separated R-scales to sweep with --sweep-all-scales")
     parser.add_argument("--objective", choices=["rmse_mean", "rmse_final"], default="rmse_mean",
-                       help="Objective metric for scale optimization")
-
-    # Visualization
+                       help="(full_compare) Objective metric for scale optimisation")
     parser.add_argument("--plot", action="store_true",
-                       help="Show RMSE convergence plots")
+                       help="(full_compare) Show RMSE convergence plots")
     parser.add_argument("--plot-shape", action="store_true",
-                       help="Show 3D shape reconstruction comparison (requires --plot)")
+                       help="(full_compare) Show 3D shape reconstruction comparison")
     parser.add_argument("--fast", action="store_true",
-                       help="Fast mode: only run SO(3) numeric (fastest method)")
+                       help="(full_compare) Only run SO(3) numeric method")
+
+    # ── so3_scale_sweep-specific parameters (new) ─────────────────────────────
+    parser.add_argument("--alpha-list", type=str, default="0.1,0.2,0.5,0.8,1.0,1.5,2.0,3.0",
+                       help="(so3_scale_sweep) Comma-separated alpha (R-scale) values to sweep")
+    parser.add_argument("--num-shapes", type=int, default=10,
+                       help="(so3_scale_sweep) Number of distinct true shapes in the shape bank (default: 10)")
+    parser.add_argument("--num-noise-realizations", type=int, default=3,
+                       help="(so3_scale_sweep) Noise realizations per shape (default: 3)")
+    parser.add_argument("--shape-bank-seed", type=int, default=123,
+                       help="(so3_scale_sweep) Seed for shape bank generation (default: 123)")
+    parser.add_argument("--noise-seed-base", type=int, default=1000,
+                       help="(so3_scale_sweep) Base offset for noise seeds (default: 1000)")
+    parser.add_argument("--k0-range", type=str, default="-2.0,2.0",
+                       help="(so3_scale_sweep) Uniform range for k0_x, k0_y (default: '-2.0,2.0')")
+    parser.add_argument("--k1-range", type=str, default="-1.5,1.5",
+                       help="(so3_scale_sweep) Uniform range for k1_x, k1_y (default: '-1.5,1.5')")
+    parser.add_argument("--kz-range", type=str, default="-1.0,1.0",
+                       help="(so3_scale_sweep) Uniform range for k0_z torsion (default: '-1.0,1.0')")
+    parser.add_argument("--alpha-objective", choices=["rmse_mean", "rmse_final"],
+                       default="rmse_mean",
+                       help="(so3_scale_sweep) Objective for selecting the recommended alpha (default: rmse_mean)")
+    parser.add_argument("--plot-alpha-sweep", action="store_true",
+                       help="(so3_scale_sweep) Plot RMSE and NIS vs alpha after sweep")
+    parser.add_argument("--selected-alpha", type=float, default=None,
+                       help="(so3_scale_sweep) Alpha value to annotate on the plot as the paper selection. "
+                            "Independent of the RMSE-based recommendation. "
+                            "Example: --selected-alpha 1.0")
+
+    # ── formulation_compare-specific parameters ───────────────────────────────
+    parser.add_argument("--formulation-alpha", type=float, default=1.0,
+                       help="(formulation_compare) R-scale (alpha) used for all 4 methods (default: 1.0)")
+    parser.add_argument("--plot-formulation-compare", action="store_true",
+                       help="(formulation_compare) Plot per-method RMSE convergence curves")
+
+    # ── Initial covariance (shared, both modes) ───────────────────────────────
+    parser.add_argument("--init-cov-scale", type=float, default=None,
+                       help="P0 = scale * I.  "
+                            "Default: 1e-2 for full_compare; "
+                            "diag([1,0.5,1,0.5,0.25]) for so3_scale_sweep unless overridden.")
+    parser.add_argument("--init-cov-diag", type=str, default="",
+                       help="P0 = diag(values), e.g. '1.0,0.5,1.0,0.5,0.25'.  "
+                            "Takes precedence over --init-cov-scale.")
+
+    # ── Post-burn-in NIS (shared, both modes) ────────────────────────────────
+    parser.add_argument("--nis-burnin", type=int, default=10,
+                       help="Steps to skip when computing post-burn-in NIS (default: 10).  "
+                            "Set to 0 to disable (post-burnin == full-horizon).")
 
     args = parser.parse_args()
-
-    # Validate inputs
     validate_inputs(args)
 
-    # Print helpful usage info
+    # ── Build initial covariance P0 ───────────────────────────────────────────
+    # Default P0 for so3_scale_sweep reflects the shape-bank sampling ranges:
+    #   k0_x, k0_y ~ U(-2,2) -> variance ~1.33  -> use 1.0 (slightly conservative)
+    #   k1_x, k1_y ~ U(-1.5,1.5) -> variance ~0.75 -> use 0.5
+    #   k0_z      ~ U(-1,1)   -> variance ~0.33  -> use 0.25
+    _SO3_SWEEP_DEFAULT_P0_DIAG = np.array([1.0, 0.5, 1.0, 0.5, 0.25])
+
+    if args.init_cov_diag:
+        # Diagonal mode: user-supplied diagonal takes highest precedence
+        _diag_vals = np.array([float(x) for x in args.init_cov_diag.split(",") if x.strip()])
+        if len(_diag_vals) != 5:
+            raise ValueError("--init-cov-diag must have exactly 5 comma-separated values")
+        P0 = np.diag(_diag_vals)
+    elif args.init_cov_scale is not None:
+        # Scalar mode: P0 = scale * I
+        P0 = args.init_cov_scale * np.eye(5)
+    else:
+        # Mode-specific defaults
+        if args.mode in ("so3_scale_sweep", "formulation_compare"):
+            P0 = np.diag(_SO3_SWEEP_DEFAULT_P0_DIAG)
+        else:
+            P0 = INITIAL_COV_SCALE * np.eye(5)  # preserve original full_compare behavior
+
+    # ── Shared physical setup ─────────────────────────────────────────────────
+    imu_pos = np.array([float(x) for x in args.imu_pos.split(",") if x.strip()])
+    L_phys = 100.0
+    e3 = np.array([0.0, 0.0, L_phys], dtype=float)
+    nis_dof = 3 * len(imu_pos)  # NIS degrees of freedom = 3 (SO3 dim) x number of IMUs
+
+    # =========================================================================
+    #  SO(3)-ANALYTIC ALPHA SWEEP MODE
+    # =========================================================================
+    if args.mode == "so3_scale_sweep":
+        alpha_list = [float(x) for x in args.alpha_list.split(",") if x.strip()]
+        k0_lo, k0_hi = [float(x) for x in args.k0_range.split(",")]
+        k1_lo, k1_hi = [float(x) for x in args.k1_range.split(",")]
+        kz_lo, kz_hi = [float(x) for x in args.kz_range.split(",")]
+
+        total_runs = args.num_shapes * args.num_noise_realizations
+
+        print("\n" + "=" * 80)
+        print("SO(3)-ANALYTIC ALPHA (R-SCALE) SWEEP")
+        print("=" * 80)
+        imu_layout_str = "[" + ", ".join(f"{v:.2f}" for v in imu_pos) + "]"
+        print(f"  IMU layout:               {imu_layout_str}  ({len(imu_pos)} sensors)")
+        print(f"  NIS DOF per step:         {nis_dof}  (= 3 x {len(imu_pos)} IMUs)")
+        print(f"  True shapes (bank size):  {args.num_shapes}")
+        print(f"  Noise realizations/shape: {args.num_noise_realizations}")
+        print(f"  Total runs per alpha:     {total_runs}")
+        print(f"  Shape bank seed:          {args.shape_bank_seed}")
+        print(f"  Noise seed base:          {args.noise_seed_base}")
+        print(f"  Steps per run:            {args.steps}")
+        print(f"  Meas noise std:           {args.meas_std_deg} deg")
+        print(f"  k0 range  (k0_x, k0_y):  [{k0_lo}, {k0_hi}]")
+        print(f"  k1 range  (k1_x, k1_y):  [{k1_lo}, {k1_hi}]")
+        print(f"  kz range  (k0_z):         [{kz_lo}, {kz_hi}]")
+        print(f"  Alpha values:             {alpha_list}")
+        print(f"  Alpha objective:          {args.alpha_objective}")
+        print(f"  NIS burn-in steps:        {args.nis_burnin}")
+        p0_diag_str = "[" + ", ".join(f"{v:.3f}" for v in np.diag(P0)) + "]"
+        print(f"  Initial cov P0 (diag):    {p0_diag_str}")
+        print("=" * 80)
+
+        # Build fixed shape bank and noise seeds ONCE — reused for every alpha
+        shape_bank = build_shape_bank(
+            args.num_shapes,
+            (k0_lo, k0_hi), (k1_lo, k1_hi), (kz_lo, kz_hi),
+            args.shape_bank_seed
+        )
+        noise_seeds = build_noise_seeds(
+            args.num_shapes, args.num_noise_realizations, args.noise_seed_base
+        )
+
+        print(f"\n  Shape bank [{args.num_shapes} shapes, seed={args.shape_bank_seed}]:")
+        for i, m in enumerate(shape_bank):
+            print(f"    Shape {i+1:2d}: [{m[0]:+6.3f}, {m[1]:+6.3f}, "
+                  f"{m[2]:+6.3f}, {m[3]:+6.3f}, {m[4]:+6.3f}]")
+
+        # Run the sweep (same measurements and P0 reused across all alphas for fairness)
+        sweep_results = run_so3_analytic_alpha_sweep(
+            alpha_list, shape_bank, noise_seeds,
+            imu_pos, e3, args.gamma, args.steps, args.meas_std_deg,
+            args.alpha_objective, nis_dof,
+            P0=P0, nis_burnin=args.nis_burnin
+        )
+
+        # ── Summary table ─────────────────────────────────────────────────────
+        w = 110
+        print("\n" + "=" * w)
+        print("ALPHA SWEEP SUMMARY  (SO(3)-analytic, paired across all alpha values)")
+        print(f"  NIS DOF={nis_dof}  |  burn-in={args.nis_burnin} steps  |  "
+              f"well-tuned filter: NIS_post ~ {nis_dof}")
+        print(f"  Full-horizon NIS may be inflated by initialisation transient; "
+              f"NIS_post is more representative.")
+        print("=" * w)
+        print(f"{'Alpha':>7} | {'RMSE_mean':>12} | {'RMSE_final':>12} | "
+              f"{'NIS_full':>9} | {'NIS_post':>9} | {'NIS_post_std':>12} | {'ms/step':>7}")
+        print("-" * w)
+        for r in sweep_results:
+            print(f"{r['alpha']:7.3f} | {r['rmse_mean_mean']:12.4e} | {r['rmse_final_mean']:12.4e} | "
+                  f"{r['nis_mean_full_mean']:9.3f} | {r['nis_mean_postburnin_mean']:9.3f} | "
+                  f"{r['nis_std_postburnin_mean']:12.3f} | "
+                  f"{r['time_per_step_mean']*1e3:7.2f}")
+        print("=" * w)
+
+        # ── Alpha selection ───────────────────────────────────────────────────
+        obj_key = "rmse_mean_mean" if args.alpha_objective == "rmse_mean" else "rmse_final_mean"
+        best = min(sweep_results, key=lambda r: r[obj_key])
+
+        nis_ratio = best["nis_mean_postburnin_mean"] / nis_dof if nis_dof > 0 else float("inf")
+
+        print(f"\n  Recommended alpha by '{args.alpha_objective}': alpha = {best['alpha']:.3f}")
+        print(f"    {args.alpha_objective:<16} = {best[obj_key]:.4e}")
+        print(f"    NIS_full (mean)    = {best['nis_mean_full_mean']:.3f} +/- "
+              f"{best['nis_mean_full_std']:.3f}  (DOF = {nis_dof})")
+        print(f"    NIS_post (mean)    = {best['nis_mean_postburnin_mean']:.3f} +/- "
+              f"{best['nis_mean_postburnin_std']:.3f}  (burn-in={args.nis_burnin})")
+        if nis_ratio > 3.0:
+            print(f"    WARNING: NIS_post/DOF = {nis_ratio:.1f} >> 1.  Filter may be overconfident "
+                  f"(R too small). Consider increasing alpha.")
+        elif nis_ratio < 0.3:
+            print(f"    WARNING: NIS_post/DOF = {nis_ratio:.2f} << 1.  Filter may be underconfident "
+                  f"(R too large). Consider decreasing alpha.")
+        else:
+            print(f"    NIS_post/DOF = {nis_ratio:.2f}  (within reasonable range of 1.0)")
+        print(f"  Note: alpha is selected purely by '{args.alpha_objective}'. "
+              f"Inspect NIS_post to confirm consistency.")
+
+        # ── Save CSV ──────────────────────────────────────────────────────────
+        import csv
+        import json
+
+        csv_path = "so3_alpha_sweep_results.csv"
+        fieldnames = [
+            "alpha", "num_shapes", "num_noise_realizations", "num_total_runs",
+            "imu_layout", "nis_dof", "nis_burnin",
+            "rmse_mean_mean", "rmse_mean_std",
+            "rmse_final_mean", "rmse_final_std",
+            "nis_mean_full_mean", "nis_mean_full_std",
+            "nis_std_full_mean", "nis_std_full_std",
+            "nis_mean_postburnin_mean", "nis_mean_postburnin_std",
+            "nis_std_postburnin_mean", "nis_std_postburnin_std",
+            "time_per_step_mean", "time_per_step_std",
+        ]
+        with open(csv_path, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            for r in sweep_results:
+                row = {k: r.get(k, "") for k in fieldnames}
+                row["imu_layout"] = str(r["imu_layout"])
+                writer.writerow(row)
+        print(f"\n  Results saved  -> {csv_path}")
+
+        json_path = "so3_alpha_sweep_results.json"
+        summary = {
+            "config": {
+                "imu_pos": list(imu_pos),
+                "nis_dof": nis_dof,
+                "nis_burnin": args.nis_burnin,
+                "P0_diag": list(np.diag(P0)),
+                "num_shapes": args.num_shapes,
+                "num_noise_realizations": args.num_noise_realizations,
+                "shape_bank_seed": args.shape_bank_seed,
+                "noise_seed_base": args.noise_seed_base,
+                "steps": args.steps,
+                "meas_std_deg": args.meas_std_deg,
+                "gamma": args.gamma,
+                "alpha_objective": args.alpha_objective,
+            },
+            "best_alpha": best["alpha"],
+            "results": sweep_results,
+        }
+        with open(json_path, "w") as f:
+            json.dump(summary, f, indent=2)
+        print(f"  Summary saved  -> {json_path}")
+
+        # ── Optional plot ─────────────────────────────────────────────────────
+        if args.plot_alpha_sweep:
+            try:
+                import matplotlib.pyplot as plt
+            except ImportError:
+                print("  [plot skipped] matplotlib is not installed.  "
+                      "Run: pip install matplotlib")
+                return
+
+            # ── data ──────────────────────────────────────────────────────────
+            alphas     = [r["alpha"]                    for r in sweep_results]
+            rmse_means = [r["rmse_mean_mean"]            for r in sweep_results]
+            nis_full   = [r["nis_mean_full_mean"]        for r in sweep_results]
+            nis_post   = [r["nis_mean_postburnin_mean"]  for r in sweep_results]
+
+            # Selected alpha for the paper (independent of RMSE-only recommendation)
+            sel_alpha = args.selected_alpha
+
+            # ── font sizes ────────────────────────────────────────────────────
+            FS_LABEL  = 18
+            FS_TICK   = 16
+            FS_LEGEND = 15
+
+            # ── colours ───────────────────────────────────────────────────────
+            c_rmse = "#2166ac"   # blue  – RMSE (left axis)
+            c_post = "#d6604d"   # red   – NIS post-burn-in (right axis)
+            c_full = "#f4a582"   # light salmon – full-horizon NIS (de-emphasised)
+            c_dof  = "#666666"   # grey  – DOF reference line
+            c_sel  = "#1a1a1a"   # near-black – selected-alpha line
+
+            fig, ax1 = plt.subplots(figsize=(10, 5))
+
+            # Left axis: RMSE mean
+            ax1.plot(alphas, rmse_means, "o-", color=c_rmse, linewidth=2.5,
+                     markersize=7, label="RMSE mean")
+            ax1.set_xlabel(r"$\alpha$ (measurement covariance scale)", fontsize=FS_LABEL)
+            ax1.set_ylabel("RMSE mean (modal coefficients)", color=c_rmse,
+                           fontsize=FS_LABEL)
+            ax1.tick_params(axis="y", labelcolor=c_rmse, labelsize=FS_TICK)
+            ax1.tick_params(axis="x", labelsize=FS_TICK)
+
+            # Right axis: NIS curves
+            ax2 = ax1.twinx()
+
+            # Full-horizon NIS — kept but visually secondary
+            ax2.plot(alphas, nis_full, "s--", color=c_full, linewidth=1.2,
+                     markersize=5, alpha=0.65, label="NIS full-horizon")
+
+            # Post-burn-in NIS — primary NIS curve
+            ax2.plot(alphas, nis_post, "^-", color=c_post, linewidth=2.5,
+                     markersize=7,
+                     label=f"NIS post-burn-in (b={args.nis_burnin})")
+
+            # NIS DOF reference line
+            ax2.axhline(nis_dof, color=c_dof, linestyle=":", linewidth=1.8,
+                        label=f"NIS DOF = {nis_dof}")
+
+            ax2.set_ylabel("NIS mean", color=c_post, fontsize=FS_LABEL)
+            ax2.tick_params(axis="y", labelcolor=c_post, labelsize=FS_TICK)
+
+            # Selected-alpha vertical line (paper choice)
+            if sel_alpha is not None:
+                ax1.axvline(sel_alpha, color=c_sel, linestyle="--", linewidth=2.0,
+                            label=rf"Selected $\alpha = {sel_alpha:g}$")
+
+            # ── legend ────────────────────────────────────────────────────────
+            lines1, lab1 = ax1.get_legend_handles_labels()
+            lines2, lab2 = ax2.get_legend_handles_labels()
+            ax1.legend(lines1 + lines2, lab1 + lab2,
+                       loc="upper right", fontsize=FS_LEGEND,
+                       framealpha=0.9, edgecolor="0.7")
+
+            plt.tight_layout()
+            plt.show()
+
+        return
+
+    # =========================================================================
+    #  FORMULATION COMPARE MODE  (all 4 methods, fixed matched-model bank)
+    # =========================================================================
+    if args.mode == "formulation_compare":
+        alpha = args.formulation_alpha
+        k0_lo, k0_hi = [float(x) for x in args.k0_range.split(",")]
+        k1_lo, k1_hi = [float(x) for x in args.k1_range.split(",")]
+        kz_lo, kz_hi = [float(x) for x in args.kz_range.split(",")]
+
+        total_runs = args.num_shapes * args.num_noise_realizations
+
+        print("\n" + "=" * 80)
+        print("FORMULATION COMPARISON  (all 4 EKF methods, fixed matched-model bank)")
+        print("=" * 80)
+        imu_layout_str = "[" + ", ".join(f"{v:.2f}" for v in imu_pos) + "]"
+        print(f"  IMU layout:               {imu_layout_str}  ({len(imu_pos)} sensors)")
+        print(f"  NIS DOF per step:         {nis_dof}  (= 3 x {len(imu_pos)} IMUs)")
+        print(f"  Alpha (R-scale):          {alpha}")
+        print(f"  True shapes (bank size):  {args.num_shapes}")
+        print(f"  Noise realizations/shape: {args.num_noise_realizations}")
+        print(f"  Total runs per method:    {total_runs}")
+        print(f"  Shape bank seed:          {args.shape_bank_seed}")
+        print(f"  Noise seed base:          {args.noise_seed_base}")
+        print(f"  Steps per run:            {args.steps}")
+        print(f"  Meas noise std:           {args.meas_std_deg} deg")
+        print(f"  NIS burn-in steps:        {args.nis_burnin}")
+        p0_diag_str = "[" + ", ".join(f"{v:.3f}" for v in np.diag(P0)) + "]"
+        print(f"  Initial cov P0 (diag):    {p0_diag_str}")
+        print("=" * 80)
+
+        # Build fixed shape bank and noise seeds
+        shape_bank = build_shape_bank(
+            args.num_shapes,
+            (k0_lo, k0_hi), (k1_lo, k1_hi), (kz_lo, kz_hi),
+            args.shape_bank_seed
+        )
+        noise_seeds = build_noise_seeds(
+            args.num_shapes, args.num_noise_realizations, args.noise_seed_base
+        )
+
+        print(f"\n  Shape bank [{args.num_shapes} shapes, seed={args.shape_bank_seed}]:")
+        for i, m in enumerate(shape_bank):
+            print(f"    Shape {i+1:2d}: [{m[0]:+6.3f}, {m[1]:+6.3f}, "
+                  f"{m[2]:+6.3f}, {m[3]:+6.3f}, {m[4]:+6.3f}]")
+
+        # Run all 4 formulations on the same measurements
+        stats = run_formulation_compare(
+            shape_bank, noise_seeds, imu_pos, e3, args.gamma, args.steps,
+            args.meas_std_deg, alpha, P0, args.nis_burnin
+        )
+
+        rmse_histories = stats.pop("_rmse_histories")
+
+        print_formulation_table(stats, alpha, imu_pos, nis_dof, args.nis_burnin)
+
+        # ── Save CSV ──────────────────────────────────────────────────────────
+        import csv
+        import json
+
+        csv_path = "meas_model_comparison_results.csv"
+        csv_rows = []
+        for key in FORMULATION_ORDER:
+            s = stats[key]
+            csv_rows.append({
+                "method":                    key,
+                "label":                     FORMULATION_LABELS[key],
+                "alpha":                     alpha,
+                "num_shapes":                args.num_shapes,
+                "num_noise_realizations":    args.num_noise_realizations,
+                "num_total_runs":            total_runs,
+                "imu_layout":               str(list(imu_pos)),
+                "nis_dof":                   nis_dof,
+                "nis_burnin":                args.nis_burnin,
+                "rmse_mean_mean":            s["rmse_mean"][0],
+                "rmse_mean_std":             s["rmse_mean"][1],
+                "rmse_final_mean":           s["rmse_final"][0],
+                "rmse_final_std":            s["rmse_final"][1],
+                "nis_mean_full_mean":        s["nis_mean"][0],
+                "nis_mean_full_std":         s["nis_mean"][1],
+                "nis_mean_postburnin_mean":  s["nis_mean_postburnin"][0],
+                "nis_mean_postburnin_std":   s["nis_mean_postburnin"][1],
+                "nis_std_postburnin_mean":   s["nis_std_postburnin"][0],
+                "time_per_step_mean":        s["time_per_step"][0],
+                "time_per_step_std":         s["time_per_step"][1],
+            })
+
+        fieldnames = list(csv_rows[0].keys())
+        with open(csv_path, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(csv_rows)
+        print(f"\n  Results saved  -> {csv_path}")
+
+        json_path = "meas_model_comparison_results.json"
+        summary = {
+            "config": {
+                "imu_pos":               list(imu_pos),
+                "nis_dof":               nis_dof,
+                "nis_burnin":            args.nis_burnin,
+                "P0_diag":               list(np.diag(P0)),
+                "alpha":                 alpha,
+                "num_shapes":            args.num_shapes,
+                "num_noise_realizations": args.num_noise_realizations,
+                "shape_bank_seed":       args.shape_bank_seed,
+                "noise_seed_base":       args.noise_seed_base,
+                "steps":                 args.steps,
+                "meas_std_deg":          args.meas_std_deg,
+                "gamma":                 args.gamma,
+            },
+            "results": {key: {
+                "rmse_mean":                stats[key]["rmse_mean"],
+                "rmse_final":               stats[key]["rmse_final"],
+                "nis_mean_full":            stats[key]["nis_mean"],
+                "nis_mean_postburnin":      stats[key]["nis_mean_postburnin"],
+                "nis_std_postburnin":       stats[key]["nis_std_postburnin"],
+                "time_per_step":            stats[key]["time_per_step"],
+            } for key in FORMULATION_ORDER},
+        }
+        with open(json_path, "w") as f:
+            json.dump(summary, f, indent=2)
+        print(f"  Summary saved  -> {json_path}")
+
+        # ── Optional RMSE convergence plot ────────────────────────────────────
+        if args.plot_formulation_compare:
+            try:
+                import matplotlib.pyplot as plt
+            except ImportError:
+                print("  [plot skipped] matplotlib is not installed.  "
+                      "Run: pip install matplotlib")
+                return
+
+            FS_LABEL  = 18
+            FS_TICK   = 16
+            FS_LEGEND = 15
+
+            colors = {
+                "quat_numeric":  "#d6604d",
+                "quat_analytic": "#f4a582",
+                "so3_analytic":  "#2166ac",
+                "so3_numeric":   "#74add1",
+            }
+            t_axis = np.arange(args.steps)
+
+            _, ax = plt.subplots(figsize=(10, 5))
+            for key in FORMULATION_ORDER:
+                label = FORMULATION_LABELS[key]
+                trajs = rmse_histories[key]  # list of 1-D arrays length=steps
+                mean_traj = np.mean(np.vstack(trajs), axis=0)
+                ax.plot(t_axis, mean_traj, linewidth=2.0,
+                        color=colors[key], label=label)
+
+            ax.set_xlabel("Time step", fontsize=FS_LABEL)
+            ax.set_ylabel("RMSE (modal coefficients)", fontsize=FS_LABEL)
+            ax.tick_params(axis="both", labelsize=FS_TICK)
+            ax.legend(fontsize=FS_LEGEND, framealpha=0.9, edgecolor="0.7")
+            ax.grid(True, alpha=0.3)
+            plt.tight_layout()
+            plt.show()
+
+        return
+
+    # =========================================================================
+    #  FULL COMPARE MODE  (all 4 methods — original logic, preserved)
+    # =========================================================================
     print("\n" + "=" * 80)
     print("EKF SHAPE ESTIMATION COMPARISON")
     print("=" * 80)
-    print(f"Configuration: {args.trials} trials x {args.steps} steps, gamma={args.gamma}")
+    imu_layout_str = "[" + ", ".join(f"{v:.2f}" for v in imu_pos) + "]"
+    print(f"  IMU layout:  {imu_layout_str}  ({len(imu_pos)} sensors)")
+    print(f"  NIS DOF:     {nis_dof}  (= 3 x {len(imu_pos)} IMUs)")
+    print(f"  Config:      {args.trials} trials x {args.steps} steps,  gamma={args.gamma}")
     if args.fast:
-        print("Mode: FAST (SO(3) numeric only)")
+        print("  Method:      FAST — SO(3) numeric only")
     else:
-        print("Mode: FULL COMPARISON (all 4 methods)")
+        print("  Method:      FULL COMPARISON (all 4 methods)")
     print("\nTip: Use --fast for quick runs, --plot for visualization, --plot-shape for 3D shapes")
     print("=" * 80)
 
@@ -1265,12 +2128,6 @@ def main():
     seeds = [int(s) for s in args.seed_list.split(",") if s.strip()]
     if len(seeds) < args.trials:
         raise ValueError("seed-list must have at least as many entries as trials")
-
-    # Physical parameters
-    imu_pos = np.array([0.25, 0.50, 0.75], dtype=float)
-    L_phys = 100.0
-    e3 = np.array([0.0, 0.0, L_phys], dtype=float)
-    nis_dof = 3 * len(imu_pos)  # Degrees of freedom for NIS statistic
 
     def run_all_methods(scales: Dict[str, float], fast_mode: bool = False) -> Tuple[Dict, Dict, Dict]:
         """
@@ -1287,7 +2144,7 @@ def main():
         """
         if fast_mode:
             methods_to_run = ["so3_numeric"]
-            print("\n[FAST MODE] Running only SO(3) numeric method (fastest & most accurate)")
+            print("\n[FAST MODE] Running only SO(3) numeric method")
         else:
             methods_to_run = ["quat_numeric", "quat_analytic", "so3_analytic", "so3_numeric"]
 
@@ -1307,42 +2164,38 @@ def main():
                 m_true, imu_pos, e3, args.gamma, args.steps, args.meas_std_deg, rng
             )
 
-            # Dictionary to store outputs for this trial
             outputs = {}
 
             if not fast_mode:
-                # Run quaternion methods
                 outputs["quat_numeric"] = ekf_quat(meas_q, m_true, imu_pos, e3, args.gamma,
-                                 "quat_numeric", args.meas_std_deg, scales.get("quat_numeric", 1.0))
+                                 "quat_numeric", args.meas_std_deg, scales.get("quat_numeric", 1.0),
+                                 P0=P0, nis_burnin=args.nis_burnin)
                 outputs["quat_analytic"] = ekf_quat(meas_q, m_true, imu_pos, e3, args.gamma,
-                                 "quat_analytic", args.meas_std_deg, scales.get("quat_analytic", 1.0))
-
-                # Run SO(3) analytic method
+                                 "quat_analytic", args.meas_std_deg, scales.get("quat_analytic", 1.0),
+                                 P0=P0, nis_burnin=args.nis_burnin)
                 outputs["so3_analytic"] = ekf_so3(meas_R, m_true, imu_pos, e3, args.gamma,
-                                "so3_analytic", args.meas_std_deg, scales.get("so3_analytic", 1.0))
+                                "so3_analytic", args.meas_std_deg, scales.get("so3_analytic", 1.0),
+                                P0=P0, nis_burnin=args.nis_burnin)
 
-            # Always run SO(3) numeric (fastest and most accurate)
             outputs["so3_numeric"] = ekf_so3(meas_R, m_true, imu_pos, e3, args.gamma,
-                            "so3_numeric", args.meas_std_deg, scales.get("so3_numeric", 1.0))
+                            "so3_numeric", args.meas_std_deg, scales.get("so3_numeric", 1.0),
+                            P0=P0, nis_burnin=args.nis_burnin)
 
-            # Store results for methods that were run
             for method in methods_to_run:
                 out = outputs[method]
                 results[method].append(out)
                 rmse_histories[method].append(np.sqrt(np.mean((out["hist"] - m_true) ** 2, axis=1)))
 
-                # Store final estimate from last trial
                 if t == args.trials - 1:
                     final_estimates[method] = out["m_est"]
                     m_true_final = m_true
 
-        # Compute statistics
         stats = {k: summarize(v) for k, v in results.items()}
         mean_rmse = {k: np.mean(np.vstack(v), axis=0) for k, v in rmse_histories.items()}
 
         return stats, mean_rmse, final_estimates, m_true_final
 
-    # ========== R-scale sweep mode ==========
+    # ── R-scale sweep sub-mode (--sweep-all-scales flag, unchanged) ────────────
     if args.sweep_all_scales:
         scale_list = [float(x) for x in args.scale_list.split(",") if x.strip()]
 
@@ -1352,13 +2205,11 @@ def main():
 
         best_results = {}
 
-        # Sweep each method independently
         for method in ["quat_numeric", "quat_analytic", "so3_analytic", "so3_numeric"]:
             print(f"\nSweeping {method}...")
             sweep = []
 
             for scale in scale_list:
-                # Set all scales to default, then override for current method
                 scales = {
                     "quat_numeric": args.quat_num_scale,
                     "quat_analytic": args.quat_ana_scale,
@@ -1367,19 +2218,16 @@ def main():
                 }
                 scales[method] = scale
 
-                # Run trials with this scale
                 stats, _, _, _ = run_all_methods(scales, fast_mode=False)
-                obj = stats[method][args.objective][0]  # Extract mean of objective
+                obj = stats[method][args.objective][0]
                 sweep.append((obj, scale, stats))
                 print(f"  scale={scale:<6.2f}  {args.objective}={obj:.6e}")
 
-            # Find best scale
             sweep.sort(key=lambda x: x[0])
             best_obj, best_scale, _ = sweep[0]
             best_results[method] = (best_scale, best_obj)
-            print(f"  → Best: scale={best_scale:.2f}, {args.objective}={best_obj:.6e}")
+            print(f"  -> Best: scale={best_scale:.2f}, {args.objective}={best_obj:.6e}")
 
-        # Run final comparison with all optimal scales
         print("\n" + "=" * 80)
         print("FINAL COMPARISON WITH OPTIMAL SCALES")
         print("=" * 80)
@@ -1389,9 +2237,12 @@ def main():
 
         print_comparison_table(final_stats, optimal_scales, nis_dof)
 
-        # Plot if requested
         if args.plot:
-            import matplotlib.pyplot as plt
+            try:
+                import matplotlib.pyplot as plt
+            except ImportError:
+                print("[plot skipped] matplotlib is not installed.  Run: pip install matplotlib")
+                return
             t = np.arange(args.steps)
 
             plt.figure(figsize=(10, 6))
@@ -1410,13 +2261,12 @@ def main():
             plt.tight_layout()
             plt.show()
 
-            # Plot shape comparison if requested
             if args.plot_shape and m_true_final is not None:
                 plot_shape_comparison(m_true_final, final_est, e3, args.gamma)
 
         return
 
-    # ========== Single run with provided scales ==========
+    # ── Single run with provided scales ────────────────────────────────────────
     scales = {
         "quat_numeric": args.quat_num_scale,
         "quat_analytic": args.quat_ana_scale,
@@ -1426,10 +2276,8 @@ def main():
 
     stats, rmse_hist, final_est, m_true_final = run_all_methods(scales, fast_mode=args.fast)
 
-    # Print comparison table (only for methods that were run)
     print_comparison_table(stats, scales, nis_dof)
 
-    # Print modal coefficients for clarity
     if m_true_final is not None:
         print("\n" + "=" * 80)
         print("MODAL COEFFICIENTS (Shape Parameters)")
@@ -1444,9 +2292,12 @@ def main():
                       f"(error: {np.linalg.norm(error):.4f})")
         print("=" * 80)
 
-    # Plot if requested
     if args.plot:
-        import matplotlib.pyplot as plt
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            print("[plot skipped] matplotlib is not installed.  Run: pip install matplotlib")
+            return
         t = np.arange(args.steps)
 
         plt.figure(figsize=(10, 6))
@@ -1468,7 +2319,6 @@ def main():
         plt.tight_layout()
         plt.show()
 
-        # Plot shape comparison if requested
         if args.plot_shape and m_true_final is not None:
             plot_shape_comparison(m_true_final, final_est, e3, args.gamma)
 
