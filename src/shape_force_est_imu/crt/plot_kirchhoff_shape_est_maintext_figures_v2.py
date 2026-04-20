@@ -113,6 +113,11 @@ _FRAME_COLS      = ("r", "g", "b")                     # x y z axes
 _FRAME_ALPHA_GT  = 0.90
 _FRAME_ALPHA_EST = 0.30    # lighter frames for 3-IMU
 
+# Base plate — single source of truth shared with axis-limit helper
+# so all panels show the same cross-section window around the plate
+_BASE_HALF_SIDE  = 0.010   # m  (half the plate side length)
+_BASE_MIN_LATERAL = 4.0 * _BASE_HALF_SIDE   # 40 mm — min x/y span across panels
+
 # complexity-band labels for n_cases = 4
 _CX_LABELS = {
     2: ("low complexity",  "high complexity"),
@@ -429,7 +434,7 @@ def _draw_base_plate(
     ax,
     origin: np.ndarray,
     R: np.ndarray,
-    half_side: float = 0.010,
+    half_side: float = _BASE_HALF_SIDE,
     color: str = "#3a3a3a",
     alpha: float = 0.72,
 ) -> None:
@@ -512,29 +517,34 @@ def _clean_3d_axis(ax) -> None:
         axis.set_ticklabels([])
 
 
-def _tight_axis_limits(ax, all_pts: np.ndarray, pad_frac: float = 0.03) -> None:
+def _tight_axis_limits(ax, all_pts: np.ndarray, pad_frac: float = 0.05) -> None:
     """
-    Set tight 3-D limits and shape the view-box to match the data span.
-    Adapted from set_equal_axis_scale() in 3d_CR_with_disc_tendon_v2.py.
+    Set per-axis tight 3-D limits with a minimum lateral span tied to the
+    base plate, so the plate appears at a consistent scale across all panels.
 
-    Using the actual per-axis span ratios for set_box_aspect prevents the
-    equal-cube box from leaving large whitespace when the robot is elongated
-    along one axis.  Spans are clamped to >= 20 % of the max span so no axis
-    collapses to a sliver.
+    x/y spans are floored at _BASE_MIN_LATERAL (4 × plate half-side = 40 mm)
+    so the base plate always has visual breathing room and all panels share the
+    same cross-section window.  set_box_aspect uses the resulting per-axis
+    spans, giving correct physical proportions without arbitrary clamping.
     """
-    lo, hi   = all_pts.min(0), all_pts.max(0)
-    span     = hi - lo
-    max_span = span.max()
-    pad      = max(max_span * pad_frac, 1e-3)
-    ctr      = (lo + hi) / 2
-    half     = max_span / 2 + pad
-    ax.set_xlim(ctr[0] - half, ctr[0] + half)
-    ax.set_ylim(ctr[1] - half, ctr[1] + half)
-    ax.set_zlim(ctr[2] - half, ctr[2] + half)
-    # box aspect proportional to data span → shape fills the subplot
-    ratios = np.clip(span / (max_span + 1e-12), 0.20, 1.0)
+    lo, hi = all_pts.min(0), all_pts.max(0)
+    span   = (hi - lo).copy()
+
+    # enforce consistent minimum lateral window (x, y) tied to base plate
+    span[0] = max(span[0], _BASE_MIN_LATERAL)
+    span[1] = max(span[1], _BASE_MIN_LATERAL)
+
+    ctr  = (lo + hi) / 2
+    half = span / 2 * (1.0 + pad_frac)
+
+    ax.set_xlim(ctr[0] - half[0], ctr[0] + half[0])
+    ax.set_ylim(ctr[1] - half[1], ctr[1] + half[1])
+    ax.set_zlim(ctr[2] - half[2], ctr[2] + half[2])
+
+    # box aspect = per-axis padded span ratios → correct proportions, no distortion
+    padded = 2.0 * half
     try:
-        ax.set_box_aspect(ratios.tolist())
+        ax.set_box_aspect((padded / padded.max()).tolist())
     except AttributeError:
         pass
 
