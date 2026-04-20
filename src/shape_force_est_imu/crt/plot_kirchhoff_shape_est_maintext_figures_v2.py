@@ -74,6 +74,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 # ---------------------------------------------------------------------------
 # Style  (slightly larger than composite backup script)
@@ -424,6 +425,34 @@ def _draw_frame(
                   arrow_length_ratio=0.30, normalize=False)
 
 
+def _draw_base_plate(
+    ax,
+    origin: np.ndarray,
+    R: np.ndarray,
+    half_side: float = 0.010,
+    color: str = "#3a3a3a",
+    alpha: float = 0.72,
+) -> None:
+    """
+    Draw a small square base plate at the fixed end (s = 0).
+    The plate lies in the base-frame x-y plane (R[:,0] × R[:,1]).
+    Rendered as a filled Poly3DCollection quad.
+    """
+    x_ax = R[:, 0] * half_side
+    y_ax = R[:, 1] * half_side
+    corners = np.array([
+        origin - x_ax - y_ax,
+        origin + x_ax - y_ax,
+        origin + x_ax + y_ax,
+        origin - x_ax + y_ax,
+    ])
+    poly = Poly3DCollection([corners], alpha=alpha, zorder=2)
+    poly.set_facecolor(color)
+    poly.set_edgecolor("#111111")
+    poly.set_linewidth(0.9)
+    ax.add_collection3d(poly)
+
+
 def render_robot_like_gt(
     ax,
     positions: np.ndarray,
@@ -437,6 +466,9 @@ def render_robot_like_gt(
     `orientations`: (M, 3, 3) rotation matrices
     `s_grid`      : (M,)     normalised arc-length values
     """
+    # base plate at the fixed end (s = 0)
+    _draw_base_plate(ax, positions[0], orientations[0])
+
     # backbone
     ax.plot(positions[:, 0], positions[:, 1], positions[:, 2],
             "k-", lw=2.2, zorder=5, label="GT (Kirchhoff)")
@@ -480,22 +512,29 @@ def _clean_3d_axis(ax) -> None:
         axis.set_ticklabels([])
 
 
-def _tight_axis_limits(ax, all_pts: np.ndarray, pad_frac: float = 0.06) -> None:
+def _tight_axis_limits(ax, all_pts: np.ndarray, pad_frac: float = 0.03) -> None:
     """
-    Set equal-aspect 3-D limits tightly around `all_pts`.
+    Set tight 3-D limits and shape the view-box to match the data span.
     Adapted from set_equal_axis_scale() in 3d_CR_with_disc_tendon_v2.py.
+
+    Using the actual per-axis span ratios for set_box_aspect prevents the
+    equal-cube box from leaving large whitespace when the robot is elongated
+    along one axis.  Spans are clamped to >= 20 % of the max span so no axis
+    collapses to a sliver.
     """
-    lo, hi = all_pts.min(0), all_pts.max(0)
-    span   = hi - lo
+    lo, hi   = all_pts.min(0), all_pts.max(0)
+    span     = hi - lo
     max_span = span.max()
-    pad  = max(max_span * pad_frac, 2e-3)
-    ctr  = (lo + hi) / 2
-    half = max_span / 2 + pad
+    pad      = max(max_span * pad_frac, 1e-3)
+    ctr      = (lo + hi) / 2
+    half     = max_span / 2 + pad
     ax.set_xlim(ctr[0] - half, ctr[0] + half)
     ax.set_ylim(ctr[1] - half, ctr[1] + half)
     ax.set_zlim(ctr[2] - half, ctr[2] + half)
+    # box aspect proportional to data span → shape fills the subplot
+    ratios = np.clip(span / (max_span + 1e-12), 0.20, 1.0)
     try:
-        ax.set_box_aspect([1, 1, 1])
+        ax.set_box_aspect(ratios.tolist())
     except AttributeError:
         pass
 
@@ -707,12 +746,12 @@ def build_representative_case_figure(
 
     # ── figure layout ───────────────────────────────────────────────────────
     fig_w = max(5.5 * n_cols, 18.0)
-    fig = plt.figure(figsize=(fig_w, 12.5))
+    fig = plt.figure(figsize=(fig_w, 13.5))
     gs  = fig.add_gridspec(
         3, n_cols,
-        height_ratios=[4.5, 2.2, 2.2],
-        hspace=0.28, wspace=0.18,
-        left=0.06, right=0.97, top=0.94, bottom=0.07,
+        height_ratios=[5.5, 2.0, 2.0],
+        hspace=0.25, wspace=0.18,
+        left=0.06, right=0.97, top=0.95, bottom=0.07,
     )
 
     legend_handles: list = []
@@ -767,8 +806,12 @@ def build_representative_case_figure(
             mask_p = (d["case_ids"] == cid) & (d["noise_real"] == 0)
             if np.any(mask_p):
                 panel_pts.append(d["p_est"][mask_p][0])
-        _tight_axis_limits(ax3, np.vstack(panel_pts), pad_frac=0.04)
+        _tight_axis_limits(ax3, np.vstack(panel_pts))
         ax3.view_init(elev=elev, azim=azim)
+        try:
+            ax3.set_proj_type("ortho")
+        except Exception:
+            pass
         _clean_3d_axis(ax3)
 
         # panel title — clean, no shorthand
@@ -909,7 +952,7 @@ def main() -> None:
     # ── Figure 2: representative cases ─────────────────────────────────────
     if args.plot_representative_only:
         stem2 = (None if args.no_save
-                 else results_dir / "kirchhoff_shape_est_composite_maintext_v2")
+                 else results_dir / "kirchhoff_shape_est_composite_maintext_v3")
         print(f"\n--- Figure 2: representative-case detail "
               f"({args.n_rep_cases} cases, "
               f"top-{100 - args.np_percentile:.0f}% nonplanar) ---")
