@@ -429,11 +429,10 @@ def render_robot_like_gt(
     positions: np.ndarray,
     orientations: np.ndarray,
     s_grid: np.ndarray,
-    disk_s_locs: Tuple[float, ...] = _DISK_S_LOCS,
     frame_s_locs: Tuple[float, ...] = _FRAME_S_LOCS,
 ) -> None:
     """
-    Render the GT backbone with disks and sparse RGB frames.
+    Render the GT backbone with sparse RGB frames.
     `positions`   : (M, 3)   backbone positions
     `orientations`: (M, 3, 3) rotation matrices
     `s_grid`      : (M,)     normalised arc-length values
@@ -442,12 +441,7 @@ def render_robot_like_gt(
     ax.plot(positions[:, 0], positions[:, 1], positions[:, 2],
             "k-", lw=2.2, zorder=5, label="GT (Kirchhoff)")
 
-    # disks (adapted from archive plot_cylinder)
-    for s_val in disk_s_locs:
-        idx = int(np.argmin(np.abs(s_grid - s_val)))
-        _disk_ring(ax, positions[idx], orientations[idx])
-
-    # sparse frames
+    # sparse frames along GT backbone
     for s_val in frame_s_locs:
         idx = int(np.argmin(np.abs(s_grid - s_val)))
         _draw_frame(ax, positions[idx], orientations[idx],
@@ -711,23 +705,6 @@ def build_representative_case_figure(
     n_cols  = len(selected)
     cmap_gt = _cid_map(case_ids_gt)
 
-    # ── global 3-D axis limits: tight around all positions for this figure ──
-    all_pts_list: List[np.ndarray] = []
-    for entry in selected:
-        cid = entry[0]
-        all_pts_list.append(positions_gt[cmap_gt[cid]])
-        for d in shapes.values():
-            mask = (d["case_ids"] == cid) & (d["noise_real"] == 0)
-            if np.any(mask):
-                all_pts_list.append(d["p_est"][mask][0])
-    all_pts = np.vstack(all_pts_list)
-    lo, hi  = all_pts.min(0), all_pts.max(0)
-    span    = hi - lo
-    max_sp  = span.max()
-    pad_g   = max(max_sp * 0.06, 2e-3)
-    ctr     = (lo + hi) / 2
-    half_g  = max_sp / 2 + pad_g
-
     # ── figure layout ───────────────────────────────────────────────────────
     fig_w = max(5.5 * n_cols, 18.0)
     fig = plt.figure(figsize=(fig_w, 12.5))
@@ -784,14 +761,13 @@ def build_representative_case_figure(
 
         legend_done = True
 
-        # axis limits & clean style
-        ax3.set_xlim(ctr[0] - half_g, ctr[0] + half_g)
-        ax3.set_ylim(ctr[1] - half_g, ctr[1] + half_g)
-        ax3.set_zlim(ctr[2] - half_g, ctr[2] + half_g)
-        try:
-            ax3.set_box_aspect([1, 1, 1])
-        except AttributeError:
-            pass
+        # per-panel tight axis limits (each case fills its own panel)
+        panel_pts = [p_gt]
+        for d in shapes.values():
+            mask_p = (d["case_ids"] == cid) & (d["noise_real"] == 0)
+            if np.any(mask_p):
+                panel_pts.append(d["p_est"][mask_p][0])
+        _tight_axis_limits(ax3, np.vstack(panel_pts), pad_frac=0.04)
         ax3.view_init(elev=elev, azim=azim)
         _clean_3d_axis(ax3)
 
