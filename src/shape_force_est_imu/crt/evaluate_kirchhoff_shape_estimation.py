@@ -844,6 +844,8 @@ def main() -> None:
         )
     print(sep)
 
+    layout_names = list(imu_datasets.keys())
+
     # ------------------------------------------------------------------
     # Save
     # ------------------------------------------------------------------
@@ -867,8 +869,6 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Plots
     # ------------------------------------------------------------------
-    layout_names = list(imu_datasets.keys())
-
     if args.plot_summary:
         plot_cross_model_summary(summary, save_stem=stem)
 

@@ -2,24 +2,39 @@
 """
 Plot-only companion to evaluate_kirchhoff_shape_estimation.py.
 
-Reads saved results (JSON + shapes NPZ + GT NPZ) and regenerates figures
+Reads saved results (JSON + shapes NPZ + GT NPZ) and regenerates all figures
 without re-running the EKF.
 
-Three figure types
-------------------
-  --plot-summary   — aggregate bar chart: mean centerline error & tip error
-                     (reads kirchhoff_shape_est_results.json)
-  --plot-overlays  — representative shape overlays GT vs EKF per layout
-                     (reads kirchhoff_shape_est_shapes.npz + GT NPZ)
-  --plot-metrics   — per-layout violin plots for all five geometry metrics
-                     (reads kirchhoff_shape_est_results.json)
+Figure types
+------------
+  --plot-summary           bar chart: mean centerline error & tip error
+                           → kirchhoff_shape_est_summary.{png,pdf}
+
+  --plot-metrics           per-layout violin plots (all 5 geometry metrics)
+                           → kirchhoff_shape_est_metrics.{png,pdf}
+
+  --plot-arclength-pos     position error vs normalised arc-length s
+                           → kirchhoff_shape_est_arclength_pos.{png,pdf}
+
+  --plot-arclength-ori     tangent-direction error vs arc-length s
+                           (approximates SO(3) z-axis error; full R_est not
+                            saved — see note in plot_arclength_orientation_errors)
+                           → kirchhoff_shape_est_arclength_ori.{png,pdf}
+
+  --plot-complexity-overlays
+                           2×3 shape overlays selected by shape complexity
+                           → kirchhoff_shape_est_overlays_complexity.{png,pdf}
+
+  --plot-overlays          original low/median/high error overlays (legacy)
+                           → kirchhoff_shape_est_overlays.{png,pdf}
 
 Usage
 -----
   python plot_kirchhoff_shape_est.py
   python plot_kirchhoff_shape_est.py --results-dir gt_data/results --plot-summary
-  python plot_kirchhoff_shape_est.py --plot-summary --plot-overlays --plot-metrics
-  python plot_kirchhoff_shape_est.py --num-overlay-cases 5 --no-save
+  python plot_kirchhoff_shape_est.py --plot-arclength-pos --plot-arclength-ori
+  python plot_kirchhoff_shape_est.py --plot-complexity-overlays
+  python plot_kirchhoff_shape_est.py --plot-all
 """
 from __future__ import annotations
 
@@ -27,53 +42,89 @@ import argparse
 import json
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
+# ---------------------------------------------------------------------------
+# Style constants  (publication-friendly)
+# ---------------------------------------------------------------------------
+
+LABEL_FS  = 12
+TICK_FS   = 11
+LEGEND_FS = 11
+TITLE_FS  = 12
+ANN_FS    = 7
+
+# Per-layout plot style — extend for more than 2 layouts
+_PALETTE = [
+    {"color": "#1f77b4", "ls": "--",  "lw": 1.8},   # blue
+    {"color": "#d62728", "ls": "-.",  "lw": 1.8},   # red
+    {"color": "#2ca02c", "ls": ":",   "lw": 1.8},   # green
+    {"color": "#9467bd", "ls": "--",  "lw": 1.8},   # purple
+]
+
+
+def _lstyle(layout_name: str, layout_names: List[str]) -> dict:
+    idx = layout_names.index(layout_name) if layout_name in layout_names else 0
+    return _PALETTE[idx % len(_PALETTE)]
+
 
 # ---------------------------------------------------------------------------
-# Data loading
+# Data loading helpers
 # ---------------------------------------------------------------------------
 
 def load_json(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
-def load_gt_positions(gt_npz: Path) -> np.ndarray:
-    """Returns positions (N, M, 3) and case_ids (N,)."""
+def load_gt(gt_npz: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Returns positions (N,M,3), orientations (N,M,3,3), case_ids (N,)."""
     data = np.load(gt_npz, allow_pickle=True)
-    return data["positions"], data["case_id"]
+    N, M, _ = data["positions"].shape
+    ori = data["orientations"].reshape(N, M, 3, 3)
+    return data["positions"], ori, data["case_id"]
 
 
-def load_shapes(shapes_npz: Path) -> dict:
+def load_shapes(shapes_npz: Path) -> Tuple[List[str], Dict[str, dict]]:
     """
-    Returns dict keyed by layout_name with entries:
-      p_est     : (n_rows, M, 3)
-      case_ids  : (n_rows,)
-      noise_real: (n_rows,)
+    Returns (layout_names, shapes_dict).
+    shapes_dict[lname] has keys: p_est (n,M,3), case_ids (n,), noise_real (n,).
     """
-    data = np.load(shapes_npz, allow_pickle=True)
-    layout_names = list(data["layout_names"])
-    shapes: dict = {}
-    for lname in layout_names:
-        shapes[lname] = {
-            "p_est"     : data[f"p_est_{lname}"],
-            "case_ids"  : data[f"case_ids_{lname}"],
-            "noise_real": data[f"noise_real_{lname}"],
+    data  = np.load(shapes_npz, allow_pickle=True)
+    names = list(data["layout_names"])
+    out: Dict[str, dict] = {}
+    for nm in names:
+        out[nm] = {
+            "p_est"     : data[f"p_est_{nm}"],
+            "case_ids"  : data[f"case_ids_{nm}"],
+            "noise_real": data[f"noise_real_{nm}"],
         }
-    return shapes
+    return names, out
 
 
 # ---------------------------------------------------------------------------
-# Helpers
+# General helpers
 # ---------------------------------------------------------------------------
 
-def _tight_axis_limits(ax, positions_list: list[np.ndarray],
-                       pad_frac: float = 0.07) -> None:
-    all_pts = np.vstack(positions_list)
+def _cid_map(case_ids_gt: np.ndarray) -> Dict[int, int]:
+    return {int(cid): i for i, cid in enumerate(case_ids_gt)}
+
+
+def _tangent(p: np.ndarray) -> np.ndarray:
+    """Normalised tangent to curve p (M,3) via central differences."""
+    t = np.zeros_like(p)
+    t[1:-1] = p[2:] - p[:-2]
+    t[0]    = p[1]  - p[0]
+    t[-1]   = p[-1] - p[-2]
+    norms = np.linalg.norm(t, axis=1, keepdims=True)
+    return t / np.where(norms < 1e-12, 1.0, norms)
+
+
+def _tight_axis_limits(ax, pts_list: list, pad_frac: float = 0.07) -> None:
+    all_pts = np.vstack(pts_list)
     lo, hi  = all_pts.min(0), all_pts.max(0)
     span    = hi - lo
     pad     = np.where(span > 0, span * pad_frac, 1e-3)
@@ -88,136 +139,370 @@ def _save_show(fig, save_stem: Optional[Path], suffix: str) -> None:
     if save_stem is not None:
         for ext in ("png", "pdf"):
             p = save_stem.parent / (save_stem.name + f"_{suffix}.{ext}")
-            fig.savefig(p, dpi=150)
+            fig.savefig(p, dpi=150, bbox_inches="tight")
             print(f"Figure saved → {p}")
     plt.close(fig)
 
 
 # ---------------------------------------------------------------------------
-# Figure 1 — aggregate bar chart
+# A  Arc-length position error
 # ---------------------------------------------------------------------------
 
-def plot_cross_model_summary(
-    summary: Dict[str, Dict],
-    save_stem: Optional[Path] = None,
-) -> None:
-    """Two-panel bar plot: mean centerline error and tip position error."""
-    names  = list(summary.keys())
-    n      = len(names)
-    x      = np.arange(n)
-    colors = plt.cm.tab10(np.linspace(0, 0.5, n))
-
-    fig, axes = plt.subplots(1, 2, figsize=(8, 4))
-    panels = [
-        ("mean_centerline_error", "Mean centerline error  [m]"),
-        ("tip_position_error",    "Tip position error  [m]"),
-    ]
-    for ax, (metric, ylabel) in zip(axes, panels):
-        means = [summary[nm][metric + "_mean"] for nm in names]
-        stds  = [summary[nm][metric + "_std"]  for nm in names]
-        bars  = ax.bar(x, means, yerr=stds, color=colors, capsize=5,
-                       width=0.5, alpha=0.85, error_kw=dict(lw=1.2))
-        ax.set_xticks(x)
-        ax.set_xticklabels(names, rotation=12, ha="right", fontsize=9)
-        ax.set_ylabel(ylabel, fontsize=9)
-        ax.yaxis.grid(True, alpha=0.3, linestyle="--")
-        ax.set_axisbelow(True)
-        for bar, m in zip(bars, means):
-            ax.text(bar.get_x() + bar.get_width() / 2,
-                    bar.get_height() * 1.02,
-                    f"{m*1e3:.2f} mm", ha="center", va="bottom", fontsize=7)
-
-    fig.suptitle("Cross-Model Robustness: Kirchhoff-rod shape estimation",
-                 fontsize=11)
-    _save_show(fig, save_stem, "summary")
-
-
-# ---------------------------------------------------------------------------
-# Figure 2 — shape overlays
-# ---------------------------------------------------------------------------
-
-def plot_representative_overlays(
+def compute_arclength_position_errors(
+    shapes: Dict[str, dict],
     positions_gt: np.ndarray,
     case_ids_gt: np.ndarray,
-    shapes: Dict[str, dict],
-    n_cases: int = 3,
+) -> Dict[str, np.ndarray]:
+    """
+    Returns {layout_name: errors (n_rows, M)} in metres.
+    Rows with no matching GT case are filled with NaN.
+    """
+    cmap = _cid_map(case_ids_gt)
+    out: Dict[str, np.ndarray] = {}
+    for lname, d in shapes.items():
+        n, M, _ = d["p_est"].shape
+        errs = np.full((n, M), np.nan)
+        for k in range(n):
+            gt_idx = cmap.get(int(d["case_ids"][k]))
+            if gt_idx is None:
+                continue
+            diff       = d["p_est"][k] - positions_gt[gt_idx]   # (M, 3)
+            errs[k]    = np.linalg.norm(diff, axis=1)
+        out[lname] = errs
+    return out
+
+
+def plot_arclength_position_errors(
+    pos_errors: Dict[str, np.ndarray],
+    s_grid: np.ndarray,
+    layout_names: List[str],
     save_stem: Optional[Path] = None,
 ) -> None:
     """
-    Shape overlay for n_cases representative cases (low / median / high error).
-
-    Representative cases are selected by mean centerline error of the first
-    layout, noise-realization 0.
+    Position error || p_est(s) - p_gt(s) || vs normalised arc-length.
+    Mean curve + 25–75 percentile shaded band.
     """
-    layout_names = list(shapes.keys())
-    if not layout_names:
-        print("No shape data available for overlays.")
-        return
+    fig, ax = plt.subplots(figsize=(7, 4))
 
-    cid_to_idx = {int(cid): idx for idx, cid in enumerate(case_ids_gt)}
+    for lname in layout_names:
+        errs  = pos_errors[lname] * 1e3          # m → mm
+        mean  = np.nanmean(errs,                  axis=0)
+        p25   = np.nanpercentile(errs,  25,       axis=0)
+        p75   = np.nanpercentile(errs,  75,       axis=0)
+        st    = _lstyle(lname, layout_names)
+        ax.plot(s_grid, mean,
+                color=st["color"], ls=st["ls"], lw=st["lw"], label=lname)
+        ax.fill_between(s_grid, p25, p75,
+                        color=st["color"], alpha=0.18, linewidth=0)
 
-    # Rank cases by tip-to-tip distance (proxy: use GT tip z-spread as a
-    # rough error ordering) — better: use per-case tip error from the JSON.
-    # Here we rank by mean p_est deviation for the first layout, noise_real=0.
-    lname0   = layout_names[0]
-    d0       = shapes[lname0]
-    mask0    = d0["noise_real"] == 0
-    c0       = d0["case_ids"][mask0]
-    p0       = d0["p_est"][mask0]      # (N, M, 3)
+    ax.set_xlabel("Normalised arc-length  $s$", fontsize=LABEL_FS)
+    ax.set_ylabel("Position error  [mm]",       fontsize=LABEL_FS)
+    ax.tick_params(labelsize=TICK_FS)
+    ax.set_xlim(s_grid[0], s_grid[-1])
+    ax.set_ylim(bottom=0)
+    ax.legend(fontsize=LEGEND_FS)
+    ax.yaxis.grid(True, alpha=0.3, linestyle="--")
+    ax.set_axisbelow(True)
+    # sensor markers: IMU positions inferred from layout names
+    _mark_imu_positions(ax, layout_names, pos_errors)
 
-    case_err: Dict[int, float] = {}
-    for k, cid in enumerate(c0):
-        gt_idx = cid_to_idx.get(int(cid))
-        if gt_idx is None:
-            continue
-        p_gt = positions_gt[gt_idx]    # (M, 3)
-        err  = float(np.mean(np.linalg.norm(p0[k] - p_gt, axis=1)))
-        case_err[int(cid)] = err
+    _save_show(fig, save_stem, "arclength_pos")
 
-    sorted_cases = sorted(case_err.items(), key=lambda x: x[1])
-    n_total  = len(sorted_cases)
-    pick_idx = [0, n_total // 2, n_total - 1][:n_cases]
-    rep_cases = [sorted_cases[i][0] for i in pick_idx]
-    labels    = ["low error", "median error", "high error"][:n_cases]
 
-    layout_colors = plt.cm.Set1(np.linspace(0, 0.55, len(layout_names)))
-
-    fig = plt.figure(figsize=(5 * n_cases, 5))
-    for col, (cid, lbl) in enumerate(zip(rep_cases, labels)):
-        ax     = fig.add_subplot(1, n_cases, col + 1, projection="3d")
-        gt_idx = cid_to_idx[cid]
-        p_gt   = positions_gt[gt_idx]
-
-        ax.plot(p_gt[:, 0], p_gt[:, 1], p_gt[:, 2],
-                "k-", lw=1.8, label="GT (Kirchhoff)")
-
-        all_pos = [p_gt]
-        for li, lname in enumerate(layout_names):
-            d      = shapes[lname]
-            mask   = (d["case_ids"] == cid) & (d["noise_real"] == 0)
-            if not np.any(mask):
-                continue
-            p_est  = d["p_est"][mask][0]
-            ax.plot(p_est[:, 0], p_est[:, 1], p_est[:, 2],
-                    "--", color=layout_colors[li], lw=1.3,
-                    label=lname, alpha=0.9)
-            all_pos.append(p_est)
-
-        ax.set_title(f"case {cid}  ({lbl})", fontsize=8)
-        ax.set_xlabel("x [m]", fontsize=7)
-        ax.set_ylabel("y [m]", fontsize=7)
-        ax.set_zlabel("z [m]", fontsize=7)
-        ax.set_box_aspect([1, 1, 1])
-        _tight_axis_limits(ax, all_pos)
-        if col == 0:
-            ax.legend(fontsize=6, loc="upper left")
-
-    fig.suptitle("Shape overlays — GT vs EKF estimate (cross-model)", fontsize=10)
-    _save_show(fig, save_stem, "overlays")
+def _mark_imu_positions(ax, layout_names, errs_dict) -> None:
+    """Add light vertical lines at common IMU positions if consistent across layouts."""
+    # Heuristic: snap to nearest 0.25 fraction of s based on layout name
+    imu_s_hints = {"2-IMU": [0.50, 1.00], "3-IMU": [0.25, 0.50, 1.00]}
+    done: set = set()
+    for lname in layout_names:
+        for s_pos in imu_s_hints.get(lname, []):
+            if s_pos not in done:
+                ax.axvline(s_pos, color="grey", lw=0.7, ls=":", alpha=0.6, zorder=0)
+                done.add(s_pos)
 
 
 # ---------------------------------------------------------------------------
-# Figure 3 — per-metric violin plots
+# B  Arc-length tangent-direction (orientation proxy) error
+# ---------------------------------------------------------------------------
+
+def compute_arclength_orientation_errors(
+    shapes: Dict[str, dict],
+    orientations_gt: np.ndarray,
+    case_ids_gt: np.ndarray,
+) -> Dict[str, np.ndarray]:
+    """
+    Approximate orientation error using the rod's axial (tangent) direction.
+
+    For an inextensible rod the body-frame z-axis equals the centerline tangent,
+    so the angle between estimated tangent t_est(s) and the GT z-column
+    R_gt(s)[:,2] gives the SO(3) z-axis component of the orientation error.
+
+    Note: twist about the rod axis cannot be recovered from saved positions alone
+    and is therefore excluded from this metric.
+
+    Returns {layout_name: errors_deg (n_rows, M)}.
+    """
+    cmap = _cid_map(case_ids_gt)
+    out: Dict[str, np.ndarray] = {}
+    for lname, d in shapes.items():
+        n, M, _ = d["p_est"].shape
+        errs = np.full((n, M), np.nan)
+        for k in range(n):
+            gt_idx = cmap.get(int(d["case_ids"][k]))
+            if gt_idx is None:
+                continue
+            t_est  = _tangent(d["p_est"][k])          # (M, 3)
+            t_gt   = orientations_gt[gt_idx, :, :, 2] # (M, 3) — GT z-col
+            dots   = np.clip((t_est * t_gt).sum(axis=1), -1.0, 1.0)
+            errs[k] = np.degrees(np.arccos(dots))
+        out[lname] = errs
+    return out
+
+
+def plot_arclength_orientation_errors(
+    ori_errors: Dict[str, np.ndarray],
+    s_grid: np.ndarray,
+    layout_names: List[str],
+    save_stem: Optional[Path] = None,
+) -> None:
+    """
+    Tangent-direction error [deg] vs normalised arc-length.
+    Mean curve + 25–75 percentile shaded band.
+    """
+    fig, ax = plt.subplots(figsize=(7, 4))
+
+    for lname in layout_names:
+        errs = ori_errors[lname]
+        mean = np.nanmean(errs,          axis=0)
+        p25  = np.nanpercentile(errs, 25, axis=0)
+        p75  = np.nanpercentile(errs, 75, axis=0)
+        st   = _lstyle(lname, layout_names)
+        ax.plot(s_grid, mean,
+                color=st["color"], ls=st["ls"], lw=st["lw"], label=lname)
+        ax.fill_between(s_grid, p25, p75,
+                        color=st["color"], alpha=0.18, linewidth=0)
+
+    ax.set_xlabel("Normalised arc-length  $s$",          fontsize=LABEL_FS)
+    ax.set_ylabel("Tangent direction error  [deg]",      fontsize=LABEL_FS)
+    ax.tick_params(labelsize=TICK_FS)
+    ax.set_xlim(s_grid[0], s_grid[-1])
+    ax.set_ylim(bottom=0)
+    ax.legend(fontsize=LEGEND_FS)
+    ax.yaxis.grid(True, alpha=0.3, linestyle="--")
+    ax.set_axisbelow(True)
+    # footnote
+    ax.text(0.99, 0.97,
+            "Axial (z-axis) component only;\ntwist excluded (R_est not saved)",
+            transform=ax.transAxes, fontsize=6.5, ha="right", va="top",
+            color="grey", style="italic")
+    _mark_imu_positions(ax, layout_names, ori_errors)
+
+    _save_show(fig, save_stem, "arclength_ori")
+
+
+# ---------------------------------------------------------------------------
+# C  Shape complexity scoring & representative-case selection
+# ---------------------------------------------------------------------------
+
+def compute_shape_complexity_scores(positions_gt: np.ndarray) -> np.ndarray:
+    """
+    Scalar complexity score (0=simplest, 1=most complex) for each GT case.
+
+    Three normalised components (each to [0,1]):
+      w=0.40  tip lateral displacement  ||p_tip[:2]||₂
+      w=0.30  maximum lateral deflection  max_s ||p(s)[:2]||₂
+      w=0.30  total curvature proxy  Σ arccos(t_i · t_{i+1})
+
+    The curvature proxy is the sum of turning angles between consecutive
+    discretised tangent segments — a discrete approximation of ∫|κ(s)|ds.
+    """
+    # tip lateral displacement
+    tip_lat  = np.linalg.norm(positions_gt[:, -1, :2], axis=1)      # (N,)
+    # max lateral deflection along arc
+    max_lat  = np.linalg.norm(positions_gt[:, :, :2], axis=2).max(1) # (N,)
+    # curvature proxy: sum of turning angles between consecutive tangent segments
+    dp       = np.diff(positions_gt, axis=1)                          # (N,M-1,3)
+    dp_norm  = dp / np.where(np.linalg.norm(dp, axis=2, keepdims=True) < 1e-12,
+                             1.0, np.linalg.norm(dp, axis=2, keepdims=True))
+    cos_ang  = np.clip((dp_norm[:, :-1] * dp_norm[:, 1:]).sum(axis=2), -1.0, 1.0)
+    curv_prx = np.degrees(np.arccos(cos_ang)).sum(axis=1)            # (N,)
+
+    def _norm01(x: np.ndarray) -> np.ndarray:
+        lo, hi = x.min(), x.max()
+        return (x - lo) / (hi - lo + 1e-12)
+
+    return 0.40 * _norm01(tip_lat) + 0.30 * _norm01(max_lat) + 0.30 * _norm01(curv_prx)
+
+
+COMPLEXITY_LABELS = ["simplest", "low", "mid-low", "mid-high", "high", "most complex"]
+
+
+def select_cases_by_complexity(
+    complexity: np.ndarray,
+    case_ids_gt: np.ndarray,
+    n: int = 6,
+) -> List[Tuple[int, str, int]]:
+    """
+    Return a list of (case_id, label, complexity_rank) tuples, evenly spaced
+    across the complexity-sorted ranking.
+
+    n must be ≤ len(case_ids_gt).
+    """
+    order    = np.argsort(complexity)              # ascending
+    n_total  = len(order)
+    # evenly spaced: [0, floor(N/(n-1)*i)] for i in 0..n-1, clamped to n_total-1
+    picks    = [int(round((n_total - 1) * i / (n - 1))) for i in range(n)]
+    labels   = COMPLEXITY_LABELS[:n]
+    return [(int(case_ids_gt[order[p]]), labels[i], int(order[p]))
+            for i, p in enumerate(picks)]
+
+
+def _per_case_error_map(per_case: List[dict]) -> Dict[Tuple[int, str], float]:
+    """Build (case_id, layout_name) → mean_centerline_error lookup."""
+    acc: Dict[Tuple[int, str], List[float]] = defaultdict(list)
+    for row in per_case:
+        acc[(row["case_id"], row["layout_name"])].append(row["mean_centerline_error"])
+    return {k: float(np.mean(v)) for k, v in acc.items()}
+
+
+# ---------------------------------------------------------------------------
+# C  Complexity-based overlay figure  (2 × 3 grid)
+# ---------------------------------------------------------------------------
+
+def plot_complexity_overlays(
+    positions_gt: np.ndarray,
+    case_ids_gt: np.ndarray,
+    layout_names: List[str],
+    shapes: Dict[str, dict],
+    per_case: List[dict],
+    n_cases: int = 6,
+    elev: float = 25.0,
+    azim: float = -60.0,
+    save_stem: Optional[Path] = None,
+) -> None:
+    """
+    2 × 3 grid of shape overlays, cases ordered by complexity score.
+
+    GT backbone:  black solid
+    Each layout:  dashed with layout colour
+    Consistent view angle and global axis limits across all panels.
+    Legend placed once below the figure.
+    """
+    complexity = compute_shape_complexity_scores(positions_gt)
+    selected   = select_cases_by_complexity(complexity, case_ids_gt, n=n_cases)
+    cmap_gt    = _cid_map(case_ids_gt)
+    err_map    = _per_case_error_map(per_case)
+
+    n_cols = 3
+    n_rows = int(np.ceil(n_cases / n_cols))
+    fig, axes = plt.subplots(
+        n_rows, n_cols,
+        figsize=(5.0 * n_cols, 5.2 * n_rows),
+        subplot_kw={"projection": "3d"},
+    )
+    axes_flat = np.array(axes).ravel()
+
+    # --- compute global axis limits ---
+    all_pts: List[np.ndarray] = []
+    for cid, _, _ in selected:
+        all_pts.append(positions_gt[cmap_gt[cid]])
+        for lname, d in shapes.items():
+            mask = (d["case_ids"] == cid) & (d["noise_real"] == 0)
+            if np.any(mask):
+                all_pts.append(d["p_est"][mask][0])
+    all_pts_arr = np.vstack(all_pts)
+    lo, hi = all_pts_arr.min(0), all_pts_arr.max(0)
+    span   = hi - lo
+    pad    = np.where(span > 0, span * 0.08, 2e-3)
+    xlim   = (lo[0] - pad[0], hi[0] + pad[0])
+    ylim   = (lo[1] - pad[1], hi[1] + pad[1])
+    zlim   = (lo[2] - pad[2], hi[2] + pad[2])
+
+    legend_handles: list = []
+    legend_labels:  list = []
+    legend_done = False
+
+    for col_i, (cid, lbl, _) in enumerate(selected):
+        ax     = axes_flat[col_i]
+        gt_idx = cmap_gt[cid]
+        p_gt   = positions_gt[gt_idx]
+
+        h_gt, = ax.plot(p_gt[:, 0], p_gt[:, 1], p_gt[:, 2],
+                        "k-", lw=1.8, zorder=5, label="GT (Kirchhoff)")
+        if not legend_done:
+            legend_handles.append(h_gt)
+            legend_labels.append("GT (Kirchhoff)")
+
+        ann_parts = [f"case {cid}", lbl]
+
+        for lname in layout_names:
+            d    = shapes[lname]
+            mask = (d["case_ids"] == cid) & (d["noise_real"] == 0)
+            if not np.any(mask):
+                continue
+            p_est = d["p_est"][mask][0]
+            st    = _lstyle(lname, layout_names)
+            h_est, = ax.plot(
+                p_est[:, 0], p_est[:, 1], p_est[:, 2],
+                color=st["color"], ls=st["ls"], lw=st["lw"],
+                alpha=0.9, label=lname,
+            )
+            if not legend_done:
+                legend_handles.append(h_est)
+                legend_labels.append(lname)
+
+            err_mm = err_map.get((cid, lname), float("nan")) * 1e3
+            ann_parts.append(f"{lname}: {err_mm:.2f} mm")
+
+        legend_done = True
+
+        # consistent view
+        ax.set_xlim(*xlim)
+        ax.set_ylim(*ylim)
+        ax.set_zlim(*zlim)
+        ax.set_box_aspect([1, 1, 1])
+        ax.view_init(elev=elev, azim=azim)
+
+        ax.set_xlabel("x [m]", fontsize=9)
+        ax.set_ylabel("y [m]", fontsize=9)
+        ax.set_zlabel("z [m]", fontsize=9)
+        ax.tick_params(labelsize=8)
+
+        # annotation box (top-left in axes coordinates)
+        ax.text2D(
+            0.03, 0.97, "\n".join(ann_parts),
+            transform=ax.transAxes,
+            fontsize=ANN_FS, va="top", ha="left",
+            bbox=dict(facecolor="white", alpha=0.65, edgecolor="none", pad=2),
+        )
+
+    # hide unused panels
+    for j in range(n_cases, len(axes_flat)):
+        axes_flat[j].set_visible(False)
+
+    fig.legend(
+        legend_handles, legend_labels,
+        loc="lower center", ncol=len(legend_handles),
+        fontsize=LEGEND_FS,
+        bbox_to_anchor=(0.5, 0.01),
+        framealpha=0.9,
+    )
+    fig.suptitle(
+        "Shape overlays — GT vs EKF estimate, ranked by complexity",
+        fontsize=TITLE_FS, y=1.01,
+    )
+    plt.subplots_adjust(bottom=0.09, hspace=0.12, wspace=0.06)
+    plt.show()
+    if save_stem is not None:
+        for ext in ("png", "pdf"):
+            p = save_stem.parent / (save_stem.name + f"_overlays_complexity.{ext}")
+            fig.savefig(p, dpi=150, bbox_inches="tight")
+            print(f"Figure saved → {p}")
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# Existing plots (unchanged)
 # ---------------------------------------------------------------------------
 
 METRIC_LABELS = {
@@ -227,55 +512,150 @@ METRIC_LABELS = {
     "tip_orientation_error_deg" : "Tip orientation error [deg]",
     "mean_orientation_error_deg": "Mean orientation error [deg]",
 }
-MM_METRICS = {
-    "mean_centerline_error",
-    "max_centerline_error",
-    "tip_position_error",
-}
+MM_METRICS = {"mean_centerline_error", "max_centerline_error", "tip_position_error"}
+
+
+def plot_cross_model_summary(
+    summary: Dict[str, dict],
+    layout_names: List[str],
+    save_stem: Optional[Path] = None,
+) -> None:
+    """Two-panel bar chart: mean centerline error and tip position error."""
+    n      = len(layout_names)
+    x      = np.arange(n)
+    colors = [_lstyle(nm, layout_names)["color"] for nm in layout_names]
+
+    fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+    panels = [
+        ("mean_centerline_error", "Mean centerline error  [m]"),
+        ("tip_position_error",    "Tip position error  [m]"),
+    ]
+    for ax, (metric, ylabel) in zip(axes, panels):
+        means = [summary[nm][metric + "_mean"] for nm in layout_names]
+        stds  = [summary[nm][metric + "_std"]  for nm in layout_names]
+        bars  = ax.bar(x, means, yerr=stds, color=colors, capsize=5,
+                       width=0.5, alpha=0.85, error_kw=dict(lw=1.2))
+        ax.set_xticks(x)
+        ax.set_xticklabels(layout_names, rotation=12, ha="right",
+                           fontsize=TICK_FS)
+        ax.set_ylabel(ylabel, fontsize=LABEL_FS)
+        ax.tick_params(labelsize=TICK_FS)
+        ax.yaxis.grid(True, alpha=0.3, linestyle="--")
+        ax.set_axisbelow(True)
+        for bar, m in zip(bars, means):
+            ax.text(bar.get_x() + bar.get_width() / 2,
+                    bar.get_height() * 1.02,
+                    f"{m*1e3:.2f} mm",
+                    ha="center", va="bottom", fontsize=9)
+
+    fig.suptitle("Cross-Model Robustness: Kirchhoff-rod shape estimation",
+                 fontsize=TITLE_FS)
+    _save_show(fig, save_stem, "summary")
 
 
 def plot_metric_distributions(
-    per_case: List[Dict],
+    per_case: List[dict],
+    layout_names: List[str],
     save_stem: Optional[Path] = None,
 ) -> None:
     """Violin plot of each geometry metric, grouped by layout."""
-    from collections import defaultdict
-
-    groups: Dict[str, Dict[str, List[float]]] = defaultdict(lambda: defaultdict(list))
+    groups: Dict[str, Dict[str, List[float]]] = {
+        nm: defaultdict(list) for nm in layout_names
+    }
     for row in per_case:
         lname = row["layout_name"]
+        if lname not in groups:
+            continue
         for mk in METRIC_LABELS:
-            val = row[mk]
-            if mk in MM_METRICS:
-                val *= 1e3   # → mm
+            val = row[mk] * (1e3 if mk in MM_METRICS else 1.0)
             groups[lname][mk].append(val)
 
-    layout_names = list(groups.keys())
-    n_metrics    = len(METRIC_LABELS)
-    metric_keys  = list(METRIC_LABELS.keys())
-
-    fig, axes = plt.subplots(1, n_metrics, figsize=(3.5 * n_metrics, 4.5))
-    colors = plt.cm.tab10(np.linspace(0, 0.5, len(layout_names)))
+    n_metrics  = len(METRIC_LABELS)
+    metric_keys = list(METRIC_LABELS.keys())
+    fig, axes  = plt.subplots(1, n_metrics, figsize=(3.5 * n_metrics, 4.5))
 
     for ax, mk in zip(axes, metric_keys):
-        data_per_layout = [groups[ln][mk] for ln in layout_names]
-        parts = ax.violinplot(data_per_layout, showmedians=True, showextrema=True)
-        for pc, col in zip(parts["bodies"], colors):
-            pc.set_facecolor(col)
+        data_per = [groups[nm][mk] for nm in layout_names]
+        parts    = ax.violinplot(data_per, showmedians=True, showextrema=True)
+        for pc, nm in zip(parts["bodies"], layout_names):
+            pc.set_facecolor(_lstyle(nm, layout_names)["color"])
             pc.set_alpha(0.70)
         for comp in ("cmedians", "cmins", "cmaxes", "cbars"):
             if comp in parts:
                 parts[comp].set_color("k")
                 parts[comp].set_linewidth(0.9)
-
         ax.set_xticks(range(1, len(layout_names) + 1))
-        ax.set_xticklabels(layout_names, rotation=12, ha="right", fontsize=8)
-        ax.set_ylabel(METRIC_LABELS[mk], fontsize=8)
+        ax.set_xticklabels(layout_names, rotation=12, ha="right", fontsize=TICK_FS)
+        ax.set_ylabel(METRIC_LABELS[mk], fontsize=LABEL_FS)
+        ax.tick_params(labelsize=TICK_FS)
         ax.yaxis.grid(True, alpha=0.3, linestyle="--")
         ax.set_axisbelow(True)
 
-    fig.suptitle("Metric distributions — cross-model EKF (Kirchhoff rod)", fontsize=10)
+    fig.suptitle("Metric distributions — cross-model EKF (Kirchhoff rod)",
+                 fontsize=TITLE_FS)
     _save_show(fig, save_stem, "metrics")
+
+
+def plot_representative_overlays(
+    positions_gt: np.ndarray,
+    case_ids_gt: np.ndarray,
+    layout_names: List[str],
+    shapes: Dict[str, dict],
+    n_cases: int = 3,
+    save_stem: Optional[Path] = None,
+) -> None:
+    """Legacy: low/median/high error overlays (error ranked from first layout)."""
+    cmap_gt = _cid_map(case_ids_gt)
+    lname0  = layout_names[0]
+    d0      = shapes[lname0]
+    mask0   = d0["noise_real"] == 0
+    c0      = d0["case_ids"][mask0]
+    p0      = d0["p_est"][mask0]
+
+    case_err: Dict[int, float] = {}
+    for k, cid in enumerate(c0):
+        gt_idx = cmap_gt.get(int(cid))
+        if gt_idx is None:
+            continue
+        p_gt = positions_gt[gt_idx]
+        case_err[int(cid)] = float(np.mean(np.linalg.norm(p0[k] - p_gt, axis=1)))
+
+    sorted_cases = sorted(case_err.items(), key=lambda x: x[1])
+    n_total  = len(sorted_cases)
+    picks    = [0, n_total // 2, n_total - 1][:n_cases]
+    rep_cases = [(sorted_cases[i][0], lbl) for i, lbl in
+                 zip(picks, ["low error", "median error", "high error"][:n_cases])]
+
+    fig = plt.figure(figsize=(5 * n_cases, 5))
+    for col, (cid, lbl) in enumerate(rep_cases):
+        ax     = fig.add_subplot(1, n_cases, col + 1, projection="3d")
+        gt_idx = cmap_gt[cid]
+        p_gt   = positions_gt[gt_idx]
+        ax.plot(p_gt[:, 0], p_gt[:, 1], p_gt[:, 2],
+                "k-", lw=1.8, label="GT (Kirchhoff)")
+        all_pos = [p_gt]
+        for lname in layout_names:
+            d    = shapes[lname]
+            mask = (d["case_ids"] == cid) & (d["noise_real"] == 0)
+            if not np.any(mask):
+                continue
+            p_est = d["p_est"][mask][0]
+            st    = _lstyle(lname, layout_names)
+            ax.plot(p_est[:, 0], p_est[:, 1], p_est[:, 2],
+                    color=st["color"], ls=st["ls"], lw=st["lw"],
+                    alpha=0.9, label=lname)
+            all_pos.append(p_est)
+        ax.set_title(f"case {cid}  ({lbl})", fontsize=9)
+        ax.set_xlabel("x [m]", fontsize=8)
+        ax.set_ylabel("y [m]", fontsize=8)
+        ax.set_zlabel("z [m]", fontsize=8)
+        ax.set_box_aspect([1, 1, 1])
+        _tight_axis_limits(ax, all_pos)
+        if col == 0:
+            ax.legend(fontsize=LEGEND_FS - 2, loc="upper left")
+
+    fig.suptitle("Shape overlays — GT vs EKF estimate (cross-model)", fontsize=TITLE_FS)
+    _save_show(fig, save_stem, "overlays")
 
 
 # ---------------------------------------------------------------------------
@@ -292,88 +672,134 @@ def main() -> None:
         "--results-dir", default="gt_data/results",
         help="directory containing kirchhoff_shape_est_*.json / *_shapes.npz",
     )
-    parser.add_argument(
-        "--json", default=None,
-        help="explicit path to kirchhoff_shape_est_results.json "
-             "(overrides --results-dir for summary/metrics)",
-    )
-    parser.add_argument(
-        "--shapes", default=None,
-        help="explicit path to kirchhoff_shape_est_shapes.npz "
-             "(overrides --results-dir for overlays)",
-    )
-    parser.add_argument(
-        "--gt", default="gt_data/kirchhoff_gt_dataset.npz",
-        help="Step-1 ground-truth NPZ (required for --plot-overlays)",
-    )
-    parser.add_argument("--plot-summary",  action="store_true", default=True)
-    parser.add_argument("--no-plot-summary", dest="plot_summary",
+    parser.add_argument("--json",   default=None,
+                        help="explicit path to kirchhoff_shape_est_results.json")
+    parser.add_argument("--shapes", default=None,
+                        help="explicit path to kirchhoff_shape_est_shapes.npz")
+    parser.add_argument("--gt",     default="gt_data/kirchhoff_gt_dataset.npz",
+                        help="Step-1 ground-truth NPZ")
+
+    # which figures to generate
+    parser.add_argument("--plot-summary",            action="store_true", default=True)
+    parser.add_argument("--no-plot-summary",         dest="plot_summary",
                         action="store_false")
-    parser.add_argument("--plot-overlays", action="store_true", default=False)
-    parser.add_argument("--plot-metrics",  action="store_true", default=False)
-    parser.add_argument("--num-overlay-cases", type=int, default=3)
+    parser.add_argument("--plot-metrics",            action="store_true", default=False)
+    parser.add_argument("--plot-overlays",           action="store_true", default=False)
+    parser.add_argument("--plot-arclength-pos",      action="store_true", default=False)
+    parser.add_argument("--plot-arclength-ori",      action="store_true", default=False)
+    parser.add_argument("--plot-complexity-overlays",action="store_true", default=False)
+    parser.add_argument("--plot-all",                action="store_true", default=False,
+                        help="enable all figure types")
+
+    # overlay options
+    parser.add_argument("--num-overlay-cases",       type=int,   default=3)
+    parser.add_argument("--elev",                    type=float, default=25.0,
+                        help="3-D view elevation for complexity overlays")
+    parser.add_argument("--azim",                    type=float, default=-60.0,
+                        help="3-D view azimuth for complexity overlays")
+
     parser.add_argument("--no-save", action="store_true",
-                        help="display figures but do not save PNG/PDF")
+                        help="display figures but do not write PNG/PDF")
     args = parser.parse_args()
 
-    results_dir = Path(args.results_dir)
-    json_path   = Path(args.json)   if args.json   else results_dir / "kirchhoff_shape_est_results.json"
-    shapes_path = Path(args.shapes) if args.shapes else results_dir / "kirchhoff_shape_est_shapes.npz"
-    gt_path     = Path(args.gt)
+    # expand --plot-all
+    if args.plot_all:
+        args.plot_summary             = True
+        args.plot_metrics             = True
+        args.plot_overlays            = True
+        args.plot_arclength_pos       = True
+        args.plot_arclength_ori       = True
+        args.plot_complexity_overlays = True
 
-    # Resolve save stem
-    save_stem = None if args.no_save else (results_dir / "kirchhoff_shape_est")
+    results_dir  = Path(args.results_dir)
+    json_path    = Path(args.json)   if args.json   else results_dir / "kirchhoff_shape_est_results.json"
+    shapes_path  = Path(args.shapes) if args.shapes else results_dir / "kirchhoff_shape_est_shapes.npz"
+    gt_path      = Path(args.gt)
+    save_stem    = None if args.no_save else (results_dir / "kirchhoff_shape_est")
 
-    # ------------------------------------------------------------------ #
-    # Load JSON (summary + per-case metrics)
-    # ------------------------------------------------------------------ #
+    # ------------------------------------------------------------------ load JSON
     if not json_path.exists():
         raise FileNotFoundError(f"Results JSON not found: {json_path}")
-    data_json = load_json(json_path)
-    summary   = data_json["summary"]
-    per_case  = data_json["per_case"]
-    print(f"Loaded {len(per_case)} per-case rows from {json_path}")
-    print(f"Layouts: {list(summary.keys())}")
+    data_json    = load_json(json_path)
+    summary      = data_json["summary"]
+    per_case     = data_json["per_case"]
+    layout_names = list(summary.keys())
+    print(f"Loaded {len(per_case)} rows from {json_path}")
+    print(f"Layouts: {layout_names}")
 
-    # ------------------------------------------------------------------ #
-    # Summary bar chart
-    # ------------------------------------------------------------------ #
+    # ------------------------------------------------------------------ GT
+    need_gt = (args.plot_arclength_pos or args.plot_arclength_ori
+               or args.plot_complexity_overlays or args.plot_overlays)
+    positions_gt: Optional[np.ndarray] = None
+    orientations_gt: Optional[np.ndarray] = None
+    case_ids_gt: Optional[np.ndarray] = None
+    if need_gt:
+        if not gt_path.exists():
+            raise FileNotFoundError(f"GT NPZ not found: {gt_path}")
+        positions_gt, orientations_gt, case_ids_gt = load_gt(gt_path)
+        print(f"Loaded {len(positions_gt)} GT cases from {gt_path}")
+
+    # ------------------------------------------------------------------ shapes
+    need_shapes = (args.plot_arclength_pos or args.plot_arclength_ori
+                   or args.plot_complexity_overlays or args.plot_overlays)
+    shapes: Optional[Dict[str, dict]] = None
+    if need_shapes:
+        if not shapes_path.exists():
+            raise FileNotFoundError(
+                f"Shapes NPZ not found: {shapes_path}\n"
+                "Re-run evaluate_kirchhoff_shape_estimation.py to generate it."
+            )
+        _, shapes = load_shapes(shapes_path)
+        M       = next(iter(shapes.values()))["p_est"].shape[1]
+        s_grid  = np.linspace(0.0, 1.0, M)
+        print(f"Loaded estimated shapes (M={M} arc-length points)")
+
+    # ------------------------------------------------------------------ figures
+
     if args.plot_summary:
         print("\n--- summary bar chart ---")
-        plot_cross_model_summary(summary, save_stem=save_stem)
+        plot_cross_model_summary(summary, layout_names, save_stem)
 
-    # ------------------------------------------------------------------ #
-    # Metric distributions
-    # ------------------------------------------------------------------ #
     if args.plot_metrics:
         print("\n--- metric distributions ---")
-        plot_metric_distributions(per_case, save_stem=save_stem)
+        plot_metric_distributions(per_case, layout_names, save_stem)
 
-    # ------------------------------------------------------------------ #
-    # Shape overlays (needs shapes NPZ + GT NPZ)
-    # ------------------------------------------------------------------ #
+    if args.plot_arclength_pos:
+        print("\n--- arc-length position error ---")
+        pos_errors = compute_arclength_position_errors(
+            shapes, positions_gt, case_ids_gt)
+        plot_arclength_position_errors(pos_errors, s_grid, layout_names, save_stem)
+
+    if args.plot_arclength_ori:
+        print("\n--- arc-length orientation (tangent direction) error ---")
+        ori_errors = compute_arclength_orientation_errors(
+            shapes, orientations_gt, case_ids_gt)
+        plot_arclength_orientation_errors(ori_errors, s_grid, layout_names, save_stem)
+
+    if args.plot_complexity_overlays:
+        print("\n--- complexity-based shape overlays ---")
+        plot_complexity_overlays(
+            positions_gt  = positions_gt,
+            case_ids_gt   = case_ids_gt,
+            layout_names  = layout_names,
+            shapes        = shapes,
+            per_case      = per_case,
+            n_cases       = 6,
+            elev          = args.elev,
+            azim          = args.azim,
+            save_stem     = save_stem,
+        )
+
     if args.plot_overlays:
-        if not shapes_path.exists():
-            print(f"WARNING: shapes NPZ not found at {shapes_path} — "
-                  "skipping overlays.\n"
-                  "Re-run evaluate_kirchhoff_shape_estimation.py to generate it.")
-        elif not gt_path.exists():
-            print(f"WARNING: GT NPZ not found at {gt_path} — "
-                  "skipping overlays.")
-        else:
-            print("\n--- shape overlays ---")
-            positions_gt, case_ids_gt = load_gt_positions(gt_path)
-            shapes = load_shapes(shapes_path)
-            print(f"Loaded {len(positions_gt)} GT cases from {gt_path}")
-            for lname, d in shapes.items():
-                print(f"  {lname}: {len(d['p_est'])} estimated shapes")
-            plot_representative_overlays(
-                positions_gt  = positions_gt,
-                case_ids_gt   = case_ids_gt,
-                shapes        = shapes,
-                n_cases       = args.num_overlay_cases,
-                save_stem     = save_stem,
-            )
+        print("\n--- legacy error-ranked overlays ---")
+        plot_representative_overlays(
+            positions_gt  = positions_gt,
+            case_ids_gt   = case_ids_gt,
+            layout_names  = layout_names,
+            shapes        = shapes,
+            n_cases       = args.num_overlay_cases,
+            save_stem     = save_stem,
+        )
 
 
 if __name__ == "__main__":
