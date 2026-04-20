@@ -220,6 +220,13 @@ def _compute_complexity(positions_gt: np.ndarray) -> np.ndarray:
             + 0.25 * _n01(curv)  + 0.20 * _n01(nonplan))
 
 
+def _nonplanarity_score(positions_gt: np.ndarray) -> np.ndarray:
+    """Raw (unnormalized) nonplanarity: σ_min / σ_sum from backbone SVD."""
+    pts_c = positions_gt - positions_gt.mean(axis=1, keepdims=True)
+    _, sv, _ = np.linalg.svd(pts_c, full_matrices=False)
+    return sv[:, 2] / (sv.sum(axis=1) + 1e-12)
+
+
 def _per_case_mean_errors(per_case: List[dict]) -> Dict[Tuple[int, str], float]:
     """Build (case_id, layout) → mean_centerline_error lookup."""
     acc: Dict[Tuple[int, str], List[float]] = defaultdict(list)
@@ -228,35 +235,61 @@ def _per_case_mean_errors(per_case: List[dict]) -> Dict[Tuple[int, str], float]:
     return {k: float(np.mean(v)) for k, v in acc.items()}
 
 
-def _select_3_cases(
-    complexity: np.ndarray,
+
+def _select_nonplanar_cases(
+    positions_gt: np.ndarray,
     case_ids_gt: np.ndarray,
     layout_names: List[str],
     err_map: Dict,
-) -> List[Tuple[int, str, float]]:
+    n_cases: int = 4,
+    np_percentile: float = 40.0,
+) -> List[Tuple[int, str, float, float]]:
     """
-    Pick one case per complexity tercile (low / mid / high).
-    Within each tercile prefer the case with largest inter-layout error gap.
-    Returns [(case_id, label, complexity_score), ...].
+    Select n_cases nonplanar-and-complex representative cases.
+
+    Strategy:
+      1. Compute complexity and (raw) nonplanarity for every case.
+      2. Keep only cases whose nonplanarity >= np_percentile-th percentile
+         (i.e. the top (100 - np_percentile) % by nonplanarity).
+      3. Within that filtered set, divide by complexity into n_cases equal
+         bands; from each band pick the case with the largest inter-layout
+         mean-error gap (diversity preference).
+
+    Returns [(case_id, label, cx_score, np_score), ...].
     """
-    N     = len(complexity)
-    order = np.argsort(complexity)
-    b     = [0, N // 3, 2 * N // 3, N]
-    out   = []
-    for gi, lbl in enumerate(("low", "mid", "high")):
-        cands = order[b[gi]: b[gi + 1]]
+    complexity = _compute_complexity(positions_gt)
+    nonplan    = _nonplanarity_score(positions_gt)
+
+    np_thresh     = np.percentile(nonplan, np_percentile)
+    filt_idxs     = np.where(nonplan >= np_thresh)[0]
+    cx_filt       = complexity[filt_idxs]
+    sorted_filt   = filt_idxs[np.argsort(cx_filt)]   # ascending complexity
+    N_filt        = len(sorted_filt)
+
+    out = []
+    for gi in range(n_cases):
+        start = gi * N_filt // n_cases
+        end   = (gi + 1) * N_filt // n_cases
+        cands = sorted_filt[start:end]
+        if len(cands) == 0:
+            cands = sorted_filt
+
         if len(layout_names) >= 2:
-            divs = []
-            for idx in cands:
-                cid = int(case_ids_gt[idx])
-                e0  = err_map.get((cid, layout_names[0]),  0.0)
-                e1  = err_map.get((cid, layout_names[-1]), 0.0)
-                divs.append(abs(e0 - e1))
+            divs = [abs(err_map.get((int(case_ids_gt[i]), layout_names[0]),  0.0)
+                      - err_map.get((int(case_ids_gt[i]), layout_names[-1]), 0.0))
+                    for i in cands]
             best = cands[int(np.argmax(divs))]
         else:
             best = cands[len(cands) // 2]
+
         cid = int(case_ids_gt[best])
-        out.append((cid, lbl, float(complexity[best])))
+        # human-readable complexity label within the nonplanar-filtered set
+        _cx_labels = {2: ("low", "high"),
+                      3: ("low", "mid", "high"),
+                      4: ("low cx", "mid-low cx", "mid-high cx", "high cx"),
+                      5: ("cx-1", "cx-2", "cx-3", "cx-4", "cx-5")}
+        lbl = _cx_labels.get(n_cases, [f"cx {gi+1}/{n_cases}"] * n_cases)[gi]
+        out.append((cid, lbl, float(complexity[best]), float(nonplan[best])))
     return out
 
 
@@ -518,7 +551,8 @@ def make_representative_figure(
 
     # ── global 3-D axis limits (consistent across top row) ────────────────
     all_pts: List[np.ndarray] = []
-    for cid, _, _ in selected:
+    for entry in selected:
+        cid = entry[0]
         all_pts.append(positions_gt[cmap_gt[cid]])
         for d in shapes.values():
             mask = (d["case_ids"] == cid) & (d["noise_real"] == 0)
@@ -545,7 +579,9 @@ def make_representative_figure(
     legend_labels:  list = []
     legend_done = False
 
-    for col, (cid, grp_lbl, cx_score) in enumerate(selected):
+    for col, entry in enumerate(selected):
+        cid, grp_lbl, cx_score = entry[0], entry[1], entry[2]
+        np_score = entry[3] if len(entry) > 3 else None
         gt_idx = cmap_gt[cid]
         p_gt   = positions_gt[gt_idx]
 
@@ -559,7 +595,9 @@ def make_representative_figure(
             legend_labels.append("GT (Kirchhoff)")
 
         ann_lines = [f"case {cid}  [{grp_lbl}]",
-                     f"complexity {cx_score:.3f}"]
+                     f"cx={cx_score:.3f}"]
+        if np_score is not None:
+            ann_lines.append(f"np={np_score:.4f}")
 
         for lname in layout_names:
             d    = shapes[lname]
@@ -647,6 +685,11 @@ def main() -> None:
                         help="generate the 2×2 aggregate figure only")
     parser.add_argument("--plot-representative",  action="store_true", default=False,
                         help="generate the 3-case representative figure only")
+    parser.add_argument("--n-rep-cases", type=int, default=4,
+                        help="number of cases in the representative figure")
+    parser.add_argument("--np-percentile", type=float, default=40.0,
+                        help="keep cases with nonplanarity >= this percentile "
+                             "(0 = all, 40 = top 60%% most nonplanar)")
     parser.add_argument("--elev", type=float, default=_ELEV,
                         help="3-D view elevation for representative figure")
     parser.add_argument("--azim", type=float, default=_AZIM,
@@ -716,16 +759,23 @@ def main() -> None:
         stem2 = (None if args.no_save
                  else results_dir / "kirchhoff_shape_est_composite_nonplanar_clean")
         print("\n--- Figure 2: representative-case detail ---")
-        complexity = _compute_complexity(positions_gt)
-        err_map    = _per_case_mean_errors(per_case)
-        selected   = _select_3_cases(complexity, case_ids_gt, layout_names, err_map)
-        print("  Selected cases (low / mid / high complexity):")
-        for cid, lbl, sc in selected:
+        err_map  = _per_case_mean_errors(per_case)
+        selected = _select_nonplanar_cases(
+            positions_gt, case_ids_gt, layout_names, err_map,
+            n_cases=args.n_rep_cases,
+            np_percentile=args.np_percentile,
+        )
+        print(f"  Selected {len(selected)} cases "
+              f"(top-{100 - args.np_percentile:.0f}% nonplanar, "
+              f"spread by complexity):")
+        for entry in selected:
+            cid, lbl, sc = entry[0], entry[1], entry[2]
+            np_sc = entry[3] if len(entry) > 3 else float("nan")
             e_str = "  ".join(
-                f"{ln}={err_map.get((cid,ln),float('nan'))*1e3:.2f}mm"
+                f"{ln}={err_map.get((cid, ln), float('nan')) * 1e3:.2f}mm"
                 for ln in layout_names
             )
-            print(f"    {lbl:4s}  case {cid:3d}  cx={sc:.3f}  {e_str}")
+            print(f"    {lbl}  case {cid:3d}  cx={sc:.3f}  np={np_sc:.4f}  {e_str}")
         make_representative_figure(
             selected=selected,
             positions_gt=positions_gt,
