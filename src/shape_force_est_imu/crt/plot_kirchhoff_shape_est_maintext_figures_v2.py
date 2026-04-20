@@ -517,38 +517,6 @@ def _clean_3d_axis(ax) -> None:
         axis.set_ticklabels([])
 
 
-def _tight_axis_limits(ax, all_pts: np.ndarray, pad_frac: float = 0.05) -> None:
-    """
-    Set per-axis tight 3-D limits with a minimum lateral span tied to the
-    base plate, so the plate appears at a consistent scale across all panels.
-
-    x/y spans are floored at _BASE_MIN_LATERAL (4 × plate half-side = 40 mm)
-    so the base plate always has visual breathing room and all panels share the
-    same cross-section window.  set_box_aspect uses the resulting per-axis
-    spans, giving correct physical proportions without arbitrary clamping.
-    """
-    lo, hi = all_pts.min(0), all_pts.max(0)
-    span   = (hi - lo).copy()
-
-    # enforce consistent minimum lateral window (x, y) tied to base plate
-    span[0] = max(span[0], _BASE_MIN_LATERAL)
-    span[1] = max(span[1], _BASE_MIN_LATERAL)
-
-    ctr  = (lo + hi) / 2
-    half = span / 2 * (1.0 + pad_frac)
-
-    ax.set_xlim(ctr[0] - half[0], ctr[0] + half[0])
-    ax.set_ylim(ctr[1] - half[1], ctr[1] + half[1])
-    ax.set_zlim(ctr[2] - half[2], ctr[2] + half[2])
-
-    # box aspect = per-axis padded span ratios → correct proportions, no distortion
-    padded = 2.0 * half
-    try:
-        ax.set_box_aspect((padded / padded.max()).tolist())
-    except AttributeError:
-        pass
-
-
 # ---------------------------------------------------------------------------
 # Panel helpers  (2-D panels shared by both figures)
 # ---------------------------------------------------------------------------
@@ -764,6 +732,37 @@ def build_representative_case_figure(
         left=0.06, right=0.97, top=0.95, bottom=0.07,
     )
 
+    # ── shared 3-D span for all top-row panels ──────────────────────────────
+    # Collect every displayed point across all representative cases so the
+    # same physical window is used in every panel.
+    _disp: List[np.ndarray] = []
+    for _e in selected:
+        _cid = _e[0]
+        _disp.append(positions_gt[cmap_gt[_cid]])
+        for _d in shapes.values():
+            _m = (_d["case_ids"] == _cid) & (_d["noise_real"] == 0)
+            if np.any(_m):
+                _disp.append(_d["p_est"][_m][0])
+    _all = np.vstack(_disp)
+
+    # xy half-span: covers every lateral deflection across all cases;
+    # floored at _BASE_MIN_LATERAL/2 so the base plate always fits.
+    _xy_range = _all[:, :2].max(axis=0) - _all[:, :2].min(axis=0)
+    _shared_xy_half = max(_xy_range.max() / 2,
+                          _BASE_MIN_LATERAL / 2) * 1.15
+
+    # z half-span + global z centre: all rods share the same base origin at
+    # z ≈ 0, so a single z window centres every shape consistently.
+    _z_lo, _z_hi   = _all[:, 2].min(), _all[:, 2].max()
+    _shared_z_half  = (_z_hi - _z_lo) / 2 * 1.12
+    _z_global_ctr   = (_z_lo + _z_hi) / 2
+
+    # box-aspect ratios (x == y enforced → base square is visually square)
+    _bxy  = 2.0 * _shared_xy_half
+    _bz   = 2.0 * _shared_z_half
+    _bmax = max(_bxy, _bz)
+    _box_aspect = [_bxy / _bmax, _bxy / _bmax, _bz / _bmax]
+
     legend_handles: list = []
     legend_labels:  list = []
     legend_done = False
@@ -810,13 +809,22 @@ def build_representative_case_figure(
 
         legend_done = True
 
-        # per-panel tight axis limits (each case fills its own panel)
-        panel_pts = [p_gt]
-        for d in shapes.values():
-            mask_p = (d["case_ids"] == cid) & (d["noise_real"] == 0)
-            if np.any(mask_p):
-                panel_pts.append(d["p_est"][mask_p][0])
-        _tight_axis_limits(ax3, np.vstack(panel_pts))
+        # shared spans: centre xy on this case, centre z globally
+        _panel_pts = [p_gt]
+        for _dv in shapes.values():
+            _mp = (_dv["case_ids"] == cid) & (_dv["noise_real"] == 0)
+            if np.any(_mp):
+                _panel_pts.append(_dv["p_est"][_mp][0])
+        _panel_arr  = np.vstack(_panel_pts)
+        _local_xy   = (_panel_arr[:, :2].min(0) + _panel_arr[:, :2].max(0)) / 2
+
+        ax3.set_xlim(_local_xy[0] - _shared_xy_half, _local_xy[0] + _shared_xy_half)
+        ax3.set_ylim(_local_xy[1] - _shared_xy_half, _local_xy[1] + _shared_xy_half)
+        ax3.set_zlim(_z_global_ctr - _shared_z_half,  _z_global_ctr + _shared_z_half)
+        try:
+            ax3.set_box_aspect(_box_aspect)
+        except AttributeError:
+            pass
         ax3.view_init(elev=elev, azim=azim)
         try:
             ax3.set_proj_type("ortho")
@@ -962,7 +970,7 @@ def main() -> None:
     # ── Figure 2: representative cases ─────────────────────────────────────
     if args.plot_representative_only:
         stem2 = (None if args.no_save
-                 else results_dir / "kirchhoff_shape_est_composite_maintext_v3")
+                 else results_dir / "kirchhoff_shape_est_composite_maintext_v4")
         print(f"\n--- Figure 2: representative-case detail "
               f"({args.n_rep_cases} cases, "
               f"top-{100 - args.np_percentile:.0f}% nonplanar) ---")
