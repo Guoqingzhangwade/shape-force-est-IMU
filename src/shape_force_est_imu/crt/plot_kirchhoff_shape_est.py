@@ -49,6 +49,22 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
 # ---------------------------------------------------------------------------
+# SO(3) helper  (identical to evaluate_kirchhoff_shape_estimation.py)
+# ---------------------------------------------------------------------------
+
+def _vee(S: np.ndarray) -> np.ndarray:
+    return np.array([S[2, 1], S[0, 2], S[1, 0]])
+
+
+def so3_log(R: np.ndarray) -> np.ndarray:
+    val   = np.clip((np.trace(R) - 1.0) / 2.0, -1.0, 1.0)
+    theta = np.arccos(val)
+    if abs(theta) < 1e-8:
+        return _vee(R - R.T) / 2.0
+    return (theta / (2.0 * np.sin(theta))) * _vee(R - R.T)
+
+
+# ---------------------------------------------------------------------------
 # Style constants  (publication-friendly)
 # ---------------------------------------------------------------------------
 
@@ -91,17 +107,21 @@ def load_gt(gt_npz: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 def load_shapes(shapes_npz: Path) -> Tuple[List[str], Dict[str, dict]]:
     """
     Returns (layout_names, shapes_dict).
-    shapes_dict[lname] has keys: p_est (n,M,3), case_ids (n,), noise_real (n,).
+    shapes_dict[lname] keys: p_est (n,M,3), R_est (n,M,3,3) if saved,
+    case_ids (n,), noise_real (n,).
     """
     data  = np.load(shapes_npz, allow_pickle=True)
     names = list(data["layout_names"])
     out: Dict[str, dict] = {}
     for nm in names:
-        out[nm] = {
+        entry: dict = {
             "p_est"     : data[f"p_est_{nm}"],
             "case_ids"  : data[f"case_ids_{nm}"],
             "noise_real": data[f"noise_real_{nm}"],
         }
+        if f"R_est_{nm}" in data.files:
+            entry["R_est"] = data[f"R_est_{nm}"]
+        out[nm] = entry
     return names, out
 
 
@@ -112,15 +132,6 @@ def load_shapes(shapes_npz: Path) -> Tuple[List[str], Dict[str, dict]]:
 def _cid_map(case_ids_gt: np.ndarray) -> Dict[int, int]:
     return {int(cid): i for i, cid in enumerate(case_ids_gt)}
 
-
-def _tangent(p: np.ndarray) -> np.ndarray:
-    """Normalised tangent to curve p (M,3) via central differences."""
-    t = np.zeros_like(p)
-    t[1:-1] = p[2:] - p[:-2]
-    t[0]    = p[1]  - p[0]
-    t[-1]   = p[-1] - p[-2]
-    norms = np.linalg.norm(t, axis=1, keepdims=True)
-    return t / np.where(norms < 1e-12, 1.0, norms)
 
 
 def _tight_axis_limits(ax, pts_list: list, pad_frac: float = 0.07) -> None:
@@ -222,7 +233,7 @@ def _mark_imu_positions(ax, layout_names, errs_dict) -> None:
 
 
 # ---------------------------------------------------------------------------
-# B  Arc-length tangent-direction (orientation proxy) error
+# B  Arc-length SO(3) orientation error
 # ---------------------------------------------------------------------------
 
 def compute_arclength_orientation_errors(
@@ -231,30 +242,36 @@ def compute_arclength_orientation_errors(
     case_ids_gt: np.ndarray,
 ) -> Dict[str, np.ndarray]:
     """
-    Approximate orientation error using the rod's axial (tangent) direction.
+    Full SO(3) orientation error at each arc-length point.
 
-    For an inextensible rod the body-frame z-axis equals the centerline tangent,
-    so the angle between estimated tangent t_est(s) and the GT z-column
-    R_gt(s)[:,2] gives the SO(3) z-axis component of the orientation error.
+        e_R(s) = || log( R_est(s) @ R_gt(s)^T ) ||   [rad → deg]
 
-    Note: twist about the rod axis cannot be recovered from saved positions alone
-    and is therefore excluded from this metric.
+    Requires R_est to be present in the shapes dict (saved by
+    evaluate_kirchhoff_shape_estimation.py).  Raises RuntimeError if missing.
 
     Returns {layout_name: errors_deg (n_rows, M)}.
     """
     cmap = _cid_map(case_ids_gt)
     out: Dict[str, np.ndarray] = {}
     for lname, d in shapes.items():
-        n, M, _ = d["p_est"].shape
+        if "R_est" not in d:
+            raise RuntimeError(
+                f"R_est not found for layout '{lname}' in the shapes NPZ.\n"
+                "Re-run evaluate_kirchhoff_shape_estimation.py to regenerate "
+                "kirchhoff_shape_est_shapes.npz with R_est arrays."
+            )
+        n, M, _, _ = d["R_est"].shape
         errs = np.full((n, M), np.nan)
         for k in range(n):
             gt_idx = cmap.get(int(d["case_ids"][k]))
             if gt_idx is None:
                 continue
-            t_est  = _tangent(d["p_est"][k])          # (M, 3)
-            t_gt   = orientations_gt[gt_idx, :, :, 2] # (M, 3) — GT z-col
-            dots   = np.clip((t_est * t_gt).sum(axis=1), -1.0, 1.0)
-            errs[k] = np.degrees(np.arccos(dots))
+            R_est_k = d["R_est"][k]              # (M, 3, 3)
+            R_gt_k  = orientations_gt[gt_idx]    # (M, 3, 3)
+            for i in range(M):
+                errs[k, i] = np.degrees(
+                    np.linalg.norm(so3_log(R_est_k[i] @ R_gt_k[i].T))
+                )
         out[lname] = errs
     return out
 
@@ -266,14 +283,14 @@ def plot_arclength_orientation_errors(
     save_stem: Optional[Path] = None,
 ) -> None:
     """
-    Tangent-direction error [deg] vs normalised arc-length.
+    SO(3) orientation error [deg] vs normalised arc-length.
     Mean curve + 25–75 percentile shaded band.
     """
     fig, ax = plt.subplots(figsize=(7, 4))
 
     for lname in layout_names:
         errs = ori_errors[lname]
-        mean = np.nanmean(errs,          axis=0)
+        mean = np.nanmean(errs,           axis=0)
         p25  = np.nanpercentile(errs, 25, axis=0)
         p75  = np.nanpercentile(errs, 75, axis=0)
         st   = _lstyle(lname, layout_names)
@@ -282,19 +299,14 @@ def plot_arclength_orientation_errors(
         ax.fill_between(s_grid, p25, p75,
                         color=st["color"], alpha=0.18, linewidth=0)
 
-    ax.set_xlabel("Normalised arc-length  $s$",          fontsize=LABEL_FS)
-    ax.set_ylabel("Tangent direction error  [deg]",      fontsize=LABEL_FS)
+    ax.set_xlabel("Normalised arc-length  $s$",       fontsize=LABEL_FS)
+    ax.set_ylabel("Orientation error  [deg]",         fontsize=LABEL_FS)
     ax.tick_params(labelsize=TICK_FS)
     ax.set_xlim(s_grid[0], s_grid[-1])
     ax.set_ylim(bottom=0)
     ax.legend(fontsize=LEGEND_FS)
     ax.yaxis.grid(True, alpha=0.3, linestyle="--")
     ax.set_axisbelow(True)
-    # footnote
-    ax.text(0.99, 0.97,
-            "Axial (z-axis) component only;\ntwist excluded (R_est not saved)",
-            transform=ax.transAxes, fontsize=6.5, ha="right", va="top",
-            color="grey", style="italic")
     _mark_imu_positions(ax, layout_names, ori_errors)
 
     _save_show(fig, save_stem, "arclength_ori")
