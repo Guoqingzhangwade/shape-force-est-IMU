@@ -567,6 +567,33 @@ def save_results_json(
     print(f"  Saved → {path}")
 
 
+def save_shapes_npz(
+    all_results: List[Dict],
+    layout_names: List[str],
+    path: Path,
+) -> None:
+    """
+    Save estimated backbone positions for all layouts so that the
+    plot-only companion (plot_kirchhoff_shape_est.py) can regenerate
+    shape overlays without re-running the EKF.
+
+    Per-layout arrays in the NPZ
+    ----------------------------
+    p_est_{name}     : (n_rows, M, 3)  estimated positions [m]
+    case_ids_{name}  : (n_rows,)       case_id per row
+    noise_real_{name}: (n_rows,)       noise_realization index per row
+    layout_names     : object array of layout name strings
+    """
+    arrays: Dict = {"layout_names": np.array(layout_names, dtype=object)}
+    for lname in layout_names:
+        rows = [r for r in all_results if r["layout_name"] == lname]
+        arrays[f"p_est_{lname}"]     = np.stack([r["_p_est"] for r in rows])
+        arrays[f"case_ids_{lname}"]  = np.array([r["case_id"] for r in rows])
+        arrays[f"noise_real_{lname}"] = np.array([r["noise_realization"] for r in rows])
+    np.savez(path, **arrays)
+    print(f"  Saved → {path}")
+
+
 # ---------------------------------------------------------------------------
 # Plots
 # ---------------------------------------------------------------------------
@@ -834,6 +861,8 @@ def main() -> None:
         },
         path=stem.parent / (stem.name + "_results.json"),
     )
+    save_shapes_npz(all_results, layout_names,
+                    stem.parent / (stem.name + "_shapes.npz"))
 
     # ------------------------------------------------------------------
     # Plots
