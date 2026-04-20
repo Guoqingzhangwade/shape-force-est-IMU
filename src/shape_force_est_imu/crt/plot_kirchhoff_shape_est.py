@@ -47,6 +47,8 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
+from mpl_toolkits.mplot3d.art3d import Line3DCollection
+import matplotlib.colors as mcolors
 
 # ---------------------------------------------------------------------------
 # SO(3) helper  (identical to evaluate_kirchhoff_shape_estimation.py)
@@ -73,6 +75,13 @@ TICK_FS   = 11
 LEGEND_FS = 11
 TITLE_FS  = 12
 ANN_FS    = 7
+
+# Orientation frame drawing
+FRAME_S_LOCS      = (0.25, 0.50, 0.75, 1.00)
+FRAME_SCALE       = 0.003            # quiver arrow length [m] — ~3 % of 0.10 m rod
+FRAME_LW          = 0.9
+_FRAME_AXIS_COLS  = ("r", "g", "b")  # x / y / z axis colours
+_ERROR_CMAP       = "plasma"         # colourmap for position-error curve
 
 # Per-layout plot style — extend for more than 2 layouts
 _PALETTE = [
@@ -320,53 +329,40 @@ def compute_shape_complexity_scores(positions_gt: np.ndarray) -> np.ndarray:
     """
     Scalar complexity score (0=simplest, 1=most complex) for each GT case.
 
-    Three normalised components (each to [0,1]):
-      w=0.40  tip lateral displacement  ||p_tip[:2]||₂
-      w=0.30  maximum lateral deflection  max_s ||p(s)[:2]||₂
-      w=0.30  total curvature proxy  Σ arccos(t_i · t_{i+1})
+    Four normalised components (each → [0,1]), weighted sum:
+      w=0.30  tip lateral displacement    ||p_tip[:2]||₂
+      w=0.25  maximum lateral deflection  max_s ||p(s)[:2]||₂
+      w=0.25  total curvature proxy       Σ arccos(t_i · t_{i+1})
+      w=0.20  3-D nonplanarity            σ_min / (σ_sum + ε)
+                  from SVD of the centered backbone point cloud
 
-    The curvature proxy is the sum of turning angles between consecutive
-    discretised tangent segments — a discrete approximation of ∫|κ(s)|ds.
+    The curvature proxy ≈ ∫|κ(s)|ds (discrete turning-angle sum).
+    The nonplanarity term captures how much the backbone leaves the best-fit
+    plane, distinguishing 3-D coils from in-plane bends.
     """
-    # tip lateral displacement
-    tip_lat  = np.linalg.norm(positions_gt[:, -1, :2], axis=1)      # (N,)
-    # max lateral deflection along arc
-    max_lat  = np.linalg.norm(positions_gt[:, :, :2], axis=2).max(1) # (N,)
-    # curvature proxy: sum of turning angles between consecutive tangent segments
-    dp       = np.diff(positions_gt, axis=1)                          # (N,M-1,3)
-    dp_norm  = dp / np.where(np.linalg.norm(dp, axis=2, keepdims=True) < 1e-12,
-                             1.0, np.linalg.norm(dp, axis=2, keepdims=True))
-    cos_ang  = np.clip((dp_norm[:, :-1] * dp_norm[:, 1:]).sum(axis=2), -1.0, 1.0)
-    curv_prx = np.degrees(np.arccos(cos_ang)).sum(axis=1)            # (N,)
-
     def _norm01(x: np.ndarray) -> np.ndarray:
         lo, hi = x.min(), x.max()
         return (x - lo) / (hi - lo + 1e-12)
 
-    return 0.40 * _norm01(tip_lat) + 0.30 * _norm01(max_lat) + 0.30 * _norm01(curv_prx)
+    # tip lateral displacement (xy)
+    tip_lat = np.linalg.norm(positions_gt[:, -1, :2], axis=1)          # (N,)
+    # max lateral deflection along arc
+    max_lat = np.linalg.norm(positions_gt[:, :, :2], axis=2).max(1)    # (N,)
+    # curvature proxy: sum of inter-segment turning angles
+    dp       = np.diff(positions_gt, axis=1)                            # (N,M-1,3)
+    seg_norm = np.linalg.norm(dp, axis=2, keepdims=True)
+    dp_unit  = dp / np.where(seg_norm < 1e-12, 1.0, seg_norm)
+    cos_ang  = np.clip((dp_unit[:, :-1] * dp_unit[:, 1:]).sum(2), -1.0, 1.0)
+    curv_prx = np.degrees(np.arccos(cos_ang)).sum(1)                    # (N,)
+    # 3-D nonplanarity: fraction of variance in minor SVD direction
+    pts_c    = positions_gt - positions_gt.mean(axis=1, keepdims=True)  # (N,M,3)
+    _, sv, _ = np.linalg.svd(pts_c, full_matrices=False)               # sv: (N,3)
+    nonplan  = sv[:, 2] / (sv.sum(axis=1) + 1e-12)                     # (N,)
 
-
-COMPLEXITY_LABELS = ["simplest", "low", "mid-low", "mid-high", "high", "most complex"]
-
-
-def select_cases_by_complexity(
-    complexity: np.ndarray,
-    case_ids_gt: np.ndarray,
-    n: int = 6,
-) -> List[Tuple[int, str, int]]:
-    """
-    Return a list of (case_id, label, complexity_rank) tuples, evenly spaced
-    across the complexity-sorted ranking.
-
-    n must be ≤ len(case_ids_gt).
-    """
-    order    = np.argsort(complexity)              # ascending
-    n_total  = len(order)
-    # evenly spaced: [0, floor(N/(n-1)*i)] for i in 0..n-1, clamped to n_total-1
-    picks    = [int(round((n_total - 1) * i / (n - 1))) for i in range(n)]
-    labels   = COMPLEXITY_LABELS[:n]
-    return [(int(case_ids_gt[order[p]]), labels[i], int(order[p]))
-            for i, p in enumerate(picks)]
+    return (0.30 * _norm01(tip_lat)
+            + 0.25 * _norm01(max_lat)
+            + 0.25 * _norm01(curv_prx)
+            + 0.20 * _norm01(nonplan))
 
 
 def _per_case_error_map(per_case: List[dict]) -> Dict[Tuple[int, str], float]:
@@ -377,12 +373,102 @@ def _per_case_error_map(per_case: List[dict]) -> Dict[Tuple[int, str], float]:
     return {k: float(np.mean(v)) for k, v in acc.items()}
 
 
+def select_cases_by_complexity_groups(
+    complexity: np.ndarray,
+    case_ids_gt: np.ndarray,
+    layout_names: List[str],
+    err_map: Dict,
+    n_per_group: int = 2,
+) -> List[Tuple[int, str, float]]:
+    """
+    Select n_per_group cases from each of three complexity terciles
+    (low / mid / high).  Within each group, prefer cases where the two
+    layouts differ most in mean-centerline-error (high inter-layout diversity).
+
+    Returns list of (case_id, group_label, complexity_score) tuples ordered
+    as: [low-A, low-B, mid-A, mid-B, high-A, high-B].
+    """
+    N     = len(complexity)
+    order = np.argsort(complexity)                   # ascending index into GT arrays
+    b     = [0, N // 3, 2 * N // 3, N]              # tercile boundaries
+    g_names = ["low", "mid", "high"]
+    g_labels = {"low": ["low-A", "low-B"],
+                "mid": ["mid-A", "mid-B"],
+                "high": ["high-A", "high-B"]}
+
+    selected: List[Tuple[int, str, float]] = []
+    for gi, gname in enumerate(g_names):
+        cands = order[b[gi]: b[gi + 1]]             # indices into case_ids_gt
+        # diversity = |err_layout0 − err_layout1|
+        if len(layout_names) >= 2:
+            divs = []
+            for idx in cands:
+                cid = int(case_ids_gt[idx])
+                e0  = err_map.get((cid, layout_names[0]),  0.0)
+                e1  = err_map.get((cid, layout_names[-1]), 0.0)
+                divs.append(abs(e0 - e1))
+            top = np.argsort(divs)[::-1]            # sort by diversity desc
+            picks = [cands[top[j]] for j in range(min(n_per_group, len(cands)))]
+        else:
+            picks = list(cands[:n_per_group])
+        # sort picks within group by complexity ascending (consistent display)
+        picks = sorted(picks, key=lambda idx: complexity[idx])
+        for j, idx in enumerate(picks):
+            cid = int(case_ids_gt[idx])
+            selected.append((cid, g_labels[gname][j], float(complexity[idx])))
+
+    return selected   # [low-A, low-B, mid-A, mid-B, high-A, high-B]
+
+
+# ---------------------------------------------------------------------------
+# C  Frame and error-curve helpers
+# ---------------------------------------------------------------------------
+
+def _draw_frame_3d(
+    ax,
+    origin: np.ndarray,
+    R: np.ndarray,
+    scale: float = FRAME_SCALE,
+    lw: float = FRAME_LW,
+    alpha: float = 1.0,
+) -> None:
+    """Draw a small RGB reference frame triad at origin with rotation R."""
+    for j, col in enumerate(_FRAME_AXIS_COLS):
+        d = R[:, j] * scale
+        ax.quiver(origin[0], origin[1], origin[2],
+                  d[0], d[1], d[2],
+                  color=col, linewidth=lw, alpha=alpha,
+                  arrow_length_ratio=0.30, normalize=False)
+
+
+def _plot_curve_colored_3d(
+    ax,
+    pts: np.ndarray,
+    values: np.ndarray,
+    norm: mcolors.Normalize,
+    cmap,
+    lw: float = 1.8,
+    alpha: float = 0.95,
+) -> Line3DCollection:
+    """
+    Draw a 3-D curve pts (M,3) with each segment coloured by the midpoint
+    of values (M,) using the supplied norm and colormap.
+    """
+    seg_vals = 0.5 * (values[:-1] + values[1:])
+    colors   = cmap(norm(seg_vals))
+    segs     = [pts[[i, i + 1]] for i in range(len(pts) - 1)]   # list of (2,3)
+    lc       = Line3DCollection(segs, colors=colors, linewidth=lw, alpha=alpha)
+    ax.add_collection3d(lc)
+    return lc
+
+
 # ---------------------------------------------------------------------------
 # C  Complexity-based overlay figure  (2 × 3 grid)
 # ---------------------------------------------------------------------------
 
 def plot_complexity_overlays(
     positions_gt: np.ndarray,
+    orientations_gt: np.ndarray,
     case_ids_gt: np.ndarray,
     layout_names: List[str],
     shapes: Dict[str, dict],
@@ -390,97 +476,187 @@ def plot_complexity_overlays(
     n_cases: int = 6,
     elev: float = 25.0,
     azim: float = -60.0,
+    frame_s_locs: Tuple[float, ...] = FRAME_S_LOCS,
+    frame_scale: float = FRAME_SCALE,
     save_stem: Optional[Path] = None,
 ) -> None:
     """
-    2 × 3 grid of shape overlays, cases ordered by complexity score.
+    2 × 3 thesis-style overlay figure, cases selected by shape complexity.
 
-    GT backbone:  black solid
-    Each layout:  dashed with layout colour
-    Consistent view angle and global axis limits across all panels.
-    Legend placed once below the figure.
+    Layout (columns = complexity level):
+      Row 0:  low-A  |  mid-A  |  high-A
+      Row 1:  low-B  |  mid-B  |  high-B
+
+    Curves
+    ------
+      GT backbone     — black solid  + small RGB frames at frame_s_locs
+      last layout     — coloured by local position error (Line3DCollection)
+                        + lighter RGB frames at same locations (if R_est saved)
+      other layouts   — plain dashed line  + tip frame only (if R_est saved)
+
+    Error colouring uses a global [0, max_err] scale across all 6 panels;
+    one shared colourbar is placed on the right side of the figure.
+
+    Panel annotations: case id, complexity group, per-layout mean error.
     """
     complexity = compute_shape_complexity_scores(positions_gt)
-    selected   = select_cases_by_complexity(complexity, case_ids_gt, n=n_cases)
-    cmap_gt    = _cid_map(case_ids_gt)
     err_map    = _per_case_error_map(per_case)
-
-    n_cols = 3
-    n_rows = int(np.ceil(n_cases / n_cols))
-    fig, axes = plt.subplots(
-        n_rows, n_cols,
-        figsize=(5.0 * n_cols, 5.2 * n_rows),
-        subplot_kw={"projection": "3d"},
+    selected   = select_cases_by_complexity_groups(
+        complexity, case_ids_gt, layout_names, err_map, n_per_group=2
     )
-    axes_flat = np.array(axes).ravel()
+    # selected = [low-A, low-B, mid-A, mid-B, high-A, high-B]
+    # display order for 2×3 grid (columns = low | mid | high):
+    #   [low-A, mid-A, high-A, low-B, mid-B, high-B]
+    disp_order = [0, 2, 4, 1, 3, 5]
+    disp = [selected[i] for i in disp_order]
 
-    # --- compute global axis limits ---
+    cmap_gt    = _cid_map(case_ids_gt)
+    M          = positions_gt.shape[1]
+    lname_col  = layout_names[-1]             # coloured curve = last layout (3-IMU)
+    has_R_est  = "R_est" in shapes.get(lname_col, {})
+
+    # ── print selection summary ─────────────────────────────────────────────
+    print(f"  Case selection (2+2+2 by complexity):")
+    for cid, lbl, score in selected:
+        e_strs = "  ".join(
+            f"{ln}={err_map.get((cid,ln),float('nan'))*1e3:.2f}mm"
+            for ln in layout_names
+        )
+        print(f"    {lbl:8s}  case {cid:3d}  complexity={score:.3f}  {e_strs}")
+    print(f"  Frame s-locations: {frame_s_locs}  scale={frame_scale*1e3:.1f} mm")
+    print(f"  R_est available: {has_R_est}")
+
+    # ── precompute global error range for coloured curve ─────────────────────
+    d_col = shapes[lname_col]
+    all_local_mm: List[np.ndarray] = []
+    for cid, _, _ in disp:
+        mask = (d_col["case_ids"] == cid) & (d_col["noise_real"] == 0)
+        if np.any(mask):
+            p_e = d_col["p_est"][mask][0]
+            p_g = positions_gt[cmap_gt[cid]]
+            all_local_mm.append(np.linalg.norm(p_e - p_g, axis=1) * 1e3)
+    global_max_mm = float(np.concatenate(all_local_mm).max()) if all_local_mm else 1.0
+    err_norm      = mcolors.Normalize(vmin=0.0, vmax=global_max_mm)
+    err_cmap      = plt.get_cmap(_ERROR_CMAP)
+
+    # ── global axis limits ───────────────────────────────────────────────────
     all_pts: List[np.ndarray] = []
-    for cid, _, _ in selected:
+    for cid, _, _ in disp:
         all_pts.append(positions_gt[cmap_gt[cid]])
-        for lname, d in shapes.items():
+        for d in shapes.values():
             mask = (d["case_ids"] == cid) & (d["noise_real"] == 0)
             if np.any(mask):
                 all_pts.append(d["p_est"][mask][0])
-    all_pts_arr = np.vstack(all_pts)
-    lo, hi = all_pts_arr.min(0), all_pts_arr.max(0)
-    span   = hi - lo
-    pad    = np.where(span > 0, span * 0.08, 2e-3)
-    xlim   = (lo[0] - pad[0], hi[0] + pad[0])
-    ylim   = (lo[1] - pad[1], hi[1] + pad[1])
-    zlim   = (lo[2] - pad[2], hi[2] + pad[2])
+    all_arr = np.vstack(all_pts)
+    lo, hi  = all_arr.min(0), all_arr.max(0)
+    span    = hi - lo
+    pad     = np.where(span > 0, span * 0.08, 2e-3)
+    xlim = (lo[0] - pad[0], hi[0] + pad[0])
+    ylim = (lo[1] - pad[1], hi[1] + pad[1])
+    zlim = (lo[2] - pad[2], hi[2] + pad[2])
+
+    # ── build figure with GridSpec (3D axes + colourbar column) ─────────────
+    n_rows, n_cols = 2, 3
+    fig = plt.figure(figsize=(5.4 * n_cols + 1.0, 5.6 * n_rows))
+    gs  = fig.add_gridspec(
+        n_rows, n_cols + 1,
+        width_ratios=[1, 1, 1, 0.045],
+        hspace=0.08, wspace=0.08,
+        left=0.03, right=0.92, top=0.91, bottom=0.11,
+    )
+    axes_3d: List = []
+    for r in range(n_rows):
+        for c in range(n_cols):
+            axes_3d.append(fig.add_subplot(gs[r, c], projection="3d"))
+    cbar_ax = fig.add_subplot(gs[:, n_cols])
 
     legend_handles: list = []
     legend_labels:  list = []
     legend_done = False
 
-    for col_i, (cid, lbl, _) in enumerate(selected):
-        ax     = axes_flat[col_i]
-        gt_idx = cmap_gt[cid]
-        p_gt   = positions_gt[gt_idx]
+    for panel_i, (cid, grp_lbl, cx_score) in enumerate(disp):
+        ax      = axes_3d[panel_i]
+        gt_idx  = cmap_gt[cid]
+        p_gt    = positions_gt[gt_idx]        # (M, 3)
+        R_gt_k  = orientations_gt[gt_idx]     # (M, 3, 3)
 
+        # ── GT backbone ──
         h_gt, = ax.plot(p_gt[:, 0], p_gt[:, 1], p_gt[:, 2],
-                        "k-", lw=1.8, zorder=5, label="GT (Kirchhoff)")
+                        "k-", lw=1.6, label="GT (Kirchhoff)")
         if not legend_done:
             legend_handles.append(h_gt)
             legend_labels.append("GT (Kirchhoff)")
 
-        ann_parts = [f"case {cid}", lbl]
+        # ── GT orientation frames ──
+        for s_loc in frame_s_locs:
+            idx_s = int(round(s_loc * (M - 1)))
+            _draw_frame_3d(ax, p_gt[idx_s], R_gt_k[idx_s],
+                           scale=frame_scale, lw=FRAME_LW, alpha=0.90)
 
-        for lname in layout_names:
+        ann_parts = [f"case {cid}  [{grp_lbl}]",
+                     f"complexity  {cx_score:.3f}"]
+
+        # ── estimated curves ──
+        for li, lname in enumerate(layout_names):
             d    = shapes[lname]
             mask = (d["case_ids"] == cid) & (d["noise_real"] == 0)
             if not np.any(mask):
                 continue
-            p_est = d["p_est"][mask][0]
+            p_est = d["p_est"][mask][0]         # (M, 3)
             st    = _lstyle(lname, layout_names)
-            h_est, = ax.plot(
-                p_est[:, 0], p_est[:, 1], p_est[:, 2],
-                color=st["color"], ls=st["ls"], lw=st["lw"],
-                alpha=0.9, label=lname,
-            )
-            if not legend_done:
-                legend_handles.append(h_est)
-                legend_labels.append(lname)
+            local_mm = np.linalg.norm(p_est - p_gt, axis=1) * 1e3
 
-            err_mm = err_map.get((cid, lname), float("nan")) * 1e3
-            ann_parts.append(f"{lname}: {err_mm:.2f} mm")
+            if lname == lname_col:
+                # last layout → colour by position error
+                _plot_curve_colored_3d(ax, p_est, local_mm,
+                                       err_norm, err_cmap,
+                                       lw=st["lw"], alpha=0.95)
+                if not legend_done:
+                    proxy = plt.Line2D([0], [0], color=err_cmap(0.7),
+                                       ls="-", lw=st["lw"],
+                                       label=f"{lname} (err-coloured)")
+                    legend_handles.append(proxy)
+                    legend_labels.append(f"{lname} (err-coloured)")
+
+                # estimated frames at all frame_s_locs (if R_est saved)
+                if has_R_est:
+                    R_est_k = d["R_est"][mask][0]
+                    for s_loc in frame_s_locs:
+                        idx_s = int(round(s_loc * (M - 1)))
+                        _draw_frame_3d(ax, p_est[idx_s], R_est_k[idx_s],
+                                       scale=frame_scale * 0.80,
+                                       lw=FRAME_LW * 0.65, alpha=0.28)
+            else:
+                # other layouts → plain dashed line
+                h_est, = ax.plot(p_est[:, 0], p_est[:, 1], p_est[:, 2],
+                                 color=st["color"], ls=st["ls"], lw=st["lw"],
+                                 alpha=0.88, label=lname)
+                if not legend_done:
+                    legend_handles.append(h_est)
+                    legend_labels.append(lname)
+
+                # tip frame only (if R_est saved, to avoid crowding)
+                if has_R_est and "R_est" in d:
+                    R_est_k = d["R_est"][mask][0]
+                    idx_tip = int(round(1.0 * (M - 1)))
+                    _draw_frame_3d(ax, p_est[idx_tip], R_est_k[idx_tip],
+                                   scale=frame_scale * 0.75,
+                                   lw=FRAME_LW * 0.55, alpha=0.22)
+
+            err_mean_mm = err_map.get((cid, lname), float("nan")) * 1e3
+            ann_parts.append(f"{lname}: {err_mean_mm:.2f} mm")
 
         legend_done = True
 
-        # consistent view
-        ax.set_xlim(*xlim)
-        ax.set_ylim(*ylim)
-        ax.set_zlim(*zlim)
+        # ── axis formatting ──
+        ax.set_xlim(*xlim);  ax.set_ylim(*ylim);  ax.set_zlim(*zlim)
         ax.set_box_aspect([1, 1, 1])
         ax.view_init(elev=elev, azim=azim)
-
         ax.set_xlabel("x [m]", fontsize=9)
         ax.set_ylabel("y [m]", fontsize=9)
         ax.set_zlabel("z [m]", fontsize=9)
         ax.tick_params(labelsize=8)
 
-        # annotation box (top-left in axes coordinates)
         ax.text2D(
             0.03, 0.97, "\n".join(ann_parts),
             transform=ax.transAxes,
@@ -488,22 +664,25 @@ def plot_complexity_overlays(
             bbox=dict(facecolor="white", alpha=0.65, edgecolor="none", pad=2),
         )
 
-    # hide unused panels
-    for j in range(n_cases, len(axes_flat)):
-        axes_flat[j].set_visible(False)
+    # ── shared colourbar ──
+    sm = plt.cm.ScalarMappable(cmap=err_cmap, norm=err_norm)
+    sm.set_array([])
+    cb = fig.colorbar(sm, cax=cbar_ax)
+    cb.set_label(f"Pos. error — {lname_col}  [mm]", fontsize=LABEL_FS - 1)
+    cb.ax.tick_params(labelsize=TICK_FS - 1)
 
+    # ── legend ──
     fig.legend(
         legend_handles, legend_labels,
         loc="lower center", ncol=len(legend_handles),
-        fontsize=LEGEND_FS,
-        bbox_to_anchor=(0.5, 0.01),
+        fontsize=LEGEND_FS - 1,
+        bbox_to_anchor=(0.45, 0.01),
         framealpha=0.9,
     )
     fig.suptitle(
-        "Shape overlays — GT vs EKF estimate, ranked by complexity",
-        fontsize=TITLE_FS, y=1.01,
+        "Shape overlays — GT vs EKF (cross-model), cases ranked by shape complexity",
+        fontsize=TITLE_FS, y=0.97,
     )
-    plt.subplots_adjust(bottom=0.09, hspace=0.12, wspace=0.06)
     plt.show()
     if save_stem is not None:
         for ext in ("png", "pdf"):
@@ -792,6 +971,7 @@ def main() -> None:
         print("\n--- complexity-based shape overlays ---")
         plot_complexity_overlays(
             positions_gt  = positions_gt,
+            orientations_gt = orientations_gt,
             case_ids_gt   = case_ids_gt,
             layout_names  = layout_names,
             shapes        = shapes,
