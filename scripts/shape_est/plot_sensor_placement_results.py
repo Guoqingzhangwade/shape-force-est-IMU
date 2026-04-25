@@ -15,23 +15,21 @@ Input files (produced by sensor_placement_study_final.py)
 
 Output figures
 --------------
-  A. best_vs_count.png / .pdf      -- best RMSE vs number of IMUs
-  B. heatmap_2imu.png  / .pdf      -- sparse 2-IMU placement heatmap
-                                      (built from the 6 predefined 2-IMU configs)
-  C. bar_all_configs.png / .pdf    -- horizontal bar chart (optional)
+  A1. best_vs_count_full.png/.pdf   -- best RMSE vs count, all 1-5 IMUs
+  A2. best_vs_count_main.png/.pdf   -- main manuscript version, 2-5 IMUs only
+  B1. heatmap_2imu_annotated.png/.pdf -- 2-IMU heatmap with cell values
+  B2. heatmap_2imu_clean.png/.pdf     -- 2-IMU heatmap without cell values
+  C.  bar_all_configs.png/.pdf        -- horizontal bar chart (optional)
 
 Heatmap note
 ------------
-The full 8x8 or 9x9 grid sweep is NOT saved in the CSV (it was an optional,
-separate run in the simulation script).  This script reconstructs a sparse
-4x4 heatmap from the 6 predefined 2-IMU configs:
-  positions = {0.25, 0.50, 0.75, 1.00}
-  valid pairs: all (s1, s2) with s1 < s2
+The saved CSV contains the 6 predefined 2-IMU configs (positions {0.25, 0.50,
+0.75, 1.00}), not a full grid sweep.  The heatmap is reconstructed as a sparse
+4x4 grid with symmetric fill and masked diagonal.
 
-Axis-centering fix: uses pcolormesh with cell-EDGE coordinates constructed
-from the sensor-position grid, then sets xticks / yticks to the center values.
-This guarantees that e.g. the label "0.25" appears at the CENTER of its cell,
-not on a boundary.
+Axis-centering fix: pcolormesh is called with cell-EDGE coordinates computed
+from the sensor-position centers.  Ticks are then placed at the center values,
+so labels (e.g. "0.25") appear at the CENTER of each cell.
 
 Usage
 -----
@@ -113,202 +111,278 @@ def load_json_meta(json_path: str) -> Dict:
 
 
 # ============================================================
-#  FIGURE A: BEST RMSE vs SENSOR COUNT
+#  FIGURE A: BEST RMSE vs SENSOR COUNT  (two versions)
 # ============================================================
 
-def plot_best_vs_count(best_rows: List[Dict],
-                       output_dir: str,
-                       fmt: str = "png") -> None:
+def _draw_best_vs_count(ax: plt.Axes, best_rows: List[Dict],
+                        annotate: bool = True) -> None:
     """
-    Plot best final RMSE vs number of IMUs with error bars.
-    One colored point per sensor count.
+    Shared drawing logic for best-vs-count.  `best_rows` may be a subset
+    (e.g. only 2-5 IMUs for the manuscript version).
     """
-    best_rows = sorted(best_rows, key=lambda r: r["n_sensors"])
     counts = [r["n_sensors"]       for r in best_rows]
     means  = [r["rmse_final_mean"] for r in best_rows]
     stds   = [r["rmse_final_std"]  for r in best_rows]
     colors = [_COUNT_COLOR.get(n, "gray") for n in counts]
 
-    fig, ax = plt.subplots(figsize=(7, 4.5))
+    # Connecting line
+    ax.plot(counts, means, "-", color="#888888",
+            linewidth=LW, zorder=2, alpha=0.6)
 
-    # Error bar spine
+    # Error bars
     ax.errorbar(counts, means, yerr=stds,
                 fmt="none", ecolor="#555555",
-                capsize=5, capthick=1.5, elinewidth=1.2, zorder=2)
+                capsize=5, capthick=1.5, elinewidth=1.2, zorder=3)
 
-    # Connect points
-    ax.plot(counts, means, "-", color="#444444",
-            linewidth=LW, zorder=2, alpha=0.5)
-
-    # Colored dots per count
+    # Colored markers
     for n, m, c in zip(counts, means, colors):
         ax.scatter([n], [m], color=c, s=MS ** 2, zorder=4,
-                   edgecolors="white", linewidths=0.8)
+                   edgecolors="white", linewidths=1.0)
 
-    # Annotations: config label
-    for row in best_rows:
-        n   = row["n_sensors"]
-        m   = row["rmse_final_mean"]
-        pos = row["imu_positions"]
-        lbl = "[" + ", ".join(f"{v:.2f}" for v in pos) + "]"
-        ax.annotate(lbl, xy=(n, m),
-                    xytext=(6, 4), textcoords="offset points",
-                    fontsize=8, color="#333333")
+    if annotate:
+        # Alternate labels above / below every other point to avoid crowding.
+        # Use axes-fraction x so labels always sit just right of the last tick,
+        # independent of data scale.
+        for k, row in enumerate(best_rows):
+            n   = row["n_sensors"]
+            m   = row["rmse_final_mean"]
+            pos = row["imu_positions"]
+            lbl = "{" + ", ".join(f"{v:.2f}" for v in pos) + "}"
+            dy  = 7 if k % 2 == 0 else -14   # alternating vertical offset
+            ax.annotate(
+                lbl,
+                xy=(n, m),
+                xytext=(10, dy),
+                textcoords="offset points",
+                fontsize=9,
+                color="#333333",
+                va="bottom" if dy > 0 else "top",
+                arrowprops=dict(arrowstyle="-",
+                                color="#bbbbbb",
+                                lw=0.7,
+                                shrinkA=4, shrinkB=2),
+            )
 
     ax.set_xticks(counts)
     ax.set_xticklabels([str(n) for n in counts], fontsize=FS_TICK)
     ax.set_xlabel("Number of IMUs", fontsize=FS_LABEL)
-    ax.set_ylabel("Best final RMSE (modal coefficients)", fontsize=FS_LABEL)
+    ax.set_ylabel("Best final RMSE\n(modal coefficients)", fontsize=FS_LABEL,
+                  labelpad=8)
     ax.tick_params(axis="y", labelsize=FS_TICK)
-    ax.grid(True, alpha=0.35, which="both")
-    fig.tight_layout()
-
-    _save(fig, output_dir, "best_vs_count", fmt)
-    plt.show()
+    ax.grid(True, alpha=0.3, axis="y", linestyle="--")
 
 
-# ============================================================
-#  FIGURE B: SPARSE 2-IMU HEATMAP
-# ============================================================
-
-def plot_heatmap_2imu(all_rows: List[Dict],
-                      output_dir: str,
-                      fmt: str = "png") -> None:
+def plot_best_vs_count(best_rows: List[Dict],
+                       output_dir: str,
+                       fmt: str = "png") -> None:
     """
-    Build a sparse heatmap from the 6 predefined 2-IMU configurations.
+    Generate two versions of the best-RMSE-vs-count figure:
+      A1. Full  (1-5 IMUs)  -> best_vs_count_full
+      A2. Main  (2-5 IMUs)  -> best_vs_count_main  (manuscript figure)
+    """
+    best_rows = sorted(best_rows, key=lambda r: r["n_sensors"])
 
-    The 4 sensor positions {0.25, 0.50, 0.75, 1.00} define a 4x4 grid.
-    Only cells where s1 < s2 have data (upper triangle); symmetric fill
-    is applied so the map looks symmetric.  Diagonal cells are masked.
+    # ── A1: Full (1–5 IMUs) ───────────────────────────────────────────────
+    fig1, ax1 = plt.subplots(figsize=(7, 4.5))
+    _draw_best_vs_count(ax1, best_rows, annotate=True)
+    fig1.tight_layout()
+    _save(fig1, output_dir, "best_vs_count_full", fmt)
+    plt.close(fig1)
 
-    Axis-centering fix
-    ------------------
-    pcolormesh requires EDGE coordinates, not center coordinates.
-    Given center positions p = [0.25, 0.50, 0.75, 1.00], the edges are
-    constructed by taking midpoints between adjacent centers and adding
-    half-steps on each end:
-        edges[0]   = p[0] - (p[1] - p[0]) / 2
-        edges[k]   = (p[k-1] + p[k]) / 2   for k = 1 .. N-1
-        edges[N]   = p[-1] + (p[-1] - p[-2]) / 2
-    Then xticks / yticks are set to p (the center values), ensuring each
-    label appears at the center of its corresponding cell.
+    # ── A2: Main manuscript (2–5 IMUs only) ──────────────────────────────
+    main_rows = [r for r in best_rows if r["n_sensors"] >= 2]
+    means2    = [r["rmse_final_mean"] for r in main_rows]
+    stds2     = [r["rmse_final_std"]  for r in main_rows]
+
+    fig2, ax2 = plt.subplots(figsize=(7, 4.5))
+    _draw_best_vs_count(ax2, main_rows, annotate=True)
+
+    # y-axis: give 30% headroom above and 20% below for error bars + labels
+    y_top = max(m + s for m, s in zip(means2, stds2)) * 1.30
+    y_bot = max(min(m - s for m, s in zip(means2, stds2)) * 0.80, 0)
+    ax2.set_ylim(y_bot, y_top)
+
+    # Extra left margin so the two-line y-label is never clipped
+    fig2.subplots_adjust(left=0.16, right=0.88, top=0.93, bottom=0.13)
+    _save(fig2, output_dir, "best_vs_count_main", fmt)
+    plt.close(fig2)
+
+    print("  [A] best_vs_count_full and best_vs_count_main saved.")
+
+
+# ============================================================
+#  FIGURE B: SPARSE 2-IMU HEATMAP  (two versions)
+# ============================================================
+
+def _build_heatmap_data(all_rows: List[Dict]):
+    """
+    Extract 2-IMU rows, build grid, edge coordinates, and mask.
+    Returns (positions, edges, grid, diag_mask, vmin, vmax) or None.
+
+    Axis-centering explanation
+    --------------------------
+    pcolormesh(X_edges, Y_edges, Z) draws cell (i,j) as the rectangle
+    [X_edges[j], X_edges[j+1]] x [Y_edges[i], Y_edges[i+1]].
+    To make the tick label at position p land at the CENTER of its cell,
+    the edges must bracket p symmetrically:
+        edges[k]   = midpoint of p[k-1] and p[k]   (for k = 1 .. N-1)
+        edges[0]   = p[0]  - half the first gap
+        edges[N]   = p[-1] + half the last gap
+    Then ax.set_xticks(p) / ax.set_yticks(p) places labels at cell centers.
     """
     two_imu = [r for r in all_rows if r["n_sensors"] == 2]
     if not two_imu:
-        print("  [heatmap skipped] No 2-IMU data found in CSV.")
-        return
+        return None
 
-    # Collect all unique positions that appear across 2-IMU configs
     pos_set = set()
     for r in two_imu:
         for p in r["imu_positions"]:
             pos_set.add(round(p, 4))
     positions = sorted(pos_set)
-    N = len(positions)
-    pos_idx = {p: i for i, p in enumerate(positions)}
+    N         = len(positions)
+    pos_idx   = {p: i for i, p in enumerate(positions)}
 
-    # Build N x N RMSE grid (NaN = no data / invalid)
     grid = np.full((N, N), np.nan)
-
     for r in two_imu:
         p1, p2 = [round(v, 4) for v in r["imu_positions"]]
         i, j   = pos_idx[p1], pos_idx[p2]
         val    = r["rmse_final_mean"]
         grid[i, j] = val
-        grid[j, i] = val   # symmetric fill
+        grid[j, i] = val     # symmetric
 
-    # Mask the diagonal (s1 == s2, physically invalid)
     diag_mask = np.zeros((N, N), dtype=bool)
     np.fill_diagonal(diag_mask, True)
 
-    # --- Build cell-edge coordinates from center positions ---
-    # This is the fix: pcolormesh plots cells whose boundaries are at `edges`,
-    # so ticks placed at `positions` will land at the center of each cell.
-    pos_arr = np.array(positions)
-    edges   = np.empty(N + 1)
-    edges[0]    = pos_arr[0] - (pos_arr[1] - pos_arr[0]) / 2.0
+    # Cell-edge coordinates (the centering fix)
+    pos_arr    = np.array(positions)
+    edges      = np.empty(N + 1)
+    edges[0]    = pos_arr[0]  - (pos_arr[1]  - pos_arr[0])  / 2.0
     edges[1:-1] = (pos_arr[:-1] + pos_arr[1:]) / 2.0
     edges[-1]   = pos_arr[-1] + (pos_arr[-1] - pos_arr[-2]) / 2.0
 
-    # Colormap: mask NaN as light grey, diagonal as dark grey
+    valid_vals  = grid[~diag_mask & ~np.isnan(grid)]
+    vmin, vmax  = float(valid_vals.min()), float(valid_vals.max())
+
+    return positions, edges, grid, diag_mask, vmin, vmax
+
+
+def _draw_heatmap(ax: plt.Axes,
+                  positions, edges, grid, diag_mask,
+                  vmin: float, vmax: float,
+                  annotate: bool) -> plt.cm.ScalarMappable:
+    """
+    Shared drawing logic for both heatmap variants.
+    Returns the pcolormesh object for colorbar attachment.
+    """
+    N = len(positions)
+
     cmap = plt.cm.get_cmap("RdYlGn_r").copy()
-    cmap.set_bad(color="#dddddd")   # NaN → light grey
+    cmap.set_bad(color="#cccccc")    # diagonal / NaN -> light grey
 
-    # Compute vmin / vmax from valid (non-diagonal, non-NaN) cells
-    valid_vals = grid[~diag_mask & ~np.isnan(grid)]
-    vmin, vmax = valid_vals.min(), valid_vals.max()
-
-    # Mask diagonal cells so they render in the bad-data colour
     grid_masked = np.ma.array(grid, mask=diag_mask | np.isnan(grid))
 
-    fig, ax = plt.subplots(figsize=(6, 5))
-
-    # pcolormesh with edge coordinates — tick labels will land on cell centers
     pcm = ax.pcolormesh(edges, edges, grid_masked,
                         cmap=cmap, vmin=vmin, vmax=vmax,
                         shading="flat")
 
-    # Diagonal hatching to mark invalid cells clearly
+    # Diagonal: hatched grey rectangle
     for k in range(N):
-        x_lo, x_hi = edges[k], edges[k + 1]
-        y_lo, y_hi = edges[k], edges[k + 1]
         rect = mpatches.Rectangle(
-            (x_lo, y_lo), x_hi - x_lo, y_hi - y_lo,
-            linewidth=0, facecolor="#aaaaaa", hatch="//", alpha=0.6, zorder=3
+            (edges[k], edges[k]), edges[k+1] - edges[k], edges[k+1] - edges[k],
+            linewidth=0, facecolor="#999999", hatch="///",
+            alpha=0.55, zorder=3
         )
         ax.add_patch(rect)
 
-    # Annotate each valid cell with its RMSE value
-    for i in range(N):
-        for j in range(N):
-            if i == j or np.isnan(grid[i, j]):
-                continue
-            cx = (edges[j] + edges[j + 1]) / 2.0   # note: j indexes X-axis
-            cy = (edges[i] + edges[i + 1]) / 2.0   # i indexes Y-axis
-            ax.text(cx, cy, f"{grid[i, j]:.4f}",
-                    ha="center", va="center",
-                    fontsize=8, color="black", zorder=5)
+    # Optional: RMSE value inside each valid cell
+    if annotate:
+        for i in range(N):
+            for j in range(N):
+                if i == j or np.isnan(grid[i, j]):
+                    continue
+                cx = (edges[j] + edges[j+1]) / 2.0
+                cy = (edges[i] + edges[i+1]) / 2.0
+                # Choose text color for contrast against colormap
+                norm_val = (grid[i, j] - vmin) / max(vmax - vmin, 1e-12)
+                txt_color = "white" if norm_val > 0.65 else "black"
+                ax.text(cx, cy, f"{grid[i, j]:.4f}",
+                        ha="center", va="center",
+                        fontsize=9, color=txt_color,
+                        fontweight="bold", zorder=5)
 
-    # Colorbar
-    cb = plt.colorbar(pcm, ax=ax, pad=0.02)
-    cb.set_label("Mean final RMSE", fontsize=FS_LEGEND)
-    cb.ax.tick_params(labelsize=FS_TICK - 2)
+    # Thin white cell-boundary lines (only between cells, not at outer edges)
+    for e in edges[1:-1]:
+        ax.axhline(e, color="white", linewidth=0.8, zorder=2)
+        ax.axvline(e, color="white", linewidth=0.8, zorder=2)
 
-    # Axes — ticks at sensor position CENTERS
+    # Axes — ticks at sensor position CENTERS (the key alignment step)
     ax.set_xticks(positions)
     ax.set_yticks(positions)
     ax.set_xticklabels([f"{p:.2f}" for p in positions], fontsize=FS_TICK)
     ax.set_yticklabels([f"{p:.2f}" for p in positions], fontsize=FS_TICK)
-    ax.set_xlabel("Sensor 2 position $s_2$", fontsize=FS_LABEL)
-    ax.set_ylabel("Sensor 1 position $s_1$", fontsize=FS_LABEL)
+    ax.set_xlabel("Sensor 2 position $s_2$", fontsize=FS_LABEL, labelpad=8)
+    ax.set_ylabel("Sensor 1 position $s_1$", fontsize=FS_LABEL, labelpad=8)
     ax.set_xlim(edges[0], edges[-1])
     ax.set_ylim(edges[0], edges[-1])
     ax.set_aspect("equal")
 
-    n_data = len(two_imu)
-    ax.set_title(f"2-IMU placement  ({n_data} configurations; lower = better)",
-                 fontsize=FS_TITLE - 1)
+    return pcm
 
-    fig.tight_layout()
-    _save(fig, output_dir, "heatmap_2imu", fmt)
-    plt.show()
 
-    # Inform the user what's missing for a full grid sweep
-    print(f"\n  [heatmap note] This heatmap shows the {n_data} predefined 2-IMU "
-          "configurations from the study.")
-    print("  For a full grid sweep (e.g. 8x8), re-run:")
-    print("    python sensor_placement_study_final.py --heatmap-grid 8 --no-heatmap False")
+def plot_heatmap_2imu(all_rows: List[Dict],
+                      output_dir: str,
+                      fmt: str = "png") -> None:
+    """
+    Generate two heatmap variants from the 6 predefined 2-IMU configs:
+      B1. heatmap_2imu_annotated  -- RMSE values printed inside cells
+      B2. heatmap_2imu_clean      -- no cell annotations (cleaner for paper)
+    """
+    data = _build_heatmap_data(all_rows)
+    if data is None:
+        print("  [heatmap skipped] No 2-IMU data found in CSV.")
+        return
+
+    positions, edges, grid, diag_mask, vmin, vmax = data
+    n_data = sum(1 for r in all_rows if r["n_sensors"] == 2)
+
+    for annotate, stem in [(True,  "heatmap_2imu_annotated"),
+                           (False, "heatmap_2imu_clean")]:
+        # constrained_layout handles colorbar + label spacing automatically
+        fig, ax = plt.subplots(figsize=(6.2, 5.2),
+                               layout="constrained")
+        pcm = _draw_heatmap(ax, positions, edges, grid, diag_mask,
+                             vmin, vmax, annotate=annotate)
+
+        cb = fig.colorbar(pcm, ax=ax, pad=0.02, fraction=0.046, aspect=20)
+        cb.set_label("Mean final RMSE", fontsize=FS_LEGEND + 1)
+        cb.ax.tick_params(labelsize=FS_TICK - 1)
+
+        _save(fig, output_dir, stem, fmt)
+        plt.close(fig)
+
+    print(f"  [B] heatmap_2imu_annotated and heatmap_2imu_clean saved.")
+    print(f"      ({n_data} predefined 2-IMU configurations; "
+          "positions = " + str([round(p, 2) for p in positions]) + ")")
+    print("  For a dense grid heatmap re-run:")
+    print("    python sensor_placement_study_final.py --heatmap-grid 8")
 
 
 # ============================================================
 #  FIGURE C: HORIZONTAL BAR CHART (all configs)
 # ============================================================
 
+def _config_label(row: Dict) -> str:
+    """Convert config name to use curly brackets for sensor layout."""
+    n   = row["n_sensors"]
+    pos = row["imu_positions"]
+    return f"{n}-IMU " + "{" + ", ".join(f"{v:.2f}" for v in pos) + "}"
+
+
 def plot_bar_all_configs(all_rows: List[Dict],
                          output_dir: str,
                          fmt: str = "png") -> None:
     """Horizontal bar chart of final RMSE for all configurations."""
-    names  = [r["config"]          for r in all_rows]
+    names  = [_config_label(r)     for r in all_rows]
     means  = [r["rmse_final_mean"] for r in all_rows]
     stds   = [r["rmse_final_std"]  for r in all_rows]
     counts = [r["n_sensors"]       for r in all_rows]
@@ -334,7 +408,7 @@ def plot_bar_all_configs(all_rows: List[Dict],
 
     fig.tight_layout()
     _save(fig, output_dir, "bar_all_configs", fmt)
-    plt.show()
+    plt.close(fig)
 
 
 # ============================================================
@@ -423,11 +497,11 @@ def main() -> None:
     print(f"\n  Output directory: {args.output_dir}/\n")
 
     if do_best:
-        print("  [A] Plotting best RMSE vs sensor count ...")
+        print("  [A] Plotting best RMSE vs sensor count (full + main) ...")
         plot_best_vs_count(best_rows, args.output_dir, args.fmt)
 
     if do_heatmap:
-        print("  [B] Plotting 2-IMU sparse heatmap ...")
+        print("  [B] Plotting 2-IMU heatmap (annotated + clean) ...")
         plot_heatmap_2imu(all_rows, args.output_dir, args.fmt)
 
     if do_bar:
@@ -435,6 +509,7 @@ def main() -> None:
         plot_bar_all_configs(all_rows, args.output_dir, args.fmt)
 
     print("\n  Done.")
+    print(f"  All figures saved to: {args.output_dir}/")
 
 
 if __name__ == "__main__":

@@ -45,8 +45,9 @@ Disk / frame parameters
 Required input files
 --------------------
   gt_data/kirchhoff_gt_dataset.npz
-  gt_data/results/kirchhoff_shape_est_results.json
-  gt_data/results/kirchhoff_shape_est_shapes.npz
+  plus either one of these result-file pairs inside --results-dir:
+    - kirchhoff_shape_est_results.json     + kirchhoff_shape_est_shapes.npz
+    - kirchhoff_shape_est_results_seq.json + kirchhoff_shape_est_shapes_seq.npz
 
 Output files
 ------------
@@ -77,15 +78,36 @@ from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 # ---------------------------------------------------------------------------
-# Style  (slightly larger than composite backup script)
+# Style
 # ---------------------------------------------------------------------------
 
-LABEL_FS  = 13
-TICK_FS   = 12
-TITLE_FS  = 13
-PANEL_FS  = 14
-LEGEND_FS = 12
-ANN_FS    = 9.0
+_TEXT_SCALE = 2.0
+
+LABEL_FS  = 13 * _TEXT_SCALE
+TICK_FS   = 12 * _TEXT_SCALE
+TITLE_FS  = 13 * _TEXT_SCALE
+PANEL_FS  = 14 * _TEXT_SCALE
+LEGEND_FS = 12 * _TEXT_SCALE
+ANN_FS    = 9.0 * _TEXT_SCALE
+
+TICK_LEN_MAJOR = 8.0
+TICK_WIDTH_MAJOR = 1.6
+
+# Aggregate figure uses one consistent typography system across all four
+# subplots so the violin panels and arc-length panels read as one figure.
+AGG_LABEL_FS = 18.0
+AGG_TICK_FS = 16.0
+AGG_TITLE_FS = 18.0
+AGG_PANEL_FS = 18.0
+AGG_LEGEND_FS = 16.0
+AGG_NOTE_FS = 11.0
+AGG_TICK_LEN_MAJOR = 6.0
+AGG_TICK_WIDTH_MAJOR = 1.5
+
+# Arc-length error curves should read clearly in print.
+ARC_ERR_LW = 3.2
+ARC_ERR_BAND_ALPHA_GLOBAL = 0.22
+ARC_ERR_BAND_ALPHA_CASE = 0.24
 
 COLORS = {"2-IMU": "#1f77b4", "3-IMU": "#d62728"}
 LS     = {"2-IMU": "--",      "3-IMU": "-."}
@@ -152,9 +174,41 @@ def load_saved_results(
     results_dir: Path,
     gt_npz: Path,
 ) -> dict:
-    """Load all saved results and GT data; return a single bundle dict."""
-    json_path   = results_dir / "kirchhoff_shape_est_results.json"
-    shapes_path = results_dir / "kirchhoff_shape_est_shapes.npz"
+    """
+    Load saved results and GT data; return a single bundle dict.
+
+    The plot script accepts either the original cross-model filenames or the
+    sequence-workflow filenames saved by the new Step-3b evaluator.
+    """
+    candidate_pairs = [
+        (
+            results_dir / "kirchhoff_shape_est_results.json",
+            results_dir / "kirchhoff_shape_est_shapes.npz",
+        ),
+        (
+            results_dir / "kirchhoff_shape_est_results_seq.json",
+            results_dir / "kirchhoff_shape_est_shapes_seq.npz",
+        ),
+    ]
+
+    json_path = None
+    shapes_path = None
+    for cand_json, cand_shapes in candidate_pairs:
+        if cand_json.exists() and cand_shapes.exists():
+            json_path = cand_json
+            shapes_path = cand_shapes
+            break
+
+    if json_path is None or shapes_path is None:
+        raise FileNotFoundError(
+            "Could not find a valid results file pair in "
+            f"{results_dir}. Expected either "
+            "'kirchhoff_shape_est_results.json' + "
+            "'kirchhoff_shape_est_shapes.npz' or "
+            "'kirchhoff_shape_est_results_seq.json' + "
+            "'kirchhoff_shape_est_shapes_seq.npz'."
+        )
+
     for p in (json_path, shapes_path, gt_npz):
         if not p.exists():
             raise FileNotFoundError(p)
@@ -185,6 +239,7 @@ def load_saved_results(
     n_noise = len(shapes[layout_names[0]]["p_est"]) // n_cases
     s_grid  = np.linspace(0.0, 1.0, M)
 
+    print(f"Results files: {json_path.name}, {shapes_path.name}")
     print(f"JSON  : {len(per_case)} rows, layouts {layout_names}")
     print(f"GT    : {n_cases} cases, {M} arc-length points")
     print(f"Shapes: n_noise~{n_noise}, R_est={'R_est' in shapes[layout_names[0]]}")
@@ -515,6 +570,7 @@ def _clean_3d_axis(ax) -> None:
         axis._axinfo["axisline"]["linewidth"] = 0
         axis._axinfo["grid"]["linewidth"] = 0
         axis.set_ticklabels([])
+    ax.set_axis_off()
 
 
 def _tight_axis_limits(ax, all_pts: np.ndarray, pad_frac: float = 0.05) -> None:
@@ -592,9 +648,12 @@ def _panel_violin(
                        edgecolors="grey", linewidths=0.7)
 
     ax.set_xticks(_GROUP_CENTRES[: len(metric_keys)])
-    ax.set_xticklabels(metric_xlabels, fontsize=TICK_FS)
-    ax.set_ylabel(ylabel, fontsize=LABEL_FS)
-    ax.tick_params(axis="y", labelsize=TICK_FS)
+    ax.set_xticklabels(metric_xlabels, fontsize=AGG_TICK_FS)
+    ax.set_ylabel(ylabel, fontsize=AGG_LABEL_FS)
+    ax.tick_params(axis="x", labelsize=AGG_TICK_FS,
+                   length=AGG_TICK_LEN_MAJOR, width=AGG_TICK_WIDTH_MAJOR)
+    ax.tick_params(axis="y", labelsize=AGG_TICK_FS,
+                   length=AGG_TICK_LEN_MAJOR, width=AGG_TICK_WIDTH_MAJOR)
     ax.yaxis.grid(True, alpha=0.30, linestyle="--")
     ax.set_axisbelow(True)
     ax.set_xlim(_GROUP_CENTRES[0] - 0.70,
@@ -616,12 +675,14 @@ def _panel_arclength_global(
         p25  = np.nanpercentile(e, 25, axis=0)
         p75  = np.nanpercentile(e, 75, axis=0)
         col  = COLORS[lname]
-        ax.plot(s_grid, mean, color=col, lw=LW, label=lname)
-        ax.fill_between(s_grid, p25, p75, color=col, alpha=0.18, linewidth=0)
+        ax.plot(s_grid, mean, color=col, lw=ARC_ERR_LW, label=lname, zorder=3)
+        ax.fill_between(s_grid, p25, p75, color=col,
+                        alpha=ARC_ERR_BAND_ALPHA_GLOBAL, linewidth=0, zorder=1)
     _add_imu_markers(ax, layout_names)
-    ax.set_xlabel("Normalised arc-length  $s$", fontsize=LABEL_FS)
-    ax.set_ylabel(ylabel, fontsize=LABEL_FS)
-    ax.tick_params(labelsize=TICK_FS)
+    ax.set_xlabel("Normalised arc-length  $s$", fontsize=AGG_LABEL_FS)
+    ax.set_ylabel(ylabel, fontsize=AGG_LABEL_FS)
+    ax.tick_params(labelsize=AGG_TICK_FS,
+                   length=AGG_TICK_LEN_MAJOR, width=AGG_TICK_WIDTH_MAJOR)
     ax.set_xlim(s_grid[0], s_grid[-1])
     ax.set_ylim(bottom=0)
     ax.yaxis.grid(True, alpha=0.30, linestyle="--")
@@ -643,13 +704,15 @@ def _panel_arclength_case(
         p25  = np.nanpercentile(e, 25, axis=0)
         p75  = np.nanpercentile(e, 75, axis=0)
         col  = COLORS[lname]
-        ax.plot(s_grid, mean, color=col, lw=LW, ls=LS[lname])
-        ax.fill_between(s_grid, p25, p75, color=col, alpha=0.20, linewidth=0)
+        ax.plot(s_grid, mean, color=col, lw=ARC_ERR_LW, ls=LS[lname], zorder=3)
+        ax.fill_between(s_grid, p25, p75, color=col,
+                        alpha=ARC_ERR_BAND_ALPHA_CASE, linewidth=0, zorder=1)
     _add_imu_markers(ax, layout_names)
     if show_xlabel:
         ax.set_xlabel("Arc-length  $s$", fontsize=LABEL_FS)
     ax.set_ylabel(ylabel, fontsize=LABEL_FS)
-    ax.tick_params(labelsize=TICK_FS - 1)
+    ax.tick_params(labelsize=TICK_FS - 1,
+                   length=TICK_LEN_MAJOR, width=TICK_WIDTH_MAJOR)
     ax.set_xlim(s_grid[0], s_grid[-1])
     ax.set_ylim(bottom=0)
     ax.yaxis.grid(True, alpha=0.30, linestyle="--")
@@ -703,17 +766,17 @@ def build_main_aggregate_figure(
         panel_titles,
     ):
         ax.text(0.02, 0.98, lbl, transform=ax.transAxes,
-                fontsize=PANEL_FS, fontweight="bold", va="top", ha="left")
-        ax.set_title(ttl, fontsize=TITLE_FS, pad=4)
+                fontsize=AGG_PANEL_FS, fontweight="bold", va="top", ha="left")
+        ax.set_title(ttl, fontsize=AGG_TITLE_FS, pad=4)
 
     proxies = [mpatches.Patch(facecolor=COLORS[nm], alpha=0.75, label=nm)
                for nm in layout_names]
     fig.legend(handles=proxies, loc="lower center", ncol=len(layout_names),
-               fontsize=LEGEND_FS, framealpha=0.9, bbox_to_anchor=(0.5, 0.00))
+               fontsize=AGG_LEGEND_FS, framealpha=0.9, bbox_to_anchor=(0.5, 0.00))
 
     ax_d.text(0.98, 0.97,
               f"n = {n_cases} cases  x  {n_noise} realisations",
-              transform=ax_d.transAxes, fontsize=9,
+              transform=ax_d.transAxes, fontsize=AGG_NOTE_FS,
               ha="right", va="top", color="grey", style="italic")
 
     plt.tight_layout(rect=[0, 0.06, 1, 1])
@@ -862,11 +925,11 @@ def build_representative_case_figure(
     ]
     fig.legend(
         handles=[gt_proxy] + est_proxies,
-        loc="lower center",
+        loc="center",
         ncol=1 + len(layout_names),
         fontsize=LEGEND_FS,
         framealpha=0.92,
-        bbox_to_anchor=(0.5, 0.01),
+        bbox_to_anchor=(0.5, 0.49),
     )
 
     if save_stem is not None:
