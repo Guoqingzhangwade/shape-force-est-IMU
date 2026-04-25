@@ -2,6 +2,15 @@ import numpy as np
 from scipy.linalg import expm, expm_frechet
 
 
+E3 = np.array([0.0, 0.0, 1.0])
+
+
+def _trapezoid(y, x, axis=-1):
+    if hasattr(np, "trapezoid"):
+        return np.trapezoid(y, x, axis=axis)
+    return np.trapz(y, x, axis=axis)
+
+
 def hat(v):
     return np.array([
         [0.0, -v[2], v[1]],
@@ -174,28 +183,107 @@ def body_jacobian_at_s(m, s, gamma, L, order_x, order_y, order_z):
     return J, T
 
 
-def cable_dir_body(kappa, r_i):
-    return np.array([0.0, 0.0, 1.0]) + hat(kappa) @ r_i
+def cable_tangent_body(kappa, r_i, L):
+    """
+    Physical derivative of the tendon/cable point with respect to normalized
+    arclength s, expressed in the local body frame.
+
+    With s = l/L and normalized curvature kappa(s) = L*kappa_phys(l),
+
+        R.T d w_i / ds = L e3 + kappa(s) x r_i
+
+    for constant cross-section routing r_i'(s) = 0.
+    """
+    return L * E3 + hat(kappa) @ r_i
 
 
-def cable_jacobian(m, r_list, L, order_x, order_y, order_z, n_int=200):
+def cable_dir_body(kappa, r_i, L=1.0):
+    """
+    Legacy helper name for cable_tangent_body().
+
+    New code should call cable_tangent_body(kappa, r_i, L) so the normalized
+    arclength scaling is explicit.
+    """
+    return cable_tangent_body(kappa, r_i, L)
+
+
+def cable_length_physical(
+    m,
+    r_i,
+    L,
+    order_x,
+    order_y,
+    order_z,
+    n_int=400,
+):
+    """
+    Physical tendon/cable length:
+
+        ell_i = integral_0^1 ||L e3 + kappa(s) x r_i|| ds
+
+    This is mainly for finite-difference convention checks.
+    """
+    s_vals = np.linspace(0.0, 1.0, n_int + 1)
+    integrand = np.zeros(len(s_vals))
+    for idx, s in enumerate(s_vals):
+        kappa = curvature_from_modal(s, m, order_x, order_y, order_z)
+        tangent = cable_tangent_body(kappa, r_i, L)
+        integrand[idx] = np.linalg.norm(tangent)
+    return float(_trapezoid(integrand, s_vals, axis=0))
+
+
+def pull_jacobian(m, r_list, L, order_x, order_y, order_z, n_int=200):
+    """
+    Modal tendon-pull/shortening Jacobian:
+
+        J_qm = d q/dm = -d ell/dm.
+
+    This is the object used in:
+
+        b_w = gradU - J_qm.T @ tau.
+
+    Wrench/tension convention:
+        positive tau_i performs positive virtual work when q_i increases.
+    """
     n_params = total_params(order_x, order_y, order_z)
     s_vals = np.linspace(0.0, 1.0, n_int + 1)
-    J = np.zeros((len(r_list), n_params))
+    J_qm = np.zeros((len(r_list), n_params))
     for i_r, r_i in enumerate(r_list):
         integrand = np.zeros((len(s_vals), n_params))
         for idx, s in enumerate(s_vals):
             kappa = curvature_from_modal(s, m, order_x, order_y, order_z)
-            t_dir = cable_dir_body(kappa, r_i)
-            t_hat = t_dir / np.linalg.norm(t_dir)
+            tangent = cable_tangent_body(kappa, r_i, L)
+            t_hat = tangent / np.linalg.norm(tangent)
             moment_arm = np.cross(r_i, t_hat)
             for i_param in range(n_params):
                 axis, power = param_axis_and_power(
                     i_param, order_x, order_y, order_z
                 )
                 integrand[idx, i_param] = moment_arm[axis] * (s ** power)
-        J[i_r, :] = -np.trapezoid(integrand, s_vals, axis=0)
-    return J
+        J_qm[i_r, :] = -_trapezoid(integrand, s_vals, axis=0)
+    return J_qm
+
+
+def cable_jacobian(m, r_list, L, order_x, order_y, order_z, n_int=200):
+    """
+    Legacy alias.
+
+    Historically this function name was used in the repo, but it returns the
+    tendon-pull/shortening Jacobian J_qm, not the true cable-length Jacobian
+    J_lm. New code should call pull_jacobian().
+    """
+    return pull_jacobian(m, r_list, L, order_x, order_y, order_z, n_int)
+
+
+def cable_length_jacobian(m, r_list, L, order_x, order_y, order_z, n_int=200):
+    """
+    True tendon/cable-length Jacobian:
+
+        J_lm = d ell/dm = -J_qm.
+
+    This is provided only for clarity or diagnostics.
+    """
+    return -pull_jacobian(m, r_list, L, order_x, order_y, order_z, n_int)
 
 
 def elastic_energy_gradient(m, EIx, EIy, GJ, L, order_x, order_y, order_z):
@@ -218,7 +306,25 @@ def adjoint(T):
     return np.vstack([upper, lower])
 
 
-def solve_wrench(J_vb_m, J_lm, gradU, tau, rcond=1e-8):
+def generalized_modal_load(gradU, J_qm, tau):
+    """
+    Generalized modal load attributed to the external wrench:
+
+        b_w = gradU - J_qm.T @ tau.
+
+    J_qm is the tendon pull/shortening Jacobian d q/dm.
+    """
+    return gradU - J_qm.T @ tau
+
+
+def solve_wrench(J_vb_m, J_qm, gradU, tau, rcond=1e-8):
+    """
+    Nominal minimum-norm full-6D wrench baseline.
+
+    This is not generally a unique physical wrench estimate when J_vb_m.T is
+    rank deficient. Use load-subspace solvers for the main constrained
+    estimator.
+    """
     A = J_vb_m.T
-    b = gradU - J_lm.T @ tau
+    b = generalized_modal_load(gradU, J_qm, tau)
     return np.linalg.pinv(A, rcond=rcond) @ b
