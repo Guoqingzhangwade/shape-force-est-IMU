@@ -24,3 +24,39 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local assistant/tool folders
+.claude/
+
+# Generated shape-estimation outputs
+/scripts/shape_est/figures/
+/scripts/shape_est/figures_test/
+/scripts/shape_est/sensor_*.pdf
+/scripts/shape_est/*results*.csv
+/scripts/shape_est/*results*.json
+
+# Generated force/wrench debug outputs
+/scripts/force_est/debug_output/
+/src/shape_force_est_imu/crt/debug_constrained/
+
+# Generated Kirchhoff/Cosserat datasets
+/src/shape_force_est_imu/crt/gt_data/
+/src/shape_force_est_imu/crt/gt_data_constrained/
+/src/shape_force_est_imu/crt/gt_data_seq/
+
+# Generated archives and figures
+/src/shape_force_est_imu/crt.zip
+/src/shape_force_est_imu/crt/fig*.pdf
+
+# Root-level generated result summaries
+/meas_model_comparison_results.csv
+/meas_model_comparison_results.json
+/sensor_best_by_count.csv
+/sensor_placement_results.csv
+/sensor_placement_results.json
+/so3_alpha_sweep_results.csv
+/so3_alpha_sweep_results.json
