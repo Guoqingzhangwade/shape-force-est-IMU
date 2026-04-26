@@ -11,8 +11,10 @@ Conventions
       F = [Mx, My, Mz, Fx, Fy, Fz]
   i.e. [moment; force].
 - `J_Vb_m` is the 6 x n_m body Jacobian at the tip.
+- `J_qm = dq/dm = -dell/dm` is the tendon pull/shortening
+  Jacobian for q = ell_0 - ell.
 - The virtual-work wrench map is
-      b_w = gradU(m) - J_lm.T @ tau = J_Vb_m.T @ F_b
+      b_w = gradU(m) - J_qm.T @ tau = J_Vb_m.T @ F_b
   so the matrix of interest for observability is `J_Vb_m.T` with shape
   (n_m, 6).
 - GT wrench components in the Kirchhoff dataset are stored in world axes as
@@ -41,9 +43,10 @@ if not hasattr(np, "trapezoid"):
 
 from virtual_work import (
     body_jacobian_at_s,
-    cable_jacobian,
     elastic_energy_gradient,
+    generalized_modal_load,
     gram_matrix,
+    pull_jacobian,
     total_params,
 )
 
@@ -193,7 +196,7 @@ class VirtualWorkTerms:
     m: np.ndarray
     tau: np.ndarray
     gradU: np.ndarray
-    J_lm: np.ndarray
+    J_qm: np.ndarray
     J_vbm: np.ndarray
     T_tip: np.ndarray
     A: np.ndarray
@@ -231,16 +234,16 @@ def build_virtual_work_terms(
     gradU = elastic_energy_gradient(
         m, EIx, EIy, GJ, length_m, order_x, order_y, order_z
     )
-    J_lm = cable_jacobian(m, r_list, length_m, order_x, order_y, order_z)
+    J_qm = pull_jacobian(m, r_list, length_m, order_x, order_y, order_z)
     J_vbm, T_tip = body_jacobian_at_s(m, 1.0, gamma, length_m, order_x, order_y, order_z)
     A = J_vbm.T
-    b = gradU - J_lm.T @ tau
+    b = generalized_modal_load(gradU, J_qm, tau)
     return VirtualWorkTerms(
         order_cfg=order_cfg,
         m=m,
         tau=tau,
         gradU=gradU,
-        J_lm=J_lm,
+        J_qm=J_qm,
         J_vbm=J_vbm,
         T_tip=T_tip,
         A=A,
@@ -346,6 +349,9 @@ def recursive_map_update(
     Closed-form recursive MAP fusion:
 
       argmin ||F - mean_meas||^2_{cov_meas^{-1}} + ||F - prior_mean||^2_{prior_cov^{-1}}
+
+    This is a post-pseudoinverse diagnostic smoother. The manuscript MAP
+    estimator should use the residual-level load-subspace formulation instead.
     """
     cov_meas_reg = cov_meas + jitter * np.eye(cov_meas.shape[0])
     prior_cov_reg = prior_cov + jitter * np.eye(prior_cov.shape[0])
