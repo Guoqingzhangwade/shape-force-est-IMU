@@ -413,6 +413,7 @@ def evaluate_constrained_case(
     steps: int,
     n_noise: int,
     rng: np.random.Generator,
+    max_cases: int | None = None,
 ) -> List[Dict]:
     """
     Full evaluation pipeline for one constrained case.
@@ -444,6 +445,16 @@ def evaluate_constrained_case(
     l_ext_gt        = data["l_ext"]          # (N, 3) — world frame
     case_ids        = data["case_id"]        # (N,)
     num_cases, num_pts, _ = positions_gt.shape
+    if max_cases is not None:
+        n_use = min(max_cases, num_cases)
+        print(f"    Applying --max-cases {max_cases}: using first {n_use} cases.")
+        positions_gt = positions_gt[:n_use]
+        orientations_gt = orientations_gt[:n_use]
+        tau_gt = tau_gt[:n_use]
+        f_ext_gt = f_ext_gt[:n_use]
+        l_ext_gt = l_ext_gt[:n_use]
+        case_ids = case_ids[:n_use]
+        num_cases = n_use
 
     S = _S_MATRICES[case_name]
     subspace_method = _SUBSPACE_METHOD_NAMES[case_name]
@@ -860,7 +871,11 @@ def main() -> None:
     parser.add_argument("--steps",         type=int,   default=STEPS_DEFAULT)
     parser.add_argument("--n-noise",       type=int,   default=_N_NOISE)
     parser.add_argument("--seed",          type=int,   default=999)
+    parser.add_argument("--max-cases",     type=int,   default=None,
+                        help="process only the first N cases after loading")
     args = parser.parse_args()
+    if args.max_cases is not None and args.max_cases <= 0:
+        parser.error("--max-cases must be > 0")
 
     rng      = np.random.default_rng(args.seed)
     script_dir = Path(__file__).resolve().parent
@@ -900,6 +915,7 @@ def main() -> None:
             steps        = args.steps,
             n_noise      = args.n_noise,
             rng          = rng,
+            max_cases    = args.max_cases,
         )
         all_results.extend(results)
         print(f"    {len(results)} rows collected for {case_name}")

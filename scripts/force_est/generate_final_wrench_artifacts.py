@@ -13,6 +13,7 @@ Run from repo root:
   python scripts/force_est/generate_final_wrench_artifacts.py
 """
 from __future__ import annotations
+import argparse
 import os, sys, json, csv
 from pathlib import Path
 
@@ -43,7 +44,6 @@ from virtual_work import (
 # Paths
 # ---------------------------------------------------------------------------
 OUT_DIR = CRT / "gt_data" / "results" / "final_wrench"
-OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 GT_PATH   = CRT / "gt_data" / "kirchhoff_gt_dataset.npz"
 IMU2_PATH = CRT / "gt_data" / "kirchhoff_imu_2imu.npz"
@@ -89,6 +89,51 @@ ORDERS_EKF = [
 
 N_CASES_EKF = 3   # cases for oracle-vs-EKF table
 N_NOISE     = 5
+
+
+def resolve_output_dir(out_dir_arg: str | None) -> Path:
+    if out_dir_arg is None:
+        return OUT_DIR
+    expanded = os.path.expandvars(os.path.expanduser(out_dir_arg))
+    raw = Path(expanded)
+    return raw if raw.is_absolute() else (ROOT / raw).resolve()
+
+
+def planned_output_files(out_dir: Path) -> list[Path]:
+    return [
+        out_dir / "oracle_order_summary.csv",
+        out_dir / "oracle_order_summary.md",
+        out_dir / "oracle_vs_ekf_table.csv",
+        out_dir / "oracle_vs_ekf_table.md",
+        out_dir / "constrained_force_only_3d_known_direction_1d_oracle_direction.csv",
+        out_dir / "constrained_force_only_3d_known_direction_1d_oracle_direction.md",
+        out_dir / "trend_force_direction.pdf",
+        out_dir / "trend_force_direction.png",
+        out_dir / "conclusions.md",
+    ]
+
+
+def print_dry_run(args: argparse.Namespace, out_dir: Path) -> None:
+    print("Final wrench artifact dry run")
+    print(f"  Output directory: {out_dir}")
+    print("  Source datasets:")
+    for label, path in [
+        ("GT", GT_PATH),
+        ("IMU2", IMU2_PATH),
+        ("IMU3", IMU3_PATH),
+        ("TDCR", TDCR_PATH),
+        ("Constrained", CONSTRAINED_PATH),
+    ]:
+        print(f"    {label}: {path}")
+    print("  Settings:")
+    print(f"    N_CASES_EKF={args.n_cases_ekf}")
+    print(f"    N_NOISE={args.n_noise}")
+    print(f"    max_cases_oracle={args.max_cases_oracle}")
+    print(f"    max_cases_constrained={args.max_cases_constrained}")
+    print("  Output files that would be written:")
+    for path in planned_output_files(out_dir):
+        print(f"    {path}")
+
 
 # ---------------------------------------------------------------------------
 # Helper utilities
@@ -160,7 +205,7 @@ def make_S_known_direction(d_body):
 # OUTPUT 1 — Oracle modal-order summary on TDCR 10-sample dataset
 # ===========================================================================
 
-def run_oracle_tdcr():
+def run_oracle_tdcr(max_cases_oracle=None):
     print("\n" + "="*60)
     print("Output 1: Oracle summary on TDCR 10-sample dataset")
     print("="*60)
@@ -173,6 +218,14 @@ def run_oracle_tdcr():
     l_ext  = d["l_ext"]      # (N, 3) world frame
     N      = T_all.shape[0]
     M      = T_all.shape[1]  # 40 disk frames
+    if max_cases_oracle is not None:
+        n_use = min(max_cases_oracle, N)
+        print(f"  Applying --max-cases-oracle {max_cases_oracle}: using first {n_use} cases.")
+        T_all = T_all[:n_use]
+        tau = tau[:n_use]
+        f_ext = f_ext[:n_use]
+        l_ext = l_ext[:n_use]
+        N = n_use
 
     # Extract backbone geometry
     positions    = T_all[:, :, :3, 3]                # (N, 40, 3) physical [m]
@@ -246,7 +299,8 @@ def run_oracle_tdcr():
 # OUTPUT 2 — Corrected oracle vs EKF on Kirchhoff-rod GT
 # ===========================================================================
 
-def run_oracle_vs_ekf():
+def run_oracle_vs_ekf(n_cases_ekf=N_CASES_EKF, n_noise=N_NOISE):
+    global N_CASES_EKF, N_NOISE
     print("\n" + "="*60)
     print("Output 2: Oracle vs EKF on Kirchhoff GT")
     print("="*60)
@@ -262,6 +316,14 @@ def run_oracle_vs_ekf():
     _, R_meas3, _, _, meta3 = load_imu_measurements(IMU3_PATH)
     pos2 = np.array(meta2.get("imu_actual_s", IMU2_POS.tolist()), dtype=float)
     pos3 = np.array(meta3.get("imu_actual_s", IMU3_POS.tolist()), dtype=float)
+    n_cases_eval = min(n_cases_ekf, pos_gt.shape[0], R_meas2.shape[0], R_meas3.shape[0])
+    n_noise_eval = min(n_noise, R_meas2.shape[1], R_meas3.shape[1])
+    if n_cases_eval != n_cases_ekf:
+        print(f"  Requested {n_cases_ekf} EKF cases; using {n_cases_eval} available cases.")
+    if n_noise_eval != n_noise:
+        print(f"  Requested {n_noise} noise realizations; using {n_noise_eval} available realizations.")
+    N_CASES_EKF = n_cases_eval
+    N_NOISE = n_noise_eval
 
     layouts = {
         "EKF 2-IMU": (R_meas2, pos2),
@@ -277,7 +339,7 @@ def run_oracle_vs_ekf():
         # Oracle (GT-curvature, no noise)
         oracle_metrics = {k: [] for k in
             ["tip_mm", "rms_mm", "dir_F", "NRMSE_F", "dir_M", "NRMSE_M"]}
-        for ci in range(N_CASES_EKF):
+        for ci in range(n_cases_eval):
             try:
                 m_o = estimate_modal_oracle(pos_gt[ci], ori_gt[ci], ox, oy, oz, L)
                 f_e, l_e = wrench_from_modal(m_o, tau[ci], ox, oy, oz)
@@ -301,8 +363,8 @@ def run_oracle_vs_ekf():
         for layout_name, (R_meas_all, imu_pos) in layouts.items():
             ekf_metrics = {k: [] for k in
                 ["tip_mm", "rms_mm", "dir_F", "NRMSE_F", "dir_M", "NRMSE_M"]}
-            for ci in range(N_CASES_EKF):
-                for ni in range(N_NOISE):
+            for ci in range(n_cases_eval):
+                for ni in range(n_noise_eval):
                     R_frame = [R_meas_all[ci, ni, si]
                                for si in range(len(imu_pos))]
                     try:
@@ -370,7 +432,7 @@ def run_oracle_vs_ekf():
 # OUTPUT 3 — Constrained force-only with correct IMU layouts
 # ===========================================================================
 
-def run_constrained_force_only():
+def run_constrained_force_only(n_noise=N_NOISE, max_cases_constrained=None):
     print("\n" + "="*60)
     print("Output 3: Constrained force-only (correct layouts)")
     print("="*60)
@@ -382,6 +444,10 @@ def run_constrained_force_only():
     f_ext   = d["f_ext"]        # (N, 3) world
     l_ext   = d["l_ext"]        # (N, 3)  zero for force_only
     N       = pos_gt.shape[0]
+    if max_cases_constrained is not None:
+        n_use = min(max_cases_constrained, N)
+        print(f"  Applying --max-cases-constrained {max_cases_constrained}: using first {n_use} cases.")
+        N = n_use
 
     ox, oy, oz = 1, 1, 0        # (1,1,0) — validated EKF order
     rng = np.random.default_rng(99)
@@ -407,7 +473,7 @@ def run_constrained_force_only():
 
         for ci in range(N):
             R_meas_case = synthesize_imu(ori_gt[ci], imu_pos,
-                                         n_noise=N_NOISE, rng=rng)  # (N_NOISE, n_imu, 3,3)
+                                         n_noise=n_noise, rng=rng)  # (n_noise, n_imu, 3,3)
 
             # --- Oracle force-only and oracle-direction diagnostics ---
             try:
@@ -446,7 +512,7 @@ def run_constrained_force_only():
                 pass
 
             # --- EKF methods (per noise realization) ---
-            for ni in range(N_NOISE):
+            for ni in range(n_noise):
                 R_frame = [R_meas_case[ni, si] for si in range(len(imu_pos))]
                 try:
                     m_e, _ = run_ekf_on_frame(
@@ -529,7 +595,7 @@ def run_constrained_force_only():
     md_lines = [
         "## Table 3 — Force-Only 3D and Known-Direction 1D Oracle-Direction Tip-Force Estimation",
         "",
-        "Dataset: `kirchhoff_gt_force_only.npz` (N=50 cases, zero-moment wrenches),",
+        f"Dataset: `kirchhoff_gt_force_only.npz` (N={N} cases, zero-moment wrenches),",
         f"Modal order: (1,1,0),  IMU layouts: 2-IMU = {{0.50, 1.00}}, 3-IMU = {{0.25, 0.50, 1.00}}",
         "",
         "| Method | Layout | Dir error F (°) | NRMSE-F | Force err (mN) |",
@@ -690,13 +756,62 @@ def write_conclusions(oracle_rows, ekf_rows, constrained_rows):
 # Main
 # ===========================================================================
 
-if __name__ == "__main__":
-    oracle_rows      = run_oracle_tdcr()
-    ekf_rows         = run_oracle_vs_ekf()
-    constrained_rows = run_constrained_force_only()
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Generate final external-wrench artifact tables and figures.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("--out-dir", type=str, default=None,
+                        help="output directory; defaults to CRT/gt_data/results/final_wrench")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="print planned inputs/outputs without loading datasets or writing files")
+    parser.add_argument("--n-cases-ekf", type=int, default=N_CASES_EKF,
+                        help="number of Kirchhoff cases for the oracle-vs-EKF table")
+    parser.add_argument("--n-noise", type=int, default=N_NOISE,
+                        help="number of EKF noise realizations to process")
+    parser.add_argument("--max-cases-oracle", type=int, default=None,
+                        help="cap TDCR oracle cases for smoke runs")
+    parser.add_argument("--max-cases-constrained", type=int, default=None,
+                        help="cap constrained force-only cases for smoke runs")
+    args = parser.parse_args()
+    if args.n_cases_ekf <= 0:
+        parser.error("--n-cases-ekf must be > 0")
+    if args.n_noise <= 0:
+        parser.error("--n-noise must be > 0")
+    if args.max_cases_oracle is not None and args.max_cases_oracle <= 0:
+        parser.error("--max-cases-oracle must be > 0")
+    if args.max_cases_constrained is not None and args.max_cases_constrained <= 0:
+        parser.error("--max-cases-constrained must be > 0")
+    return args
+
+
+def main():
+    global OUT_DIR, N_CASES_EKF, N_NOISE
+
+    args = parse_args()
+    OUT_DIR = resolve_output_dir(args.out_dir)
+
+    if args.dry_run:
+        print_dry_run(args, OUT_DIR)
+        return
+
+    N_CASES_EKF = args.n_cases_ekf
+    N_NOISE = args.n_noise
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    oracle_rows = run_oracle_tdcr(args.max_cases_oracle)
+    ekf_rows = run_oracle_vs_ekf(args.n_cases_ekf, args.n_noise)
+    constrained_rows = run_constrained_force_only(
+        args.n_noise,
+        args.max_cases_constrained,
+    )
     make_trend_figure(ekf_rows)
     write_conclusions(oracle_rows, ekf_rows, constrained_rows)
 
     print("\n" + "="*60)
     print(f"All outputs saved to:\n  {OUT_DIR}")
     print("="*60)
+
+
+if __name__ == "__main__":
+    main()

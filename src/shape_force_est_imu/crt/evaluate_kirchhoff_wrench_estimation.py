@@ -454,7 +454,11 @@ def main() -> None:
                         help="MAP force prior std dev [N]")
     parser.add_argument("--sigma-moment", type=float, default=_SIGMA_MOMENT_NM,
                         help="MAP moment prior std dev [N·m]")
+    parser.add_argument("--max-cases", type=int, default=None,
+                        help="process only the first N cases after loading")
     args = parser.parse_args()
+    if args.max_cases is not None and args.max_cases <= 0:
+        parser.error("--max-cases must be > 0")
 
     script_dir = Path(__file__).resolve().parent
 
@@ -480,6 +484,16 @@ def main() -> None:
     f_ext_gt = gt_data["f_ext"]     # (N, 3)
     l_ext_gt = gt_data["l_ext"]     # (N, 3)
     num_cases, num_pts, _ = positions_gt.shape
+    if args.max_cases is not None:
+        n_use = min(args.max_cases, num_cases)
+        print(f"Applying --max-cases {args.max_cases}: using first {n_use} cases.")
+        positions_gt = positions_gt[:n_use]
+        orientations_gt = orientations_gt[:n_use]
+        case_ids_gt = case_ids_gt[:n_use]
+        tau_gt = tau_gt[:n_use]
+        f_ext_gt = f_ext_gt[:n_use]
+        l_ext_gt = l_ext_gt[:n_use]
+        num_cases = n_use
     L_phys = float(gt_meta.get("length_m", _L))
     print(f"  {num_cases} cases, L = {L_phys} m")
     print(f"  ||f_ext|| range: {np.linalg.norm(f_ext_gt, axis=1).min():.3f} "
@@ -494,6 +508,7 @@ def main() -> None:
             print(f"  WARNING: {path} not found — skipping {label}")
             continue
         R_true, R_meas, imu_pos, imu_idx, imu_meta = load_imu_measurements(path)
+        R_meas = R_meas[:num_cases]
         imu_actual_s = np.array(
             imu_meta.get("imu_actual_s", (imu_idx / (num_pts - 1)).tolist()),
             dtype=float,

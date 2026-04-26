@@ -254,7 +254,11 @@ def main() -> None:
     parser.add_argument("--gamma", type=int, default=10)
     parser.add_argument("--numerical-rank-rel-tol", type=float, default=1e-6)
     parser.add_argument("--effective-rank-rel-tol", type=float, default=1e-2)
+    parser.add_argument("--max-cases", type=int, default=None,
+                        help="process only the first N cases after loading")
     args = parser.parse_args()
+    if args.max_cases is not None and args.max_cases <= 0:
+        parser.error("--max-cases must be > 0")
 
     script_dir = Path(__file__).resolve().parent
     gt_path = resolve_cli_path(args.gt, script_dir, must_exist=True)
@@ -262,6 +266,12 @@ def main() -> None:
     save_dir.mkdir(parents=True, exist_ok=True)
 
     positions_gt, orientations_flat, case_ids_gt, gt_meta = load_ground_truth_dataset(gt_path)
+    if args.max_cases is not None:
+        n_use = min(args.max_cases, len(case_ids_gt))
+        print(f"Applying --max-cases {args.max_cases}: using first {n_use} cases.")
+        positions_gt = positions_gt[:n_use]
+        orientations_flat = orientations_flat[:n_use]
+        case_ids_gt = case_ids_gt[:n_use]
     orientations_gt = orientations_flat.reshape(positions_gt.shape[0], positions_gt.shape[1], 3, 3)
     s_grid = np.linspace(0.0, 1.0, positions_gt.shape[1])
     length_m = float(gt_meta.get("length_m", L_DEFAULT))
