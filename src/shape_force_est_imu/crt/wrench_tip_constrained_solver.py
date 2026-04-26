@@ -240,6 +240,9 @@ def solve_constrained_wrench(
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Legacy unweighted ridge-style constrained least-squares tip-wrench estimate.
+    This is not the main manuscript MAP estimator; use
+    solve_load_subspace_wrench() for the residual-level load-subspace
+    formulation.
 
     Problem
     -------

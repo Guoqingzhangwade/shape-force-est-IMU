@@ -118,6 +118,13 @@ from scipy.linalg import block_diag as _block_diag
 # Oracle fitting (from compare_oracle_vs_ekf_wrench_estimation.py)
 # ---------------------------------------------------------------------------
 from compare_oracle_vs_ekf_wrench_estimation import estimate_modal_oracle
+from wrench_tip_constrained_solver import (
+    make_S_direction,
+    make_S_force_only,
+    make_S_transverse,
+    solve_load_subspace_wrench,
+    solve_reduced_map,
+)
 
 # ---------------------------------------------------------------------------
 # Rod / estimator constants — must match main study
@@ -188,9 +195,15 @@ def _make_S_moment_only() -> np.ndarray:
 
 # Indexed by constrained case name
 _S_MATRICES: Dict[str, np.ndarray] = {
-    "force_only"       : _make_S_force_only(),
-    "transverse_force" : _make_S_transverse(),
+    "force_only"       : make_S_force_only(),
+    "transverse_force" : make_S_transverse(),
     "moment_only"      : _make_S_moment_only(),
+}
+
+_SUBSPACE_METHOD_NAMES: Dict[str, str] = {
+    "force_only": "force_only_3d",
+    "transverse_force": "transverse_force_2d",
+    "moment_only": "moment_only_3d",
 }
 
 # ---------------------------------------------------------------------------
@@ -218,14 +231,14 @@ def estimate_wrench_unconstrained(
     gamma: int = GAMMA_DEFAULT,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Unconstrained direct estimate (same as Step 4 baseline):
+    Direct full-6D pseudoinverse baseline:
       F̄_b = pinv( J_{Vbm}^T ) b_w
 
     Returns (f_world, l_world, F_body).
     """
-    b_w          = _compute_b_w(m_est, tau)
+    b_w = _compute_b_w(m_est, tau)
     J_vbm, T_tip = body_jacobian_at_s(m_est, 1.0, gamma, _L,
-                                       _ORDER_X, _ORDER_Y, _ORDER_Z)
+                                      _ORDER_X, _ORDER_Y, _ORDER_Z)
     F_b          = np.linalg.pinv(J_vbm.T, rcond=1e-8) @ b_w
     R_tip        = T_tip[:3, :3]
     f_world      = R_tip @ F_b[3:]
@@ -240,7 +253,7 @@ def estimate_wrench_constrained(
     gamma: int = GAMMA_DEFAULT,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
-    Constrained direct estimate:
+    Residual-level load-subspace estimate:
       F_b = S z
       ẑ   = pinv( J_{Vbm}^T S ) b_w       (manuscript eq.)
       F̂_b = S ẑ
@@ -251,19 +264,65 @@ def estimate_wrench_constrained(
 
     Returns (f_world, l_world, F_body, z_hat).
     """
-    b_w          = _compute_b_w(m_est, tau)
-    J_vbm, T_tip = body_jacobian_at_s(m_est, 1.0, gamma, _L,
-                                       _ORDER_X, _ORDER_Y, _ORDER_Z)
-    # A = J_{Vbm}^T  (n_params × 6),   A_S = A S  (n_params × n_z)
-    A    = J_vbm.T                                     # (n_params, 6)
-    A_S  = A @ S                                       # (n_params, n_z)
-    z_hat = np.linalg.pinv(A_S, rcond=1e-8) @ b_w     # (n_z,)
-    F_b  = S @ z_hat                                   # (6,) [moment; force]
+    F_b, z_hat, _, T_tip, _ = solve_load_subspace_wrench(
+        m_est,
+        tau,
+        S,
+        gamma=gamma,
+        order_x=_ORDER_X,
+        order_y=_ORDER_Y,
+        order_z=_ORDER_Z,
+        L=_L,
+        rcond=1e-8,
+    )
 
     R_tip   = T_tip[:3, :3]
     f_world = R_tip @ F_b[3:]
     l_world = R_tip @ F_b[:3]
     return f_world, l_world, F_b, z_hat
+
+
+def estimate_wrench_known_direction_oracle_direction(
+    m_est: np.ndarray,
+    tau: np.ndarray,
+    f_gt_world: np.ndarray,
+    gamma: int = GAMMA_DEFAULT,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    True 1D known-direction diagnostic using the GT world-frame force direction.
+
+    This is an oracle-direction diagnostic, not a deployable estimator unless a
+    contact-normal or force-direction prior is available.
+    """
+    f_norm = float(np.linalg.norm(f_gt_world))
+    if f_norm < 1e-12:
+        raise ValueError("known_direction_1d requires nonzero GT force direction")
+
+    b_w = _compute_b_w(m_est, tau)
+    J_vbm, T_tip = body_jacobian_at_s(m_est, 1.0, gamma, _L,
+                                      _ORDER_X, _ORDER_Y, _ORDER_Z)
+    R_tip = T_tip[:3, :3]
+    d_world = f_gt_world / f_norm
+    d_body = R_tip.T @ d_world
+    S_dir = make_S_direction(d_body)
+    z_hat = solve_reduced_map(J_vbm.T @ S_dir, b_w, rcond=1e-8)
+    F_b = S_dir @ z_hat
+    f_world = R_tip @ F_b[3:]
+    l_world = R_tip @ F_b[:3]
+    return f_world, l_world, F_b, z_hat
+
+
+def _nan_wrench_metrics(f_gt: np.ndarray, l_gt: np.ndarray) -> Dict[str, float]:
+    return {
+        "force_err_N": float("nan"),
+        "moment_err_Nm": float("nan"),
+        "force_dir_err_deg": float("nan"),
+        "moment_dir_err_deg": float("nan"),
+        "nrmse_force": float("nan"),
+        "nrmse_moment": float("nan"),
+        "force_gt_norm_N": float(np.linalg.norm(f_gt)),
+        "moment_gt_norm_Nm": float(np.linalg.norm(l_gt)),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -359,9 +418,11 @@ def evaluate_constrained_case(
     Full evaluation pipeline for one constrained case.
 
     Estimators:
-      - oracle_constrained   : GT backbone → oracle modal fit → constrained S
-      - ekf_unconstrained    : EKF modal → pinv(J.T)
-      - ekf_constrained      : EKF modal → pinv(J.T S) S
+      - direct_6d_baseline   : EKF modal -> pinv(J_Vbm.T)
+      - force_only_3d / transverse_force_2d / moment_only_3d
+                              : residual-level load-subspace estimate
+      - known_direction_1d_oracle_direction
+                              : oracle GT force direction diagnostic
 
     For each IMU layout (2-IMU, 3-IMU) and each noise realisation.
     """
@@ -385,6 +446,7 @@ def evaluate_constrained_case(
     num_cases, num_pts, _ = positions_gt.shape
 
     S = _S_MATRICES[case_name]
+    subspace_method = _SUBSPACE_METHOD_NAMES[case_name]
     P0 = np.diag(P0_DIAG)
     results: List[Dict] = []
 
@@ -396,6 +458,7 @@ def evaluate_constrained_case(
     print(f"    Computing oracle constrained estimates …")
     t0 = time.perf_counter()
     for ci in range(num_cases):
+        m_oracle = None
         try:
             m_oracle = estimate_modal_oracle(
                 positions_gt[ci], orientations_gt[ci],
@@ -411,13 +474,34 @@ def evaluate_constrained_case(
         row = {
             "case_id"       : int(case_ids[ci]),
             "constrained_case": case_name,
-            "method"        : "oracle_constrained",
+            "method"        : subspace_method,
             "layout_name"   : "GT",
             "noise_real"    : -1,
             "valid"         : valid,
         }
         row.update(metrics)
         results.append(row)
+
+        try:
+            if m_oracle is None:
+                raise RuntimeError("oracle modal fit unavailable")
+            f_kd, l_kd, _, _ = estimate_wrench_known_direction_oracle_direction(
+                m_oracle, tau_gt[ci], f_ext_gt[ci], gamma)
+            metrics_kd = wrench_metrics(f_kd, l_kd, f_ext_gt[ci], l_ext_gt[ci])
+            valid_kd = True
+        except Exception:
+            metrics_kd = _nan_wrench_metrics(f_ext_gt[ci], l_ext_gt[ci])
+            valid_kd = False
+        row_kd = {
+            "case_id": int(case_ids[ci]),
+            "constrained_case": case_name,
+            "method": "known_direction_1d_oracle_direction",
+            "layout_name": "GT",
+            "noise_real": -1,
+            "valid": valid_kd,
+        }
+        row_kd.update(metrics_kd)
+        results.append(row_kd)
     print(f"      done in {time.perf_counter()-t0:.1f} s")
 
     # ---- EKF-based estimators (per layout, per noise realisation) ----
@@ -477,6 +561,16 @@ def evaluate_constrained_case(
                     m_con = wrench_metrics(np.zeros(3), np.zeros(3), f_gt, l_gt)
                     ok_con = False
 
+                # --- EKF known-direction 1D oracle-direction diagnostic ---
+                try:
+                    f_kd, l_kd, _, _ = estimate_wrench_known_direction_oracle_direction(
+                        m_est, tau_gt[ci], f_gt, gamma)
+                    m_kd = wrench_metrics(f_kd, l_kd, f_gt, l_gt)
+                    ok_kd = ekf_ok
+                except Exception:
+                    m_kd = _nan_wrench_metrics(f_gt, l_gt)
+                    ok_kd = False
+
                 base = {
                     "case_id"         : int(case_ids[ci]),
                     "constrained_case": case_name,
@@ -484,8 +578,9 @@ def evaluate_constrained_case(
                     "noise_real"      : ni,
                 }
                 for method, met, ok in [
-                    ("ekf_unconstrained", m_unc, ok_unc),
-                    ("ekf_constrained",   m_con, ok_con),
+                    ("direct_6d_baseline", m_unc, ok_unc),
+                    (subspace_method, m_con, ok_con),
+                    ("known_direction_1d_oracle_direction", m_kd, ok_kd),
                 ]:
                     row = {**base, "method": method, "valid": ok}
                     row.update(met)
@@ -601,7 +696,13 @@ def print_summary_table(summary: List[Dict]) -> None:
     print("-" * w)
 
     _case_order  = ["force_only", "transverse_force", "moment_only"]
-    _method_order = ["oracle_constrained", "ekf_unconstrained", "ekf_constrained"]
+    _method_order = [
+        "direct_6d_baseline",
+        "force_only_3d",
+        "transverse_force_2d",
+        "moment_only_3d",
+        "known_direction_1d_oracle_direction",
+    ]
 
     def _key(e):
         ci = _case_order.index(e["constrained_case"])  if e["constrained_case"]  in _case_order  else 99
@@ -659,7 +760,13 @@ def write_markdown_summary(summary: List[Dict], path: Path) -> None:
 
     # Table
     _case_order   = ["force_only", "transverse_force", "moment_only"]
-    _method_order = ["oracle_constrained", "ekf_unconstrained", "ekf_constrained"]
+    _method_order = [
+        "direct_6d_baseline",
+        "force_only_3d",
+        "transverse_force_2d",
+        "moment_only_3d",
+        "known_direction_1d_oracle_direction",
+    ]
 
     def _key(e):
         ci = _case_order.index(e["constrained_case"])  if e["constrained_case"] in _case_order  else 99

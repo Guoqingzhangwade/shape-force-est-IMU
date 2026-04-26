@@ -4,7 +4,8 @@ Final artifacts for external wrench estimation subsection.
 Outputs (all in CRT/gt_data/results/final_wrench/):
   1. oracle_order_summary.csv / .md        — oracle on TDCR 10-sample dataset
   2. oracle_vs_ekf_table.csv / .md         — oracle vs EKF on Kirchhoff GT
-  3. constrained_force_only.csv / .md      — force-only constrained, correct layouts
+  3. constrained_force_only_3d_known_direction_1d_oracle_direction.csv / .md
+                                             — force-only and oracle-direction diagnostics
   4. trend_force_direction.pdf / .png      — modal order trend figure
   5. conclusions.md                        — main findings
 
@@ -139,6 +140,20 @@ def synthesize_imu(ori_gt, imu_pos, n_noise=N_NOISE,
 # Selection matrix for force_only: F_b = [moment_b(3); force_b(3)], S allows force only
 _S_FORCE = np.zeros((6, 3))
 _S_FORCE[3, 0] = _S_FORCE[4, 1] = _S_FORCE[5, 2] = 1.0
+
+
+def solve_subspace_from_terms(J_vbm, b_w, S, rcond=1e-8):
+    A_S = J_vbm.T @ S
+    z_hat = np.linalg.pinv(A_S, rcond=rcond) @ b_w
+    return S @ z_hat, z_hat
+
+
+def make_S_known_direction(d_body):
+    d = np.asarray(d_body, dtype=float)
+    d = d / (np.linalg.norm(d) + 1e-12)
+    S = np.zeros((6, 1))
+    S[3:6, 0] = d
+    return S
 
 
 # ===========================================================================
@@ -376,7 +391,13 @@ def run_constrained_force_only():
         "3-IMU {0.25,0.50,1.00}": IMU3_POS,
     }
 
-    method_names = ["oracle_constrained", "ekf_unconstrained", "ekf_constrained"]
+    method_names = [
+        "oracle_force_only_3d",
+        "oracle_known_direction_1d_oracle_direction",
+        "ekf_direct_6d_baseline",
+        "ekf_force_only_3d",
+        "ekf_known_direction_1d_oracle_direction",
+    ]
     rows = []
 
     for layout_name, imu_pos in layouts.items():
@@ -388,7 +409,7 @@ def run_constrained_force_only():
             R_meas_case = synthesize_imu(ori_gt[ci], imu_pos,
                                          n_noise=N_NOISE, rng=rng)  # (N_NOISE, n_imu, 3,3)
 
-            # --- Oracle constrained ---
+            # --- Oracle force-only and oracle-direction diagnostics ---
             try:
                 m_o = estimate_modal_oracle(pos_gt[ci], ori_gt[ci], ox, oy, oz, _L)
                 J_vbm, T_tip = body_jacobian_at_s(m_o, 1.0, GAMMA_DEFAULT, _L,
@@ -397,10 +418,8 @@ def run_constrained_force_only():
                                                 ox, oy, oz)
                 J_qm  = pull_jacobian(m_o, _R_LIST, _L, ox, oy, oz)
                 b_w   = generalized_modal_load(gradU, J_qm, tau[ci])
-                JS    = J_vbm.T @ _S_FORCE
-                z_hat = np.linalg.lstsq(JS, b_w, rcond=None)[0]
-                F_b   = _S_FORCE @ z_hat
                 R_tip = T_tip[:3, :3]
+                F_b, _ = solve_subspace_from_terms(J_vbm, b_w, _S_FORCE)
                 f_e   = R_tip @ F_b[3:]
                 l_e   = R_tip @ F_b[:3]
                 w = wrench_metrics(f_e, l_e, f_ext[ci], l_ext[ci])
@@ -408,7 +427,21 @@ def run_constrained_force_only():
                     key = {"dir_F": "force_dir_err_deg",
                            "NRMSE_F": "nrmse_force",
                            "force_err_N": "force_err_N"}[k]
-                    accum["oracle_constrained"][k].append(w[key])
+                    accum["oracle_force_only_3d"][k].append(w[key])
+
+                f_norm = float(np.linalg.norm(f_ext[ci]))
+                if f_norm > 1e-12:
+                    d_body = R_tip.T @ (f_ext[ci] / f_norm)
+                    S_dir = make_S_known_direction(d_body)
+                    F_b_dir, _ = solve_subspace_from_terms(J_vbm, b_w, S_dir)
+                    f_dir = R_tip @ F_b_dir[3:]
+                    l_dir = R_tip @ F_b_dir[:3]
+                    w_dir = wrench_metrics(f_dir, l_dir, f_ext[ci], l_ext[ci])
+                    for k in ["dir_F", "NRMSE_F", "force_err_N"]:
+                        key = {"dir_F": "force_dir_err_deg",
+                               "NRMSE_F": "nrmse_force",
+                               "force_err_N": "force_err_N"}[k]
+                        accum["oracle_known_direction_1d_oracle_direction"][k].append(w_dir[key])
             except Exception:
                 pass
 
@@ -439,12 +472,10 @@ def run_constrained_force_only():
                         key = {"dir_F": "force_dir_err_deg",
                                "NRMSE_F": "nrmse_force",
                                "force_err_N": "force_err_N"}[k]
-                        accum["ekf_unconstrained"][k].append(w_u[key])
+                        accum["ekf_direct_6d_baseline"][k].append(w_u[key])
 
                     # Constrained
-                    JS    = J_vbm.T @ _S_FORCE
-                    z_hat = np.linalg.lstsq(JS, b_w, rcond=None)[0]
-                    F_b_c = _S_FORCE @ z_hat
+                    F_b_c, _ = solve_subspace_from_terms(J_vbm, b_w, _S_FORCE)
                     f_c   = R_tip @ F_b_c[3:]
                     l_c   = R_tip @ F_b_c[:3]
                     w_c   = wrench_metrics(f_c, l_c, f_ext[ci], l_ext[ci])
@@ -452,7 +483,21 @@ def run_constrained_force_only():
                         key = {"dir_F": "force_dir_err_deg",
                                "NRMSE_F": "nrmse_force",
                                "force_err_N": "force_err_N"}[k]
-                        accum["ekf_constrained"][k].append(w_c[key])
+                        accum["ekf_force_only_3d"][k].append(w_c[key])
+
+                    f_norm = float(np.linalg.norm(f_ext[ci]))
+                    if f_norm > 1e-12:
+                        d_body = R_tip.T @ (f_ext[ci] / f_norm)
+                        S_dir = make_S_known_direction(d_body)
+                        F_b_dir, _ = solve_subspace_from_terms(J_vbm, b_w, S_dir)
+                        f_dir = R_tip @ F_b_dir[3:]
+                        l_dir = R_tip @ F_b_dir[:3]
+                        w_dir = wrench_metrics(f_dir, l_dir, f_ext[ci], l_ext[ci])
+                        for k in ["dir_F", "NRMSE_F", "force_err_N"]:
+                            key = {"dir_F": "force_dir_err_deg",
+                                   "NRMSE_F": "nrmse_force",
+                                   "force_err_N": "force_err_N"}[k]
+                            accum["ekf_known_direction_1d_oracle_direction"][k].append(w_dir[key])
                 except Exception:
                     pass
 
@@ -472,7 +517,7 @@ def run_constrained_force_only():
             print(f"    {m_name}: dir-F={row['dir_F_deg']:.1f}°  NRMSE-F={row['NRMSE_F']*100:.1f}%")
 
     # Save CSV
-    csv_path = OUT_DIR / "constrained_force_only.csv"
+    csv_path = OUT_DIR / "constrained_force_only_3d_known_direction_1d_oracle_direction.csv"
     fields = ["constrained_case", "method", "layout",
               "dir_F_deg", "NRMSE_F", "force_err_mN", "n_valid"]
     with open(csv_path, "w", newline="") as f:
@@ -482,7 +527,7 @@ def run_constrained_force_only():
 
     # Save markdown
     md_lines = [
-        "## Table 3 — Force-Only 3D Tip-Force Estimation",
+        "## Table 3 — Force-Only 3D and Known-Direction 1D Oracle-Direction Tip-Force Estimation",
         "",
         "Dataset: `kirchhoff_gt_force_only.npz` (N=50 cases, zero-moment wrenches),",
         f"Modal order: (1,1,0),  IMU layouts: 2-IMU = {{0.50, 1.00}}, 3-IMU = {{0.25, 0.50, 1.00}}",
@@ -497,7 +542,7 @@ def run_constrained_force_only():
             f"| {r['NRMSE_F']*100:.1f}% "
             f"| {r['force_err_mN']:.1f} |"
         )
-    md_path = OUT_DIR / "constrained_force_only.md"
+    md_path = OUT_DIR / "constrained_force_only_3d_known_direction_1d_oracle_direction.md"
     md_path.write_text("\n".join(md_lines))
     print(f"  Saved -> {md_path}")
 
@@ -581,11 +626,14 @@ def write_conclusions(oracle_rows, ekf_rows, constrained_rows):
     e_110_2 = next((r for r in ekf_rows   if r["order"] == "(1,1,0)" and "2-IMU" in r["method"]), {})
     e_332_2 = next((r for r in ekf_rows   if r["order"] == "(3,3,2)" and "2-IMU" in r["method"]), {})
     c_oc    = next((r for r in constrained_rows
-                    if r["method"] == "oracle_constrained" and "2-IMU" in r["layout"]), {})
+                    if r["method"] == "oracle_force_only_3d" and "2-IMU" in r["layout"]), {})
+    c_kd    = next((r for r in constrained_rows
+                    if r["method"] == "oracle_known_direction_1d_oracle_direction"
+                    and "2-IMU" in r["layout"]), {})
     c_ec    = next((r for r in constrained_rows
-                    if r["method"] == "ekf_constrained"   and "2-IMU" in r["layout"]), {})
+                    if r["method"] == "ekf_force_only_3d" and "2-IMU" in r["layout"]), {})
     c_eu    = next((r for r in constrained_rows
-                    if r["method"] == "ekf_unconstrained" and "2-IMU" in r["layout"]), {})
+                    if r["method"] == "ekf_direct_6d_baseline" and "2-IMU" in r["layout"]), {})
 
     lines = [
         "# External Wrench Estimation — Key Findings",
@@ -615,11 +663,13 @@ def write_conclusions(oracle_rows, ekf_rows, constrained_rows):
         "",
         "## Constrained estimator (force-only, 2-IMU layout)",
         "",
-        f"- Oracle constrained: dir-F = {c_oc.get('dir_F_deg', float('nan')):.1f}°,"
+        f"- Oracle force_only_3d: dir-F = {c_oc.get('dir_F_deg', float('nan')):.1f}°,"
         f"  NRMSE-F = {c_oc.get('NRMSE_F', float('nan'))*100:.1f}%.",
-        f"- EKF unconstrained: dir-F = {c_eu.get('dir_F_deg', float('nan')):.1f}°,"
+        f"- Oracle known_direction_1d_oracle_direction: dir-F = {c_kd.get('dir_F_deg', float('nan')):.1f}°,"
+        f"  NRMSE-F = {c_kd.get('NRMSE_F', float('nan'))*100:.1f}%.",
+        f"- EKF direct_6d_baseline: dir-F = {c_eu.get('dir_F_deg', float('nan')):.1f}°,"
         f"  NRMSE-F = {c_eu.get('NRMSE_F', float('nan'))*100:.1f}%.",
-        f"- EKF constrained:   dir-F = {c_ec.get('dir_F_deg', float('nan')):.1f}°,"
+        f"- EKF force_only_3d:   dir-F = {c_ec.get('dir_F_deg', float('nan')):.1f}°,"
         f"  NRMSE-F = {c_ec.get('NRMSE_F', float('nan'))*100:.1f}%.",
         "",
         "## Files",
@@ -628,7 +678,7 @@ def write_conclusions(oracle_rows, ekf_rows, constrained_rows):
         "|---|---|",
         "| `oracle_order_summary.csv / .md` | Table 1: oracle accuracy vs modal order (TDCR dataset) |",
         "| `oracle_vs_ekf_table.csv / .md`  | Table 2: oracle vs EKF shape + wrench (Kirchhoff GT) |",
-        "| `constrained_force_only.csv / .md` | Table 3: constrained force-only estimator |",
+        "| `constrained_force_only_3d_known_direction_1d_oracle_direction.csv / .md` | Table 3: force-only and oracle-direction diagnostics |",
         "| `trend_force_direction.pdf / .png` | Figure: force direction error vs modal order |",
     ]
     md_path = OUT_DIR / "conclusions.md"
