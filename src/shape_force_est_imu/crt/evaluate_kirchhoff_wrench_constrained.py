@@ -607,6 +607,31 @@ def evaluate_constrained_case(
 # Aggregation
 # ---------------------------------------------------------------------------
 
+SUMMARY_METRIC_COLUMNS = [
+    "force_err_N_mean",
+    "moment_err_Nm_mean",
+    "nrmse_force_mean",
+    "nrmse_moment_mean",
+    "force_dir_err_deg_mean",
+    "moment_dir_err_deg_mean",
+]
+
+
+def _safe_nanmean(vals):
+    vals = np.asarray(vals, dtype=float)
+    return float("nan") if vals.size == 0 or np.all(np.isnan(vals)) else float(np.nanmean(vals))
+
+
+def _safe_nanstd(vals):
+    vals = np.asarray(vals, dtype=float)
+    return float("nan") if vals.size == 0 or np.all(np.isnan(vals)) else float(np.nanstd(vals))
+
+
+def _safe_nanmedian(vals):
+    vals = np.asarray(vals, dtype=float)
+    return float("nan") if vals.size == 0 or np.all(np.isnan(vals)) else float(np.nanmedian(vals))
+
+
 def aggregate(results: List[Dict]) -> List[Dict]:
     from collections import defaultdict
     buckets: Dict[Tuple, List] = defaultdict(list)
@@ -630,9 +655,9 @@ def aggregate(results: List[Dict]) -> List[Dict]:
         for mk in metric_keys:
             vals = np.array([r[mk] for r in rows if mk in r], dtype=float)
             if len(vals):
-                entry[f"{mk}_mean"] = float(np.nanmean(vals))
-                entry[f"{mk}_std"]  = float(np.nanstd(vals))
-                entry[f"{mk}_med"]  = float(np.nanmedian(vals))
+                entry[f"{mk}_mean"] = _safe_nanmean(vals)
+                entry[f"{mk}_std"]  = _safe_nanstd(vals)
+                entry[f"{mk}_med"]  = _safe_nanmedian(vals)
         summary.append(entry)
     return summary
 
@@ -737,6 +762,8 @@ def print_summary_table(summary: List[Dict]) -> None:
             f"{_pct(nrmf)}  {_pct(nrmm)}"
         )
     print(sep)
+    print("  Moment metrics are N/A for force-only cases when the GT moment norm is zero.")
+    print("  constrained_summary.csv metric columns: " + ", ".join(SUMMARY_METRIC_COLUMNS))
 
 
 # ---------------------------------------------------------------------------
@@ -766,6 +793,13 @@ def write_markdown_summary(summary: List[Dict], path: Path) -> None:
         "| moment\\_only | 6×3 | body [Mx, My, Mz] (zero forces) |",
         "",
         "## Results",
+        "",
+        "Moment metrics are reported as N/A for force-only cases when the "
+        "ground-truth moment norm is zero.",
+        "",
+        "Main `constrained_summary.csv` metric columns: "
+        + ", ".join(f"`{name}`" for name in SUMMARY_METRIC_COLUMNS)
+        + ".",
         "",
     ]
 
