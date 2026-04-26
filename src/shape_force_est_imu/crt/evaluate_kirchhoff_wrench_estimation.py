@@ -66,9 +66,10 @@ from evaluate_kirchhoff_shape_estimation import (
 # ---------------------------------------------------------------------------
 from virtual_work import (
     body_jacobian_at_s,
-    cable_jacobian,
     elastic_energy_gradient,
+    generalized_modal_load,
     gram_matrix,
+    pull_jacobian,
     solve_wrench,
 )
 from scipy.linalg import block_diag as _block_diag
@@ -143,10 +144,10 @@ def estimate_wrench_direct(
     """
     gradU  = elastic_energy_gradient(m_est, _EIX, _EIY, _GJ, _L,
                                      _ORDER_X, _ORDER_Y, _ORDER_Z)
-    J_lm   = cable_jacobian(m_est, _R_LIST, _L, _ORDER_X, _ORDER_Y, _ORDER_Z)
+    J_qm   = pull_jacobian(m_est, _R_LIST, _L, _ORDER_X, _ORDER_Y, _ORDER_Z)
     J_vbm, T_tip = body_jacobian_at_s(m_est, 1.0, gamma, _L,
                                       _ORDER_X, _ORDER_Y, _ORDER_Z)
-    F_b   = solve_wrench(J_vbm, J_lm, gradU, tau)
+    F_b   = solve_wrench(J_vbm, J_qm, gradU, tau)
     f_w, l_w = _body_to_world_wrench(F_b, T_tip[:3, :3])
     return f_w, l_w, F_b
 
@@ -181,12 +182,12 @@ def estimate_wrench_map(
     """
     gradU  = elastic_energy_gradient(m_est, _EIX, _EIY, _GJ, _L,
                                      _ORDER_X, _ORDER_Y, _ORDER_Z)
-    J_lm   = cable_jacobian(m_est, _R_LIST, _L, _ORDER_X, _ORDER_Y, _ORDER_Z)
+    J_qm   = pull_jacobian(m_est, _R_LIST, _L, _ORDER_X, _ORDER_Y, _ORDER_Z)
     J_vbm, T_tip = body_jacobian_at_s(m_est, 1.0, gamma, _L,
                                       _ORDER_X, _ORDER_Y, _ORDER_Z)
 
     # Direct estimate (body frame)
-    F_b   = solve_wrench(J_vbm, J_lm, gradU, tau)
+    F_b   = solve_wrench(J_vbm, J_qm, gradU, tau)
     R_tip = T_tip[:3, :3]
     f_bar, l_bar = _body_to_world_wrench(F_b, R_tip)   # world-frame F̄
 

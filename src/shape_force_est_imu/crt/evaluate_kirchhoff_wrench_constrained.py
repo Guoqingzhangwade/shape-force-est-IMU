@@ -11,7 +11,9 @@ Evaluates constrained wrench reconstruction for three admissible-load subspaces:
 Manuscript formulation
 ----------------------
   Generalized modal load:
-      b_w = ∇_m U(m) − J_{lm}^T(m) τ
+      b_w = gradU(m) - J_qm.T(m) tau
+
+  where J_qm is the tendon-pull/shortening Jacobian.
 
   Unconstrained direct estimate (baseline, same as Step 4):
       F̄_b = pinv( J_{Vbm}^T(m) ) b_w
@@ -47,7 +49,7 @@ Frame notes
 IMU synthesis
 -------------
   Measurements are synthesised inline (no separate Step 2 required).
-  Layouts: 2-IMU at s = [1/3, 2/3],  3-IMU at s = [1/4, 1/2, 3/4].
+  Layouts: 2-IMU at s = [0.50, 1.00],  3-IMU at s = [0.25, 0.50, 1.00].
   Noise model: R_meas = expm(hat(η)) @ R_true,  η ~ N(0, σ² I),  σ = 0.5°.
   n_noise = 5 realizations per case.
 
@@ -105,10 +107,10 @@ from evaluate_kirchhoff_shape_estimation import (
 # ---------------------------------------------------------------------------
 from virtual_work import (
     body_jacobian_at_s,
-    cable_jacobian,
     elastic_energy_gradient,
+    generalized_modal_load,
     gram_matrix,
-    solve_wrench,
+    pull_jacobian,
 )
 from scipy.linalg import block_diag as _block_diag
 
@@ -151,8 +153,8 @@ _H_U = _block_diag(
 # IMU layouts (arc-length positions, normalised, matching main study)
 # ---------------------------------------------------------------------------
 _IMU_LAYOUTS: Dict[str, np.ndarray] = {
-    "2-IMU": np.array([1 / 3, 2 / 3]),
-    "3-IMU": np.array([1 / 4, 1 / 2, 3 / 4]),
+    "2-IMU": np.array([0.50, 1.00]),
+    "3-IMU": np.array([0.25, 0.50, 1.00]),
 }
 _N_NOISE = 5   # noise realisations per case
 
@@ -200,12 +202,14 @@ def _compute_b_w(
     tau: np.ndarray,
 ) -> np.ndarray:
     """
-    Generalized modal load:  b_w = ∇_m U(m) − J_{lm}^T τ
+    Generalized modal load: b_w = gradU(m) - J_qm.T tau.
+
+    J_qm is the tendon-pull/shortening Jacobian.
     """
     gradU = elastic_energy_gradient(m, _EIX, _EIY, _GJ, _L,
                                     _ORDER_X, _ORDER_Y, _ORDER_Z)
-    J_lm  = cable_jacobian(m, _R_LIST, _L, _ORDER_X, _ORDER_Y, _ORDER_Z)
-    return gradU - J_lm.T @ tau
+    J_qm = pull_jacobian(m, _R_LIST, _L, _ORDER_X, _ORDER_Y, _ORDER_Z)
+    return generalized_modal_load(gradU, J_qm, tau)
 
 
 def estimate_wrench_unconstrained(
@@ -636,7 +640,7 @@ def write_markdown_summary(summary: List[Dict], path: Path) -> None:
         "",
         "- Rod: L = 0.1 m, EI = {:.4e} N·m², GJ = {:.4e} N·m²".format(_EIX, _GJ),
         "- Modal order: ({}, {}, {})".format(_ORDER_X, _ORDER_Y, _ORDER_Z),
-        "- IMU layouts: 2-IMU @ [1/3, 2/3], 3-IMU @ [1/4, 1/2, 3/4]",
+        "- IMU layouts: 2-IMU @ [0.50, 1.00], 3-IMU @ [0.25, 0.50, 1.00]",
         "- Noise σ = 0.5°, 5 noise realizations per case",
         "",
         "## Selection matrices S (body / tip frame)",

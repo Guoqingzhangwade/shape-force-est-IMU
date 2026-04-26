@@ -341,11 +341,11 @@ def main():
             J_vb_m, T_tip = vw.body_jacobian_at_s(
                 m_est, 1.0, args.gamma, L, order_x, order_y, order_z
             )
-            J_lm = vw.cable_jacobian(m_est, r_list, L, order_x, order_y, order_z)
+            J_qm = vw.pull_jacobian(m_est, r_list, L, order_x, order_y, order_z)
             gradU = vw.elastic_energy_gradient(m_est, EIx, EIy, GJ, L, order_x, order_y, order_z)
 
             # Solve BODY(tip) wrench (this is about tip origin)
-            F_b = vw.solve_wrench(J_vb_m, J_lm, gradU, tau_all[si], args.pinv_rcond)
+            F_b = vw.solve_wrench(J_vb_m, J_qm, gradU, tau_all[si], args.pinv_rcond)
 
             # GT world-tip wrench (your dataset convention)
             F_gt_world_tip = np.hstack([l_ext_all[si], f_ext_all[si]])

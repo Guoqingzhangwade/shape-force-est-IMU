@@ -81,9 +81,10 @@ from evaluate_kirchhoff_shape_estimation import (
 # ---------------------------------------------------------------------------
 from virtual_work import (
     body_jacobian_at_s,
-    cable_jacobian,
     elastic_energy_gradient,
+    generalized_modal_load,
     gram_matrix,
+    pull_jacobian,
     solve_wrench,
 )
 
@@ -165,10 +166,10 @@ def wrench_from_modal(
     """Compute world-frame (f, l) from modal state m and tendon tensions tau."""
     gradU = elastic_energy_gradient(m, _EIX, _EIY, _GJ, _L,
                                     order_x, order_y, order_z)
-    J_lm  = cable_jacobian(m, _R_LIST, _L, order_x, order_y, order_z)
+    J_qm = pull_jacobian(m, _R_LIST, _L, order_x, order_y, order_z)
     J_vbm, T_tip = body_jacobian_at_s(m, 1.0, gamma, _L,
                                        order_x, order_y, order_z)
-    F_b = solve_wrench(J_vbm, J_lm, gradU, tau)
+    F_b = solve_wrench(J_vbm, J_qm, gradU, tau)
     R_tip = T_tip[:3, :3]
     f_world = R_tip @ F_b[3:]
     l_world = R_tip @ F_b[:3]

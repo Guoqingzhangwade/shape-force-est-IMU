@@ -34,7 +34,8 @@ from compare_oracle_vs_ekf_wrench_estimation import (
     wrench_from_modal, wrench_metrics, fwd_transform_general,
 )
 from virtual_work import (
-    body_jacobian_at_s, cable_jacobian, elastic_energy_gradient, solve_wrench,
+    body_jacobian_at_s, elastic_energy_gradient, generalized_modal_load,
+    pull_jacobian, solve_wrench,
 )
 
 # ---------------------------------------------------------------------------
@@ -394,8 +395,8 @@ def run_constrained_force_only():
                                                    ox, oy, oz)
                 gradU = elastic_energy_gradient(m_o, _EIX, _EIY, _GJ, _L,
                                                 ox, oy, oz)
-                J_lm  = cable_jacobian(m_o, _R_LIST, _L, ox, oy, oz)
-                b_w   = gradU - J_lm.T @ tau[ci]
+                J_qm  = pull_jacobian(m_o, _R_LIST, _L, ox, oy, oz)
+                b_w   = generalized_modal_load(gradU, J_qm, tau[ci])
                 JS    = J_vbm.T @ _S_FORCE
                 z_hat = np.linalg.lstsq(JS, b_w, rcond=None)[0]
                 F_b   = _S_FORCE @ z_hat
@@ -425,12 +426,12 @@ def run_constrained_force_only():
                                                        ox, oy, oz)
                     gradU = elastic_energy_gradient(m_e, _EIX, _EIY, _GJ, _L,
                                                     ox, oy, oz)
-                    J_lm  = cable_jacobian(m_e, _R_LIST, _L, ox, oy, oz)
-                    b_w   = gradU - J_lm.T @ tau[ci]
+                    J_qm  = pull_jacobian(m_e, _R_LIST, _L, ox, oy, oz)
+                    b_w   = generalized_modal_load(gradU, J_qm, tau[ci])
                     R_tip = T_tip[:3, :3]
 
                     # Unconstrained
-                    F_b_u = solve_wrench(J_vbm, J_lm, gradU, tau[ci])
+                    F_b_u = solve_wrench(J_vbm, J_qm, gradU, tau[ci])
                     f_u   = R_tip @ F_b_u[3:]
                     l_u   = R_tip @ F_b_u[:3]
                     w_u   = wrench_metrics(f_u, l_u, f_ext[ci], l_ext[ci])
@@ -481,7 +482,7 @@ def run_constrained_force_only():
 
     # Save markdown
     md_lines = [
-        "## Table 3 — Known-Direction Tip-Force Estimation (Force-Only Constraint)",
+        "## Table 3 — Force-Only 3D Tip-Force Estimation",
         "",
         "Dataset: `kirchhoff_gt_force_only.npz` (N=50 cases, zero-moment wrenches),",
         f"Modal order: (1,1,0),  IMU layouts: 2-IMU = {{0.50, 1.00}}, 3-IMU = {{0.25, 0.50, 1.00}}",
