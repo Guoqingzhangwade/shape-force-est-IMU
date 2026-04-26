@@ -32,7 +32,7 @@ without modifying the current EKF implementation.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, List, Sequence, Tuple
+from typing import Iterable, List, NamedTuple, Sequence, Tuple
 
 import numpy as np
 from scipy.linalg import block_diag
@@ -72,6 +72,13 @@ R_LIST_DEFAULT = [
     np.array([-R_TENDON_DEFAULT, 0.0, 0.0]),
     np.array([0.0, -R_TENDON_DEFAULT, 0.0]),
 ]
+
+
+class OrderConfig(NamedTuple):
+    order_x: int
+    order_y: int
+    order_z: int
+
 
 BASELINE_ORDER = (1, 1, 0)
 DEFAULT_ORDER_CONFIGS = [
@@ -251,6 +258,136 @@ def build_virtual_work_terms(
     )
 
 
+def generalized_load_from_state(
+    m: np.ndarray,
+    tau: np.ndarray,
+    order_cfg: OrderConfig,
+    length_m: float = L_DEFAULT,
+    EIx: float = EIX_DEFAULT,
+    EIy: float = EIY_DEFAULT,
+    GJ: float = GJ_DEFAULT,
+    r_list: list[np.ndarray] | None = None,
+) -> np.ndarray:
+    """
+    Compute the generalized modal load attributed to the external wrench:
+
+        b_w(m, tau) = gradU(m) - J_qm(m).T @ tau,
+
+    where J_qm = dq/dm is the tendon pull/shortening Jacobian.
+    """
+    order_x, order_y, order_z = order_cfg
+    routing = R_LIST_DEFAULT if r_list is None else r_list
+    m = np.asarray(m, dtype=float)
+    tau = np.asarray(tau, dtype=float)
+    gradU = elastic_energy_gradient(
+        m, EIx, EIy, GJ, length_m, order_x, order_y, order_z
+    )
+    J_qm = pull_jacobian(m, routing, length_m, order_x, order_y, order_z)
+    return generalized_modal_load(gradU, J_qm, tau)
+
+
+def finite_difference_B_m_for_generalized_load(
+    m: np.ndarray,
+    tau: np.ndarray,
+    order_cfg: OrderConfig,
+    eps: float = 1e-6,
+    length_m: float = L_DEFAULT,
+    EIx: float = EIX_DEFAULT,
+    EIy: float = EIY_DEFAULT,
+    GJ: float = GJ_DEFAULT,
+    r_list: list[np.ndarray] | None = None,
+) -> np.ndarray:
+    """
+    Central-difference approximation of:
+
+        B_m = d b_w / d m.
+
+    The output shape is (n_params, n_params).
+    """
+    m = np.asarray(m, dtype=float)
+    n_params = len(m)
+    B_m = np.zeros((n_params, n_params), dtype=float)
+    for j in range(n_params):
+        dm = np.zeros_like(m)
+        dm[j] = eps
+        b_plus = generalized_load_from_state(
+            m + dm, tau, order_cfg, length_m, EIx, EIy, GJ, r_list
+        )
+        b_minus = generalized_load_from_state(
+            m - dm, tau, order_cfg, length_m, EIx, EIy, GJ, r_list
+        )
+        B_m[:, j] = (b_plus - b_minus) / (2.0 * eps)
+    return B_m
+
+
+def propagate_generalized_load_covariance(
+    m: np.ndarray,
+    tau: np.ndarray,
+    P_modal: np.ndarray,
+    R_tau: np.ndarray,
+    order_cfg: OrderConfig,
+    Sigma_b_model: np.ndarray | None = None,
+    eps: float = 1e-6,
+    length_m: float = L_DEFAULT,
+    EIx: float = EIX_DEFAULT,
+    EIy: float = EIY_DEFAULT,
+    GJ: float = GJ_DEFAULT,
+    r_list: list[np.ndarray] | None = None,
+) -> np.ndarray:
+    """
+    Propagate modal-state and tendon-tension uncertainty to the
+    generalized load residual:
+
+        Sigma_b = B_m P_modal B_m.T
+                + B_tau R_tau B_tau.T
+                + Sigma_b_model
+
+    with:
+        B_tau = -J_qm.T.
+    """
+    order_x, order_y, order_z = order_cfg
+    routing = R_LIST_DEFAULT if r_list is None else r_list
+    m = np.asarray(m, dtype=float)
+    tau = np.asarray(tau, dtype=float)
+    P_modal = np.asarray(P_modal, dtype=float)
+    R_tau = np.asarray(R_tau, dtype=float)
+
+    n_params = total_params(order_x, order_y, order_z)
+    if m.shape != (n_params,):
+        raise ValueError(f"Expected m shape {(n_params,)}, got {m.shape}.")
+    if P_modal.shape != (n_params, n_params):
+        raise ValueError(
+            f"Expected P_modal shape {(n_params, n_params)}, got {P_modal.shape}."
+        )
+    if len(routing) != len(tau):
+        raise ValueError(
+            f"Expected tau length {len(routing)} for {len(routing)} tendons, "
+            f"got {len(tau)}."
+        )
+    if R_tau.shape != (len(tau), len(tau)):
+        raise ValueError(
+            f"Expected R_tau shape {(len(tau), len(tau))}, got {R_tau.shape}."
+        )
+
+    B_m = finite_difference_B_m_for_generalized_load(
+        m, tau, order_cfg, eps, length_m, EIx, EIy, GJ, routing
+    )
+    J_qm = pull_jacobian(m, routing, length_m, order_x, order_y, order_z)
+    B_tau = -J_qm.T
+    Sigma_b = B_m @ P_modal @ B_m.T + B_tau @ R_tau @ B_tau.T
+
+    if Sigma_b_model is not None:
+        Sigma_b_model = np.asarray(Sigma_b_model, dtype=float)
+        if Sigma_b_model.shape != (n_params, n_params):
+            raise ValueError(
+                "Expected Sigma_b_model shape "
+                f"{(n_params, n_params)}, got {Sigma_b_model.shape}."
+            )
+        Sigma_b = Sigma_b + Sigma_b_model
+
+    return 0.5 * (Sigma_b + Sigma_b.T)
+
+
 # ---------------------------------------------------------------------------
 # Wrench transforms / solvers
 # ---------------------------------------------------------------------------
@@ -321,11 +458,10 @@ def propagate_wrench_covariance_body(
     GJ: float = GJ_DEFAULT,
 ) -> np.ndarray:
     """
-    Propagate EKF modal covariance into a body-tip wrench covariance.
+    Legacy/post-pseudoinverse covariance diagnostic.
 
-    The model uses the same linearized virtual-work map as the existing Step-4
-    baseline, but keeps the covariance in body coordinates so recursive MAP can
-    be applied in either body or world frames as needed.
+    The manuscript MAP estimator should use
+    propagate_generalized_load_covariance() instead.
     """
     order_x, order_y, order_z = terms.order_cfg
     H_U = build_elastic_hessian(order_x, order_y, order_z, length_m, EIx, EIy, GJ)
