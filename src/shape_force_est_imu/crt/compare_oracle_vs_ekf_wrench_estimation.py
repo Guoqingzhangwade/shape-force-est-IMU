@@ -60,6 +60,11 @@ import matplotlib.pyplot as plt
 from scipy.linalg import block_diag as _block_diag
 from scipy.spatial.transform import Rotation
 
+try:
+    from scipy.optimize import least_squares as _least_squares
+except Exception:  # pragma: no cover - exercised only without scipy.optimize
+    _least_squares = None
+
 # ---------------------------------------------------------------------------
 # EKF utilities re-used from Step 3
 # ---------------------------------------------------------------------------
@@ -74,6 +79,7 @@ from evaluate_kirchhoff_shape_estimation import (
     load_ground_truth_dataset,
     load_imu_measurements,
     run_ekf_on_frame,
+    so3_log,
 )
 
 # ---------------------------------------------------------------------------
@@ -132,8 +138,12 @@ TICK_FS   = 10
 TITLE_FS  = 12
 LEGEND_FS = 10
 ANN_FS    = 8.5
-_METHOD_COLORS = {"oracle": "#2ca02c", "ekf": "#1f77b4"}
-_METHOD_LABELS = {"oracle": "Oracle", "ekf": "EKF"}
+_METHOD_COLORS = {"oracle": "#2ca02c", "sparse_batch_oracle": "#9467bd", "ekf": "#1f77b4"}
+_METHOD_LABELS = {
+    "oracle": "Dense oracle",
+    "sparse_batch_oracle": "Sparse batch oracle",
+    "ekf": "EKF",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -174,6 +184,192 @@ def wrench_from_modal(
     f_world = R_tip @ F_b[3:]
     l_world = R_tip @ F_b[:3]
     return f_world, l_world
+
+
+def _n_params(order_x: int, order_y: int, order_z: int) -> int:
+    return (order_x + 1) + (order_y + 1) + (order_z + 1)
+
+
+def _predict_rotation_general(
+    m: np.ndarray,
+    s: float,
+    order_x: int,
+    order_y: int,
+    order_z: int,
+    L: float,
+    gamma: int,
+) -> np.ndarray:
+    return fwd_transform_general(m, s, gamma, L, order_x, order_y, order_z)[:3, :3]
+
+
+def _prior_residual(
+    m: np.ndarray,
+    prior_mean: np.ndarray | None,
+    prior_cov: np.ndarray | None,
+) -> np.ndarray:
+    if prior_mean is None or prior_cov is None:
+        return np.zeros(0)
+    cov_inv = np.linalg.pinv(np.asarray(prior_cov, dtype=float))
+    try:
+        sqrt_info = np.linalg.cholesky(cov_inv)
+    except np.linalg.LinAlgError:
+        evals, evecs = np.linalg.eigh(0.5 * (cov_inv + cov_inv.T))
+        sqrt_info = evecs @ np.diag(np.sqrt(np.clip(evals, 0.0, None))) @ evecs.T
+    return sqrt_info @ (m - prior_mean)
+
+
+def _finite_difference_jacobian(fun, x: np.ndarray, eps: float = 1e-6) -> np.ndarray:
+    r0 = fun(x)
+    J = np.zeros((len(r0), len(x)), dtype=float)
+    for j in range(len(x)):
+        dx = np.zeros_like(x)
+        dx[j] = eps
+        J[:, j] = (fun(x + dx) - fun(x - dx)) / (2.0 * eps)
+    return J
+
+
+def _fallback_least_squares(fun, x0: np.ndarray, max_iter: int):
+    x = x0.astype(float).copy()
+    lam = 1e-3
+    nfev = 0
+    success = False
+    for _ in range(max_iter):
+        r = fun(x)
+        nfev += 1
+        J = _finite_difference_jacobian(fun, x)
+        nfev += 2 * len(x)
+        lhs = J.T @ J + lam * np.eye(len(x))
+        rhs = -J.T @ r
+        try:
+            step = np.linalg.solve(lhs, rhs)
+        except np.linalg.LinAlgError:
+            step = np.linalg.pinv(lhs) @ rhs
+        x_new = x + step
+        r_new = fun(x_new)
+        nfev += 1
+        if np.linalg.norm(r_new) <= np.linalg.norm(r):
+            x = x_new
+            lam = max(lam * 0.5, 1e-9)
+            if np.linalg.norm(step) < 1e-8:
+                success = True
+                break
+        else:
+            lam = min(lam * 5.0, 1e6)
+    r_final = fun(x)
+    nfev += 1
+    return {
+        "x": x,
+        "cost": 0.5 * float(r_final @ r_final),
+        "success": success,
+        "nfev": nfev,
+        "fun": r_final,
+        "status": 1 if success else 0,
+        "message": "fallback converged" if success else "fallback reached iteration cap",
+    }
+
+
+def _short_message(message: object, max_len: int = 120) -> str:
+    text = " ".join(str(message).split())
+    return text[:max_len]
+
+
+def fit_sparse_imu_batch(
+    R_meas,
+    imu_positions,
+    order_x,
+    order_y,
+    order_z,
+    L,
+    gamma,
+    m0=None,
+    sigma_rot_rad=None,
+    prior_mean=None,
+    prior_cov=None,
+    max_iter=20,
+    multistart=1,
+    seed=0,
+):
+    """
+    Fit modal state from sparse IMU orientations by batch nonlinear least squares.
+
+    Residual convention:
+        r_i(m) = Log(R_meas_i @ R_pred_i(m).T)
+
+    The max_iter argument is retained for compatibility; when SciPy is used it
+    is passed to least_squares as max_nfev.
+    """
+    R_meas = np.asarray(R_meas, dtype=float)
+    imu_positions = np.asarray(imu_positions, dtype=float)
+    n_params = _n_params(order_x, order_y, order_z)
+    sigma = 1.0 if sigma_rot_rad is None else float(sigma_rot_rad)
+    sigma = max(sigma, 1e-12)
+    prior_mean_arr = None if prior_mean is None else np.asarray(prior_mean, dtype=float)
+    prior_cov_arr = None if prior_cov is None else np.asarray(prior_cov, dtype=float)
+
+    def residual(m):
+        chunks = []
+        for R_i, s_i in zip(R_meas, imu_positions):
+            R_pred = _predict_rotation_general(
+                m, float(s_i), order_x, order_y, order_z, L, gamma
+            )
+            chunks.append(so3_log(R_i @ R_pred.T) / sigma)
+        chunks.append(_prior_residual(m, prior_mean_arr, prior_cov_arr))
+        return np.hstack([c for c in chunks if len(c)])
+
+    rng = np.random.default_rng(seed)
+    starts: List[np.ndarray] = []
+    starts.append(np.zeros(n_params))
+    if multistart > 1:
+        if m0 is not None:
+            starts.append(np.asarray(m0, dtype=float))
+        else:
+            starts.append(1e-2 * rng.standard_normal(n_params))
+    while len(starts) < max(1, multistart):
+        starts.append(1e-2 * rng.standard_normal(n_params))
+
+    best = None
+    solver_name = "scipy.optimize.least_squares" if _least_squares is not None else "fallback_lm"
+    for start in starts[: max(1, multistart)]:
+        if _least_squares is not None:
+            res = _least_squares(
+                residual,
+                start,
+                method="trf",
+                max_nfev=max_iter,
+                xtol=1e-10,
+                ftol=1e-10,
+                gtol=1e-10,
+            )
+            candidate = {
+                "x": res.x,
+                "cost": float(res.cost),
+                "success": bool(res.success),
+                "nfev": int(res.nfev),
+                "fun": res.fun,
+                "status": int(res.status),
+                "message": _short_message(res.message),
+            }
+        else:
+            candidate = _fallback_least_squares(residual, start, max_iter)
+        if best is None or candidate["cost"] < best["cost"]:
+            best = candidate
+
+    assert best is not None
+    hit_limit = (
+        int(best.get("status", -999)) == 0
+        or ((not bool(best["success"])) and int(best["nfev"]) >= int(max_iter))
+    )
+    return (
+        best["x"],
+        float(best["cost"]),
+        bool(best["success"]),
+        int(best["nfev"]),
+        float(np.linalg.norm(best["fun"])),
+        solver_name,
+        int(best.get("status", -999)),
+        _short_message(best.get("message", "")),
+        bool(hit_limit),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -495,6 +691,37 @@ def wrench_metrics(
     }
 
 
+def _empty_batch_fields() -> Dict[str, float | str | bool]:
+    return {
+        "batch_cost": float("nan"),
+        "batch_residual_norm": float("nan"),
+        "batch_success": float("nan"),
+        "batch_nfev": float("nan"),
+        "batch_solver": "",
+        "batch_status": float("nan"),
+        "batch_message_short": "",
+        "batch_max_nfev": float("nan"),
+        "batch_hit_limit": float("nan"),
+    }
+
+
+def _batch_init_vector(
+    batch_init: str,
+    n_params: int,
+    m_ekf: np.ndarray | None,
+    m_oracle: np.ndarray | None,
+    seed: int,
+) -> np.ndarray | None:
+    if batch_init == "zero":
+        return None
+    if batch_init == "ekf" and m_ekf is not None:
+        return m_ekf
+    if batch_init == "oracle" and m_oracle is not None:
+        return m_oracle
+    rng = np.random.default_rng(seed)
+    return 1e-2 * rng.standard_normal(n_params)
+
+
 # ---------------------------------------------------------------------------
 # Per-order evaluation
 # ---------------------------------------------------------------------------
@@ -513,6 +740,12 @@ def evaluate_one_order(
     alpha: float,
     steps: int,
     L_phys: float,
+    enable_sparse_batch_oracle: bool = False,
+    batch_max_iter: int = 20,
+    batch_multistart: int = 1,
+    batch_prior_weight: float = 0.0,
+    batch_init: str = "zero",
+    batch_seed: int = 0,
 ) -> List[Dict]:
     """
     Evaluate oracle and EKF wrench estimation for one modal order.
@@ -523,6 +756,8 @@ def evaluate_one_order(
     results: List[Dict] = []
     num_cases = len(positions_gt)
     ox, oy, oz = order.order_x, order.order_y, order.order_z
+    n_params = _n_params(ox, oy, oz)
+    oracle_modal_by_case: List[np.ndarray | None] = [None] * num_cases
 
     # --- Oracle: one result per case (GT backbone, no noise) ---
     print(f"  Oracle fitting {order.label} ...")
@@ -531,6 +766,7 @@ def evaluate_one_order(
         try:
             m_oracle = estimate_modal_oracle(
                 positions_gt[ci], orientations_gt[ci], ox, oy, oz, L_phys)
+            oracle_modal_by_case[ci] = m_oracle
             f_est, l_est = wrench_from_modal(m_oracle, tau_gt[ci], ox, oy, oz, gamma)
             metrics = wrench_metrics(f_est, l_est, f_ext_gt[ci], l_ext_gt[ci])
             valid = True
@@ -547,6 +783,7 @@ def evaluate_one_order(
             "noise_real":    -1,
             "valid":         valid,
         }
+        row.update(_empty_batch_fields())
         row.update(metrics)
         results.append(row)
     print(f"    Oracle done in {time.perf_counter()-t0:.1f} s")
@@ -558,11 +795,17 @@ def evaluate_one_order(
         num_noise    = R_meas_all.shape[1]
 
         print(f"  EKF {layout_name} {order.label} ({num_cases} cases × {num_noise} noise) ...")
+        if enable_sparse_batch_oracle:
+            print(
+                f"  Sparse batch oracle {layout_name} {order.label} "
+                f"(batch_max_nfev={batch_max_iter}, multistart={batch_multistart}) ..."
+            )
         t0 = time.perf_counter()
 
         for ci in range(num_cases):
             for ni in range(num_noise):
                 R_frame = [R_meas_all[ci, ni, si] for si in range(len(imu_pos_norm))]
+                m_ekf = None
                 try:
                     if ox == 1 and oy == 1 and oz == 0:
                         # Standard 5-D EKF — use the validated run_ekf_on_frame
@@ -606,8 +849,88 @@ def evaluate_one_order(
                     "noise_real":    ni,
                     "valid":         valid,
                 }
+                row.update(_empty_batch_fields())
                 row.update(metrics)
                 results.append(row)
+
+                if enable_sparse_batch_oracle:
+                    try:
+                        prior_mean = np.zeros(n_params)
+                        prior_cov = None
+                        if batch_prior_weight > 0.0:
+                            prior_cov = np.eye(n_params) / batch_prior_weight
+                        seed_i = batch_seed + 1000 * ci + 10 * ni + len(layout_name)
+                        m0 = _batch_init_vector(
+                            batch_init=batch_init,
+                            n_params=n_params,
+                            m_ekf=m_ekf,
+                            m_oracle=oracle_modal_by_case[ci],
+                            seed=seed_i,
+                        )
+                        (
+                            m_batch,
+                            cost,
+                            success,
+                            nfev,
+                            residual_norm,
+                            solver_name,
+                            status,
+                            message_short,
+                            hit_limit,
+                        ) = fit_sparse_imu_batch(
+                            R_meas=np.asarray(R_frame),
+                            imu_positions=imu_pos_norm,
+                            order_x=ox,
+                            order_y=oy,
+                            order_z=oz,
+                            L=L_phys,
+                            gamma=gamma,
+                            m0=m0,
+                            sigma_rot_rad=np.sqrt(alpha) * np.deg2rad(meas_std_deg),
+                            prior_mean=prior_mean if prior_cov is not None else None,
+                            prior_cov=prior_cov,
+                            max_iter=batch_max_iter,
+                            multistart=batch_multistart,
+                            seed=seed_i,
+                        )
+                        f_batch, l_batch = wrench_from_modal(
+                            m_batch, tau_gt[ci], ox, oy, oz, gamma
+                        )
+                        batch_metrics = wrench_metrics(
+                            f_batch, l_batch, f_ext_gt[ci], l_ext_gt[ci]
+                        )
+                        batch_valid = bool(success)
+                    except Exception as exc:
+                        cost = residual_norm = float("nan")
+                        nfev = float("nan")
+                        solver_name = ""
+                        status = -1
+                        message_short = _short_message(f"exception: {exc}")
+                        hit_limit = False
+                        batch_metrics = wrench_metrics(
+                            np.zeros(3), np.zeros(3), f_ext_gt[ci], l_ext_gt[ci]
+                        )
+                        batch_valid = False
+
+                    batch_row = {
+                        "case_id":       int(case_ids_gt[ci]),
+                        "method":        "sparse_batch_oracle",
+                        "layout_name":   layout_name,
+                        "modal_order":   order.label,
+                        "noise_real":    ni,
+                        "valid":         batch_valid,
+                        "batch_cost": cost,
+                        "batch_residual_norm": residual_norm,
+                        "batch_success": batch_valid,
+                        "batch_nfev": nfev,
+                        "batch_solver": solver_name,
+                        "batch_status": status,
+                        "batch_message_short": message_short,
+                        "batch_max_nfev": batch_max_iter,
+                        "batch_hit_limit": bool(hit_limit),
+                    }
+                    batch_row.update(batch_metrics)
+                    results.append(batch_row)
 
         elapsed = time.perf_counter() - t0
         print(f"    EKF {layout_name} done in {elapsed:.1f} s")
@@ -620,7 +943,7 @@ def evaluate_one_order(
 # ---------------------------------------------------------------------------
 
 def aggregate(results: List[Dict]) -> List[Dict]:
-    from collections import defaultdict
+    from collections import Counter, defaultdict
     buckets: Dict[Tuple, List] = defaultdict(list)
     for r in results:
         key = (r["modal_order"], r["method"], r["layout_name"])
@@ -632,6 +955,12 @@ def aggregate(results: List[Dict]) -> List[Dict]:
         "force_dir_err_deg", "moment_dir_err_deg",
         "nrmse_force", "nrmse_moment",
     ]
+    alias_keys = {
+        "nrmse_force": "nrmse_F",
+        "nrmse_moment": "nrmse_M",
+        "force_dir_err_deg": "dir_F_deg",
+        "moment_dir_err_deg": "dir_M_deg",
+    }
     for (order_lbl, method, layout), rows in sorted(buckets.items()):
         entry: Dict = {
             "modal_order": order_lbl,
@@ -640,11 +969,93 @@ def aggregate(results: List[Dict]) -> List[Dict]:
             "n_runs":      len(rows),
         }
         for mk in metric_keys:
-            vals = [r[mk] for r in rows if mk in r]
-            if vals:
-                entry[f"{mk}_mean"] = float(np.mean(vals))
-                entry[f"{mk}_std"]  = float(np.std(vals))
-                entry[f"{mk}_med"]  = float(np.median(vals))
+            vals = np.array([r[mk] for r in rows if mk in r], dtype=float)
+            if len(vals):
+                mean = float(np.nanmean(vals))
+                std = float(np.nanstd(vals))
+                med = float(np.nanmedian(vals))
+                entry[f"{mk}_mean"] = mean
+                entry[f"{mk}_std"]  = std
+                entry[f"{mk}_med"]  = med
+                if mk in alias_keys:
+                    alias = alias_keys[mk]
+                    entry[f"{alias}_mean"] = mean
+                    entry[f"{alias}_std"] = std
+                    entry[f"{alias}_med"] = med
+        for field in ("batch_cost", "batch_residual_norm", "batch_nfev"):
+            vals = np.array([r.get(field, np.nan) for r in rows], dtype=float)
+            entry[f"{field}_mean"] = (
+                float("nan") if np.all(np.isnan(vals)) else float(np.nanmean(vals))
+            )
+        success_vals = np.array(
+            [
+                float(r["batch_success"])
+                for r in rows
+                if isinstance(r.get("batch_success"), (bool, np.bool_))
+            ],
+            dtype=float,
+        )
+        entry["batch_success_rate"] = (
+            float("nan") if len(success_vals) == 0 else float(np.mean(success_vals))
+        )
+        solvers = sorted({str(r.get("batch_solver", "")) for r in rows if r.get("batch_solver", "")})
+        entry["batch_solver"] = ";".join(solvers)
+        status_vals = np.array(
+            [
+                float(r["batch_status"])
+                for r in rows
+                if isinstance(r.get("batch_status"), (int, float, np.integer, np.floating))
+                and np.isfinite(float(r["batch_status"]))
+            ],
+            dtype=float,
+        )
+        entry["batch_status_mean"] = (
+            float("nan") if len(status_vals) == 0 else float(np.mean(status_vals))
+        )
+        status_counts = Counter(
+            str(int(r["batch_status"]))
+            for r in rows
+            if isinstance(r.get("batch_status"), (int, float, np.integer, np.floating))
+            and np.isfinite(float(r["batch_status"]))
+        )
+        entry["batch_status_counts"] = ";".join(
+            f"{status}:{count}" for status, count in sorted(status_counts.items())
+        )
+        messages = [
+            str(r.get("batch_message_short", ""))
+            for r in rows
+            if str(r.get("batch_message_short", ""))
+        ]
+        message_counts = Counter(messages)
+        entry["batch_message_mode"] = (
+            message_counts.most_common(1)[0][0] if message_counts else ""
+        )
+        hit_vals = np.array(
+            [
+                float(r["batch_hit_limit"])
+                for r in rows
+                if isinstance(r.get("batch_hit_limit"), (bool, np.bool_))
+            ],
+            dtype=float,
+        )
+        entry["batch_hit_limit_rate"] = (
+            float("nan") if len(hit_vals) == 0 else float(np.mean(hit_vals))
+        )
+        max_nfev_vals = sorted(
+            {
+                int(r["batch_max_nfev"])
+                for r in rows
+                if isinstance(r.get("batch_max_nfev"), (int, float, np.integer, np.floating))
+                and np.isfinite(float(r["batch_max_nfev"]))
+            }
+        )
+        entry["batch_max_nfev"] = (
+            float("nan")
+            if not max_nfev_vals
+            else max_nfev_vals[0]
+            if len(max_nfev_vals) == 1
+            else ";".join(str(v) for v in max_nfev_vals)
+        )
         summary.append(entry)
     return summary
 
@@ -656,7 +1067,11 @@ def aggregate(results: List[Dict]) -> List[Dict]:
 def save_csv(rows: List[Dict], path: Path) -> None:
     if not rows:
         return
-    keys = list(rows[0].keys())
+    keys: List[str] = []
+    for row in rows:
+        for key in row.keys():
+            if key not in keys:
+                keys.append(key)
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=keys)
         w.writeheader()
@@ -897,9 +1312,34 @@ def main() -> None:
     )
     parser.add_argument("--max-cases", type=int, default=None,
                         help="process only the first N cases after loading")
+    parser.add_argument("--n-noise", type=int, default=None,
+                        help="use only the first N IMU noise realizations")
+    parser.add_argument("--enable-sparse-batch-oracle", action="store_true",
+                        help="fit modal state from sparse IMU orientations by batch least squares")
+    parser.add_argument(
+        "--batch-max-iter",
+        type=int,
+        default=20,
+        help="batch optimizer cap; passed to scipy.optimize.least_squares as max_nfev",
+    )
+    parser.add_argument("--batch-multistart", type=int, default=1)
+    parser.add_argument("--batch-prior-weight", type=float, default=0.0)
+    parser.add_argument(
+        "--batch-init",
+        choices=["zero", "ekf", "oracle", "zero_plus_noise"],
+        default="zero",
+    )
     args = parser.parse_args()
     if args.max_cases is not None and args.max_cases <= 0:
         parser.error("--max-cases must be > 0")
+    if args.n_noise is not None and args.n_noise <= 0:
+        parser.error("--n-noise must be > 0")
+    if args.batch_max_iter <= 0:
+        parser.error("--batch-max-iter must be > 0")
+    if args.batch_multistart <= 0:
+        parser.error("--batch-multistart must be > 0")
+    if args.batch_prior_weight < 0.0:
+        parser.error("--batch-prior-weight must be >= 0")
 
     script_dir = Path(__file__).resolve().parent
 
@@ -936,6 +1376,8 @@ def main() -> None:
         f_ext_gt = f_ext_gt[:n_use]
         l_ext_gt = l_ext_gt[:n_use]
         num_cases = n_use
+    if args.n_noise is not None:
+        print(f"Applying --n-noise {args.n_noise}: using first {args.n_noise} noise realizations.")
     L_phys = float(gt_meta.get("length_m", _L))
     print(f"  {num_cases} cases, {num_pts} arc-length points, L = {L_phys} m")
 
@@ -947,6 +1389,14 @@ def main() -> None:
             continue
         R_true, R_meas, imu_pos, imu_idx, imu_meta = load_imu_measurements(path)
         R_meas = R_meas[:num_cases]
+        if args.n_noise is not None:
+            n_noise_use = min(args.n_noise, R_meas.shape[1])
+            R_meas = R_meas[:, :n_noise_use]
+            if n_noise_use < args.n_noise:
+                print(
+                    f"  WARNING: {label} has only {n_noise_use} noise realizations; "
+                    f"requested {args.n_noise}."
+                )
         imu_actual_s = np.array(
             imu_meta.get("imu_actual_s", (imu_idx / (num_pts - 1)).tolist()),
             dtype=float,
@@ -982,6 +1432,11 @@ def main() -> None:
             alpha=args.alpha,
             steps=args.steps,
             L_phys=L_phys,
+            enable_sparse_batch_oracle=args.enable_sparse_batch_oracle,
+            batch_max_iter=args.batch_max_iter,
+            batch_multistart=args.batch_multistart,
+            batch_prior_weight=args.batch_prior_weight,
+            batch_init=args.batch_init,
         )
         all_results.extend(r)
 
@@ -992,7 +1447,21 @@ def main() -> None:
     print(f"\n{'='*90}")
     print(f"  Oracle vs EKF Summary")
     print(f"{'='*90}")
-    hdr = (f"{'Order':<12} {'Method':<8} {'Layout':<10} "
+    if args.enable_sparse_batch_oracle:
+        print("Method guide:")
+        print("  dense oracle: modal fit using richer GT shape information.")
+        print("  sparse_batch_oracle: batch modal fit using the same sparse IMU orientations as EKF.")
+        print("  EKF: recursive local-linearization estimator.")
+        print(
+            f"Sparse batch controls: batch_max_nfev = {args.batch_max_iter}, "
+            f"multistart = {args.batch_multistart}."
+        )
+        print("Interpretation:")
+        print("  sparse batch close to dense oracle with worse EKF suggests EKF tuning/linearization effects.")
+        print("  sparse batch close to EKF and both worse than dense oracle suggests sparse-IMU observability limits.")
+        print("  sparse batch between them suggests both effects are present.")
+        print()
+    hdr = (f"{'Order':<12} {'Method':<22} {'Layout':<10} "
            f"{'Force [mN]':>14}  {'Moment [mN·m]':>16}  "
            f"{'NRMSE-F':>9}  {'NRMSE-M':>9}")
     print(hdr)
@@ -1004,7 +1473,7 @@ def main() -> None:
         mstd  = s.get("moment_err_Nm_std",   0.0) * 1e3
         nrmf  = s.get("nrmse_force_mean",    0.0) * 100
         nrmm  = s.get("nrmse_moment_mean",   0.0) * 100
-        print(f"{s['modal_order']:<12} {s['method']:<8} {s['layout_name']:<10} "
+        print(f"{s['modal_order']:<12} {s['method']:<22} {s['layout_name']:<10} "
               f"{ferr:>8.2f}±{fstd:<5.2f}mN  "
               f"{merr:>9.3f}±{mstd:<5.3f}mN·m  "
               f"{nrmf:>7.1f}%  {nrmm:>7.1f}%")
@@ -1021,6 +1490,12 @@ def main() -> None:
             "alpha":        args.alpha,
             "meas_std_deg": args.meas_std_deg,
             "steps":        args.steps,
+            "n_noise":      args.n_noise,
+            "enable_sparse_batch_oracle": args.enable_sparse_batch_oracle,
+            "batch_max_nfev": args.batch_max_iter,
+            "batch_multistart": args.batch_multistart,
+            "batch_prior_weight": args.batch_prior_weight,
+            "batch_init": args.batch_init,
             "L_phys_m":     L_phys,
             "EIx_Nm2":      _EIX,
             "EIy_Nm2":      _EIY,
