@@ -1,0 +1,166 @@
+{
+  "scope": "One same physical case, noise realization and 30 static EKF updates; no aggregate tables regenerated.",
+  "baseline_commit": "5312a0fa9c2c5e98399de8a6251fe28df1f616e8",
+  "baseline_source_sha256": "3954c3ff97151b722c2329a72cd31f4fe8ce0d7fcf1f285fc04f41a28b59cd9e",
+  "fixed_source_sha256": "d9bc7f626defa26023c8a2ec43a2123f17c9f2ad247d1e8e62741e87582b73db",
+  "production_change": "One import and one matrix-exponential derivative expression.",
+  "case_index": 0,
+  "noise_realization": 0,
+  "order": [
+    2,
+    2,
+    1
+  ],
+  "steps": 30,
+  "jacobian_relative_error_before": 0.10360181691936961,
+  "jacobian_relative_error_after": 1.5299144367283356e-10,
+  "A_B_C_unchanged": true,
+  "before_and_after_D_match_independent_baseline_comparison": true,
+  "historical_evidence_hashes_unchanged": {
+    "diagnostics/oracle_ekf_gap/after.json": "9407ad2ba3c1843963aaa9428465ebcd8082ba0026f8302ff21c3441091f36ed",
+    "diagnostics/oracle_ekf_gap/before.json": "231ffecfa514a02bd48663573842c58b8977fb48ea6c3db63df50c6be7feb527",
+    "diagnostics/oracle_ekf_gap/cli_command.json": "1c6f77dbf73c0c708313f4903ad7286a08999e369247410f718edda7789c41ad",
+    "diagnostics/oracle_ekf_gap/cli_world_base.log": "7ef3aabd1515d24bcfd332a9bd3f39ac32c5fba30afd4ea795ec33277740f296",
+    "diagnostics/oracle_ekf_gap/dataset_inventory.json": "85e2752ef742397cbd9c45a8f35c91cb54b410b6cf7594263fd4c5b15bd00244",
+    "diagnostics/oracle_ekf_gap/diagnose.py": "8706654a80d1983b3499f1d60cd6da0e4f2fb2f12bb76ca6b275ac56fe4b454f",
+    "diagnostics/oracle_ekf_gap/diagnosis.md": "36bb9261c4bdb9078ddcbbacf6ccd0c21ff5c3f952bc5d705184863c99ad8c95",
+    "diagnostics/oracle_ekf_gap/history_evidence.md": "72b70b84c4670bc0ae87071ae767ca50abcaa419bf937e32168d3f9f90a2a4c1",
+    "diagnostics/oracle_ekf_gap/manuscript_crosscheck.md": "2e55504b304e076cb36348b0302a29e0c3b44f78ddb11bc98a5b790c2c962761",
+    "diagnostics/oracle_ekf_gap/manuscript_reference.json": "463b37b4db1b3b0e0fdd4a739977f05b63a28aa84e565e459fb30a76517e9c54",
+    "diagnostics/oracle_ekf_gap/recovered_diagnosis.md": "35fd3443c4377dd87dcf115b39cf53b2666042b7b4f129389ede47e0dd1257d5",
+    "diagnostics/oracle_ekf_gap/recovered_manuscript_crosscheck.md": "386be7ae7fe0f85713c514c9e30cb7868f50ffe234d023037eebe8cfd79e2ce0",
+    "diagnostics/oracle_ekf_gap/recovered_pipeline_notes.md": "dcf09a5e42072752fc21ed6bda8b323a5e2f7a01bcc317453946bf1f09b8af7d",
+    "diagnostics/oracle_ekf_gap/recovered_run/jacobian_correction.json": "eef2525fded22b3eb3ad23f71dcecbe7407ba24ae5975419872024ae1e6c4745",
+    "diagnostics/oracle_ekf_gap/recovered_run/jacobian_correction.patch": "f1fe01f7aeb093823894ad5c7afca999050b9d3890ba6efdd58267d2430c8efd",
+    "diagnostics/oracle_ekf_gap/recovered_run/original_states.npz": "db010090d4331fa43bd760bfc146e7cca91de6093cf33b6d592d543ae6b62862",
+    "diagnostics/oracle_ekf_gap/recovered_run/results.csv": "f97c53d4ce724498689c1daac42a7a3cfb41977407ea55b1ff6e5232f0f69909",
+    "diagnostics/oracle_ekf_gap/recovered_run/results.json": "d57cdd47ab73be3178ae00e208931a1420a9bd613c34bcc345bb7369e24ffe26",
+    "diagnostics/oracle_ekf_gap/recovered_run/results_before_metric_index_fix.csv": "5dc656bba42cb9ce81f3ca6fa8fef7ad30f75574d9095d26da6d543553a9a415",
+    "diagnostics/oracle_ekf_gap/recovered_run/results_before_metric_index_fix.json": "b9e29fa4b8fabdbe894a474144c18422619965ebfa0d797e58635e78cb483bda",
+    "diagnostics/oracle_ekf_gap/recovered_run/verification.json": "cb6a9f263bea584af935823c5f11546d1ea074801b49ded979f0f65ec9e08d08",
+    "diagnostics/oracle_ekf_gap/repo_reconciliation_20261008/README.md": "4d38293fb8adaa72c9d9bea6bfb7110af39b9e1d0f4eab38194ff5de022d1b97",
+    "diagnostics/oracle_ekf_gap/repo_reconciliation_20261008/modified_source_snapshot/src/shape_force_est_imu/crt/cosserat_rod_model.py": "150b3c27cadd35d9197fb6183e8e81c90b5eeb83b2689ba417a6d3f078114c81",
+    "diagnostics/oracle_ekf_gap/repo_reconciliation_20261008/modified_source_snapshot/src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_constrained.py": "9cdb3036db092f4afcc98effeb3f5fe578aeec5985fb2d52e968b01c394db109",
+    "diagnostics/oracle_ekf_gap/repo_reconciliation_20261008/modified_source_snapshot/src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset_constrained.py": "6a8eb4824a6d979dee4816f4b39f5083507a1b7fe355f797bc9f0aa8e9fcfe06",
+    "diagnostics/oracle_ekf_gap/repo_reconciliation_20261008/new_repo_uncommitted.patch": "787cbcae193d11b3ce2d0a169e47e2d18c32b9cdc689f00aaf4df0001cc0858f",
+    "diagnostics/oracle_ekf_gap/repo_reconciliation_20261008/reconciliation.json": "56c3f081a72c2740018431914200f1e7dac9442aaa1ef739b34d630229126904",
+    "diagnostics/oracle_ekf_gap/results.csv": "1f77cc5d88f16aad9963ad8c58d2a86ec27a41217969892fbdfc45c1d20d6022",
+    "diagnostics/oracle_ekf_gap/source_changes.patch": "08275c0224a0f187d4848bff8c985492d15781e25ef46c02f801789bcc1e8c8c",
+    "diagnostics/oracle_ekf_gap/sync_20261008_manifest.json": "c1dd03d5850eb55d95d71c58196672274f856c95da1bef563262904fc2965359",
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/abcd_validation.log": "eb20be29378b2847801426a2807620cc97719a3943b80db42f8f5881e3c84a27",
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/canonical_environment.json": "ff2a885811730c14582132612e0d50a7cc293488162a6c96d53a349f698ab65a",
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/cli_validation.log": "7ef3aabd1515d24bcfd332a9bd3f39ac32c5fba30afd4ea795ec33277740f296",
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/jacobian_validation.log": "3bb42fcf92eefbe47ce2fe067e004e09f10caa41392f7bef4096e4c44e4fe000",
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/legacy_compatibility.json": "98c7b9d860cef11c1fda1248ef4353dcf5296a7cca2adaf9b651258a5aa5a9f4",
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/legacy_compatibility.log": "85f081aa1d9044b04dc269e0ec72a790d4dcc2c21ea9c3f868b51fd4fb2eb2a5",
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/mechanics_validation.json": "f3e803ac3127946725f806b5449e5ed89bfaa6ff4b71cfb5ace1c6df9c3a5010",
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/mechanics_validation.log": "4564c66a06a37b17e7e5a8def1bffd591ab462d4f5b3860d2e5ec47b5725f71f",
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/verification.json": "d81be80d8a8962320e388645c6f14ebd41a987b0531b22eaab435dbf1d997fc3",
+    "diagnostics/oracle_ekf_gap/synced_abcd_20261008/original_states.npz": "db010090d4331fa43bd760bfc146e7cca91de6093cf33b6d592d543ae6b62862",
+    "diagnostics/oracle_ekf_gap/synced_abcd_20261008/results.csv": "f97c53d4ce724498689c1daac42a7a3cfb41977407ea55b1ff6e5232f0f69909",
+    "diagnostics/oracle_ekf_gap/synced_abcd_20261008/results.json": "6f9e7bec7ee4b84da64a344f4f5a6f6732f58417c73d1bab809bc7f4495fe760",
+    "diagnostics/oracle_ekf_gap/synced_jacobian_20261008/jacobian_correction.json": "23429a6c5cf51433bc484a81d62dd84ceb601efd358e0f2a4c39f1e23798c934",
+    "diagnostics/oracle_ekf_gap/synced_jacobian_20261008/jacobian_correction.patch": "f1fe01f7aeb093823894ad5c7afca999050b9d3890ba6efdd58267d2430c8efd",
+    "diagnostics/oracle_ekf_gap/verification.json": "0d4fd8440130172dbd809a1044bc3894d4d1cb13b8a07ec3ea203cd394e1f748"
+  },
+  "unrelated_protected_source_and_input_hashes_unchanged": true,
+  "regression_checks": "Four deterministic general-order 5D/8D Jacobian tests: old implementation fails; production fix passes.",
+  "comparison": [
+    {
+      "method": "A",
+      "before_method": "A_dense_oracle",
+      "after_method": "A_dense_oracle",
+      "before": {
+        "shape_rms_all100_mm": 0.014392438953909955,
+        "force_error_N": 0.0009898345951409682,
+        "force_direction_deg": 0.20004873050107758,
+        "moment_error_common_world_base_Nm": 3.322496323012122e-05
+      },
+      "after": {
+        "shape_rms_all100_mm": 0.014392438953909955,
+        "force_error_N": 0.0009898345951409682,
+        "force_direction_deg": 0.20004873050107758,
+        "moment_error_common_world_base_Nm": 3.322496323012122e-05
+      },
+      "delta": {
+        "shape_rms_all100_mm": 0.0,
+        "force_error_N": 0.0,
+        "force_direction_deg": 0.0,
+        "moment_error_common_world_base_Nm": 0.0
+      }
+    },
+    {
+      "method": "B",
+      "before_method": "B_noiseless_sparse",
+      "after_method": "B_noiseless_sparse",
+      "before": {
+        "shape_rms_all100_mm": 0.020299473893196748,
+        "force_error_N": 0.0322490660054157,
+        "force_direction_deg": 5.3857636532209545,
+        "moment_error_common_world_base_Nm": 0.00012255917008426363
+      },
+      "after": {
+        "shape_rms_all100_mm": 0.020299473893196748,
+        "force_error_N": 0.0322490660054157,
+        "force_direction_deg": 5.3857636532209545,
+        "moment_error_common_world_base_Nm": 0.00012255917008426363
+      },
+      "delta": {
+        "shape_rms_all100_mm": 0.0,
+        "force_error_N": 0.0,
+        "force_direction_deg": 0.0,
+        "moment_error_common_world_base_Nm": 0.0
+      }
+    },
+    {
+      "method": "C",
+      "before_method": "C_noisy_sparse",
+      "after_method": "C_noisy_sparse",
+      "before": {
+        "shape_rms_all100_mm": 0.6619000505254643,
+        "force_error_N": 0.7786971064308691,
+        "force_direction_deg": 94.03072217868696,
+        "moment_error_common_world_base_Nm": 0.004402330474724041
+      },
+      "after": {
+        "shape_rms_all100_mm": 0.6619000505254643,
+        "force_error_N": 0.7786971064308691,
+        "force_direction_deg": 94.03072217868696,
+        "moment_error_common_world_base_Nm": 0.004402330474724041
+      },
+      "delta": {
+        "shape_rms_all100_mm": 0.0,
+        "force_error_N": 0.0,
+        "force_direction_deg": 0.0,
+        "moment_error_common_world_base_Nm": 0.0
+      }
+    },
+    {
+      "method": "D",
+      "before_method": "D_original_ekf",
+      "after_method": "D_production_ekf",
+      "before": {
+        "shape_rms_all100_mm": 0.554543226335568,
+        "force_error_N": 0.6491484809741672,
+        "force_direction_deg": 89.66313785977962,
+        "moment_error_common_world_base_Nm": 0.0036269193337003435
+      },
+      "after": {
+        "shape_rms_all100_mm": 0.5525488953030083,
+        "force_error_N": 0.646809855642192,
+        "force_direction_deg": 89.287950640059,
+        "moment_error_common_world_base_Nm": 0.003664825498735087
+      },
+      "delta": {
+        "shape_rms_all100_mm": -0.0019943310325596375,
+        "force_error_N": -0.0023386253319752637,
+        "force_direction_deg": -0.37518721972062963,
+        "moment_error_common_world_base_Nm": 3.790616503474356e-05
+      }
+    }
+  ],
+  "remaining_scope": "Separate legacy five-dimensional EKF implementations retain the approximation; not changed by this step.",
+  "oracle_state_identical_before_after": true,
+  "before_after_ekf_states_match_independent_derivative_comparison": true,
+  "all_four_D_metrics_match_independent_derivative_comparison": true
+}

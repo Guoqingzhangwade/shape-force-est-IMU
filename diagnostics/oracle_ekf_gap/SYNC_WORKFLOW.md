@@ -72,8 +72,20 @@ own check.
 No full simulation rebuild is required. The original inputs and saved outputs
 are preserved, and both recovered diagnostic runners now infer their repo
 root and accept a fresh output directory. See `README.md` for commands.
-The saved EKF derivative patch remains an in-memory diagnostic comparison;
-this synchronization does not apply it to the production EKF.
+At migration time, the saved EKF derivative patch remained an in-memory
+diagnostic comparison; that synchronization did not apply it to production.
+The subsequent authorized Step 1 production change and its fresh same-case
+validation are documented separately in
+[step1_frechet_20261008/README.md](step1_frechet_20261008/README.md).
+Historical evidence remains unchanged; consult that report for validation status.
+
+After the production fix, `check_jacobian.py` requires the explicit pre-fix
+baseline `--baseline-ref 5312a0fa9c2c5e98399de8a6251fe28df1f616e8`.
+It reads that source from Git into memory and compares it with actual
+production code; it never restores the old expression to the working tree.
+The source comparison permits only the intended two-line Fréchet change
+after line-ending normalization. Use a fresh output directory as shown in
+`README.md`, and preserve new validation outputs separately from the old runs.
 
 The copied Python environment originally pointed to an old username on the
 other device. Its local interpreter and activation paths are repaired using

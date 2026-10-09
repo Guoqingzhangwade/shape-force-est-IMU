@@ -1,0 +1,10 @@
+[general EKF H FD] order=(1, 1, 0), state=0: max_abs=3.615e-02, relative_fro=3.383e-02, passed=False
+[general EKF H FD] order=(1, 1, 0), state=1: max_abs=8.585e-03, relative_fro=7.741e-03, passed=False
+[general EKF H FD] order=(2, 2, 1), state=0: max_abs=3.458e-02, relative_fro=3.471e-02, passed=False
+[general EKF H FD] order=(2, 2, 1), state=1: max_abs=2.320e-02, relative_fro=1.991e-02, passed=False
+Traceback (most recent call last):
+  File "C:\Users\guoqi\AppData\Local\Temp\ekf_frechet_step1_20261008\validate_regression_candidate.py", line 68, in main
+    test_module.assert_checks(rows)
+  File "C:\Users\guoqi\AppData\Local\Temp\ekf_frechet_step1_20261008\candidate\tests\check_variable_order_ekf_jacobian.py", line 126, in assert_checks
+    raise AssertionError(
+AssertionError: 4 of 4 measurement Jacobians failed: require max_abs < 2e-07 and relative_fro < 1e-06

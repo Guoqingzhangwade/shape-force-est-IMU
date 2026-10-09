@@ -63,6 +63,15 @@ def main():
                     "generate_kirchhoff_gt_dataset_constrained.py"]
     input_paths = ["gt_data/kirchhoff_gt_dataset.npz", "gt_data/kirchhoff_imu_3imu.npz"]
     hashes = {name: sha(CRT / name) for name in source_paths + input_paths}
+    production_source = source_path.read_text(encoding="utf-8")
+    frechet_expression = "dePsi_dm[k][:, :, i] = expm_frechet(Psi_k, dP, compute_expm=False)"
+    legacy_expression = "dePsi_dm[k][:, :, i] = ePsi_k @ (dP + 0.5 * (Psi_k @ dP - dP @ Psi_k))"
+    if frechet_expression in production_source and legacy_expression not in production_source:
+        derivative_implementation = "scipy.linalg.expm_frechet"
+    elif legacy_expression in production_source and frechet_expression not in production_source:
+        derivative_implementation = "legacy_truncated_commutator"
+    else:
+        derivative_implementation = "unrecognized_or_mixed_source; inspect recorded source hash"
     git_args = ["git", "-C", str(recovered), "-c", "core.fsmonitor=false"]
     status_args = git_args + ["status", "--porcelain=v1", "--untracked-files=normal", "--", "."]
     # New results may live inside this repository after migration; exclude only
@@ -99,13 +108,13 @@ def main():
         ).as_rotvec() for s, R in zip(actual_s, observations)])
 
     m_oracle = original.estimate_modal_oracle(pos, rotations, *ORDER, L_phys=L)
-    # Preserve original EKF before offline fitting; no estimator/options substitution.
+    # Preserve the selected production EKF before offline fitting; no options substitution.
     t0 = time.perf_counter()
     m_ekf = original.run_ekf_for_order(noisy_R, actual_s, *ORDER, gamma=GAMMA,
                                       meas_std_deg=SIGMA_DEG, alpha=ALPHA, steps=STEPS)
     original_elapsed = time.perf_counter() - t0
     np.savez_compressed(args.output_dir / "original_states.npz", oracle=m_oracle, ekf=m_ekf)
-    print("Original A/D states saved.", flush=True)
+    print("Dense-oracle and selected production EKF states saved.", flush=True)
 
     # A few fixed, GT-independent initializations. Preserve every convergence outcome.
     rng = np.random.default_rng(SEED)
@@ -170,12 +179,13 @@ def main():
         elif method.startswith("C_"):
             metrics["information"] = "one saved noisy orientation triplet, same as D; 3 GT-independent starts; no prior"
         else:
-            metrics["information"] = "same saved noisy triplet reused 30 updates; zero initialization; original P0/Q/analytic H"
+            metrics["information"] = ("same saved noisy triplet reused 30 updates; zero initialization; "
+                                      "selected production P0/Q and analytic H; derivative=" + derivative_implementation)
         return metrics
 
     terms = {}
     rows = [evaluate(m_oracle, "A_dense_oracle"), evaluate(fitted["B_noiseless_sparse"], "B_noiseless_sparse"),
-            evaluate(fitted["C_noisy_sparse"], "C_noisy_sparse"), evaluate(m_ekf, "D_original_ekf")]
+            evaluate(fitted["C_noisy_sparse"], "C_noisy_sparse"), evaluate(m_ekf, "D_production_ekf")]
     # Both sides of the wrench equation depend on shape; compare at a common reference.
     A0, b0, w0 = terms["A_dense_oracle"]
     for row in rows[1:]:
@@ -204,7 +214,8 @@ def main():
               "status_check_excludes_output_directory": str(output_relative) if output_relative is not None else None,
               "head": subprocess.check_output(git_args + ["rev-parse", "HEAD"], text=True).strip(),
               "preexisting_status": status_before, "recovered_repo_status_preserved": True,
-              "hashes": hashes, "case_index": 0, "case_id": case_id, "noise_realization": 0,
+              "hashes": hashes, "production_derivative_implementation": derivative_implementation,
+              "case_index": 0, "case_id": case_id, "noise_realization": 0,
               "gt_metadata": gt_meta, "imu_metadata": imu_meta, "order": list(ORDER),
               "nominal_s": nominal_s.tolist(), "actual_s_used": actual_s.tolist(),
               "reason_for_actual_s": "manuscript table generator uses meta imu_actual_s; original compare CLI uses nominal positions",

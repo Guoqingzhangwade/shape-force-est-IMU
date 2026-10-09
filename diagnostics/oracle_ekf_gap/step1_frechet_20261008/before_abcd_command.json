@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\.venv\\Scripts\\python.exe",
+    "-B",
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\diagnostics\\oracle_ekf_gap\\recovered_run\\diagnose_recovered.py",
+    "--repo-root",
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU",
+    "--output-dir",
+    "C:\\Users\\guoqi\\AppData\\Local\\Temp\\ekf_frechet_step1_20261008\\before_abcd"
+  ],
+  "returncode": 0
+}

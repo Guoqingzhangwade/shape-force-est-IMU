@@ -1,0 +1,281 @@
+{
+  "scope": "Regression test for general-order EKF H only; four fixed synthetic cases, no datasets or simulations",
+  "command_argv": [
+    "C:\\Users\\guoqi\\OneDrive\\Desktop\\shape_force_IMU\\shape-force-est-IMU\\.venv\\Scripts\\python.exe",
+    "-B",
+    "C:\\Users\\guoqi\\AppData\\Local\\Temp\\ekf_frechet_step1_20261008\\validate_regression_candidate.py"
+  ],
+  "python": "C:\\Users\\guoqi\\OneDrive\\Desktop\\shape_force_IMU\\shape-force-est-IMU\\.venv\\Scripts\\python.exe",
+  "numpy": "2.2.4",
+  "scipy": "1.15.2",
+  "test_path": "C:\\Users\\guoqi\\AppData\\Local\\Temp\\ekf_frechet_step1_20261008\\candidate\\tests\\check_variable_order_ekf_jacobian.py",
+  "test_sha256": "1c164a0c366d96998cdcab16ba47f9ca68d3d17496da0442f46c4e6478aa51bb",
+  "candidate_source_path": "C:\\Users\\guoqi\\AppData\\Local\\Temp\\ekf_frechet_step1_20261008\\candidate\\src\\shape_force_est_imu\\crt\\compare_oracle_vs_ekf_wrench_estimation.py",
+  "candidate_source_sha256": "d9bc7f626defa26023c8a2ec43a2123f17c9f2ad247d1e8e62741e87582b73db",
+  "candidate_is_exact_saved_two_line_fix": true,
+  "source_and_historical_diagnostic_hashes_before": {
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\src\\shape_force_est_imu\\crt\\compare_oracle_vs_ekf_wrench_estimation.py": "3954c3ff97151b722c2329a72cd31f4fe8ce0d7fcf1f285fc04f41a28b59cd9e",
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\diagnostics\\oracle_ekf_gap\\recovered_run\\check_jacobian.py": "97cde9fa939d4b086167e487c0c4414e68cb32a8cf0f5e3bebe049040bda2f9c",
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\diagnostics\\oracle_ekf_gap\\recovered_run\\diagnose_recovered.py": "ef32a27b8dd5e3b3a4104008d0f3339e5b27fc7d5b606f67eeef976d61c4e8f2"
+  },
+  "source_and_historical_diagnostic_hashes_after": {
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\src\\shape_force_est_imu\\crt\\compare_oracle_vs_ekf_wrench_estimation.py": "3954c3ff97151b722c2329a72cd31f4fe8ce0d7fcf1f285fc04f41a28b59cd9e",
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\diagnostics\\oracle_ekf_gap\\recovered_run\\check_jacobian.py": "97cde9fa939d4b086167e487c0c4414e68cb32a8cf0f5e3bebe049040bda2f9c",
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\diagnostics\\oracle_ekf_gap\\recovered_run\\diagnose_recovered.py": "ef32a27b8dd5e3b3a4104008d0f3339e5b27fc7d5b606f67eeef976d61c4e8f2"
+  },
+  "production_and_historical_sources_unchanged": true,
+  "positions_normalized": [
+    0.25252525252525254,
+    0.5050505050505051,
+    1.0
+  ],
+  "gamma": 10,
+  "finite_difference_step": 1e-06,
+  "max_absolute_tolerance": 2e-07,
+  "relative_frobenius_tolerance": 1e-06,
+  "records": {
+    "before": {
+      "passed": false,
+      "assertion": "4 of 4 measurement Jacobians failed: require max_abs < 2e-07 and relative_fro < 1e-06",
+      "cases": [
+        {
+          "orders": [
+            1,
+            1,
+            0
+          ],
+          "state_index": 0,
+          "state": [
+            0.4,
+            -0.2,
+            0.3,
+            0.1,
+            0.05
+          ],
+          "reference_state": [
+            0.3,
+            0.1,
+            -0.25,
+            0.15,
+            0.12
+          ],
+          "max_abs_difference": 0.03614994060999358,
+          "relative_frobenius_difference": 0.03383139641978251,
+          "passed": false
+        },
+        {
+          "orders": [
+            1,
+            1,
+            0
+          ],
+          "state_index": 1,
+          "state": [
+            -0.2,
+            0.3,
+            -0.1,
+            0.25,
+            -0.08
+          ],
+          "reference_state": [
+            0.3,
+            0.1,
+            -0.25,
+            0.15,
+            0.12
+          ],
+          "max_abs_difference": 0.008584892424909563,
+          "relative_frobenius_difference": 0.007741175006782251,
+          "passed": false
+        },
+        {
+          "orders": [
+            2,
+            2,
+            1
+          ],
+          "state_index": 0,
+          "state": [
+            0.4,
+            -0.2,
+            0.06,
+            0.3,
+            0.1,
+            -0.04,
+            0.05,
+            0.02
+          ],
+          "reference_state": [
+            0.3,
+            0.1,
+            -0.02,
+            -0.25,
+            0.15,
+            0.03,
+            0.12,
+            -0.04
+          ],
+          "max_abs_difference": 0.03457523357687016,
+          "relative_frobenius_difference": 0.034712318815910345,
+          "passed": false
+        },
+        {
+          "orders": [
+            2,
+            2,
+            1
+          ],
+          "state_index": 1,
+          "state": [
+            -0.3,
+            0.1,
+            0.07,
+            0.2,
+            -0.15,
+            0.03,
+            -0.08,
+            0.04
+          ],
+          "reference_state": [
+            0.3,
+            0.1,
+            -0.02,
+            -0.25,
+            0.15,
+            0.03,
+            0.12,
+            -0.04
+          ],
+          "max_abs_difference": 0.023203839094469797,
+          "relative_frobenius_difference": 0.019906590727679856,
+          "passed": false
+        }
+      ]
+    },
+    "candidate": {
+      "passed": true,
+      "assertion": null,
+      "cases": [
+        {
+          "orders": [
+            1,
+            1,
+            0
+          ],
+          "state_index": 0,
+          "state": [
+            0.4,
+            -0.2,
+            0.3,
+            0.1,
+            0.05
+          ],
+          "reference_state": [
+            0.3,
+            0.1,
+            -0.25,
+            0.15,
+            0.12
+          ],
+          "max_abs_difference": 8.58934035008474e-11,
+          "relative_frobenius_difference": 7.827042455210338e-11,
+          "passed": true
+        },
+        {
+          "orders": [
+            1,
+            1,
+            0
+          ],
+          "state_index": 1,
+          "state": [
+            -0.2,
+            0.3,
+            -0.1,
+            0.25,
+            -0.08
+          ],
+          "reference_state": [
+            0.3,
+            0.1,
+            -0.25,
+            0.15,
+            0.12
+          ],
+          "max_abs_difference": 4.735758703591775e-11,
+          "relative_frobenius_difference": 5.896280462044039e-11,
+          "passed": true
+        },
+        {
+          "orders": [
+            2,
+            2,
+            1
+          ],
+          "state_index": 0,
+          "state": [
+            0.4,
+            -0.2,
+            0.06,
+            0.3,
+            0.1,
+            -0.04,
+            0.05,
+            0.02
+          ],
+          "reference_state": [
+            0.3,
+            0.1,
+            -0.02,
+            -0.25,
+            0.15,
+            0.03,
+            0.12,
+            -0.04
+          ],
+          "max_abs_difference": 8.163780762515671e-11,
+          "relative_frobenius_difference": 9.144244626473283e-11,
+          "passed": true
+        },
+        {
+          "orders": [
+            2,
+            2,
+            1
+          ],
+          "state_index": 1,
+          "state": [
+            -0.3,
+            0.1,
+            0.07,
+            0.2,
+            -0.15,
+            0.03,
+            -0.08,
+            0.04
+          ],
+          "reference_state": [
+            0.3,
+            0.1,
+            -0.02,
+            -0.25,
+            0.15,
+            0.03,
+            0.12,
+            -0.04
+          ],
+          "max_abs_difference": 1.7791374536807458e-10,
+          "relative_frobenius_difference": 1.4080836597375336e-10,
+          "passed": true
+        }
+      ]
+    }
+  },
+  "old_fails_candidate_passes": true,
+  "limits": [
+    "Checks the general-order implementation for two 5D and two 8D coefficient states; not the separate run_ekf_on_frame implementation.",
+    "Synthetic observations are fixed independently of evaluated/perturbed states; no archived GT/IMU dataset is required.",
+    "Finite differences validate local derivative consistency, not global observability, filter convergence, or wrench accuracy.",
+    "Production code and historical diagnostic scripts were loaded read-only; corrected source was executed only in memory."
+  ]
+}

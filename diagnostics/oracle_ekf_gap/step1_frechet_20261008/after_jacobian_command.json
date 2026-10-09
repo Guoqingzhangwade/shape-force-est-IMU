@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\.venv\\Scripts\\python.exe",
+    "-B",
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\diagnostics\\oracle_ekf_gap\\recovered_run\\check_jacobian.py",
+    "--repo-root",
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU",
+    "--baseline-ref",
+    "5312a0fa9c2c5e98399de8a6251fe28df1f616e8",
+    "--output-dir",
+    "C:\\Users\\guoqi\\AppData\\Local\\Temp\\ekf_frechet_step1_20261008\\after_jacobian"
+  ],
+  "returncode": 0
+}

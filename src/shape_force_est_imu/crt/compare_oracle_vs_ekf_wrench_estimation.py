@@ -57,7 +57,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from scipy.linalg import block_diag as _block_diag
+from scipy.linalg import block_diag as _block_diag, expm_frechet
 from scipy.spatial.transform import Rotation
 
 try:
@@ -618,7 +618,7 @@ def run_ekf_for_order(
             Psi_k  = Psi_list[k]
             for i in range(n_params):
                 dP = dPsi_dm[k][:, :, i]
-                dePsi_dm[k][:, :, i] = ePsi_k @ (dP + 0.5 * (Psi_k @ dP - dP @ Psi_k))
+                dePsi_dm[k][:, :, i] = expm_frechet(Psi_k, dP, compute_expm=False)
 
         dT_dm = np.zeros((4, 4, n_params))
         for i in range(n_params):

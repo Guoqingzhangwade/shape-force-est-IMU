@@ -1,0 +1,5 @@
+[general EKF H FD] order=(1, 1, 0), state=0: max_abs=8.589e-11, relative_fro=7.827e-11, passed=True
+[general EKF H FD] order=(1, 1, 0), state=1: max_abs=4.736e-11, relative_fro=5.896e-11, passed=True
+[general EKF H FD] order=(2, 2, 1), state=0: max_abs=8.164e-11, relative_fro=9.144e-11, passed=True
+[general EKF H FD] order=(2, 2, 1), state=1: max_abs=1.779e-10, relative_fro=1.408e-10, passed=True
+All general-order EKF measurement-Jacobian checks passed.
