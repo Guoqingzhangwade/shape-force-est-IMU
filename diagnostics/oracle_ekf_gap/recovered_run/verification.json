@@ -1,0 +1,54 @@
+{
+  "recovered_source_and_input_hashes_preserved": true,
+  "recovered_git_status_preserved": true,
+  "original_D_independent_runs_state_identical": true,
+  "all_six_offline_fits_successful": true,
+  "same_observation_fit_residuals_agree_across_three_initializations": true,
+  "corrected_H_matches_FD_relative_under_1e_7": true,
+  "general_and_mechanics_FK_agree": true,
+  "diagnostic_syntax_valid": true,
+  "original_workspace_diff_check_exit_code": 0,
+  "original_workspace_tracked_source_modifications_unchanged": [
+    "scripts/force_est/force_est_curve_fit.py",
+    "src/shape_force_est_imu/crt/virtual_work.py"
+  ],
+  "manuscript_bytes_unchanged": true,
+  "script_sha256": {
+    "diagnose_recovered.py": "579a115c4d428e03e224c7731cb449c5b5436c1cf469f6bc49b24afe64aef3b4",
+    "check_jacobian.py": "1ae5c1b47c7748002b3960a8aeab31c6c4a8e6dec8e48674d6fd767c45540994"
+  },
+  "metric_postprocessing": {
+    "reason": "Match exact table-generator point selection: round(linspace(0,M-1,20)), correcting floor indexing in initial diagnostic.",
+    "source": "generate_final_wrench_artifacts.py:150",
+    "original_raw_diagnostic_preserved": "results_before_metric_index_fix.json",
+    "fit_and_wrench_results_unchanged": true,
+    "correct_20_indices": [
+      0,
+      5,
+      10,
+      16,
+      21,
+      26,
+      31,
+      36,
+      42,
+      47,
+      52,
+      57,
+      63,
+      68,
+      73,
+      78,
+      83,
+      89,
+      94,
+      99
+    ],
+    "field_clarification": "evaluation_orientation_triplets counts residual evaluation only; A fits100 dense orientations, not an IMU triplet."
+  },
+  "limits": [
+    "one physical sample and one stored noisy realization",
+    "no aggregate estimator rerun",
+    "corrected EKF module is in memory; recovered source unmodified"
+  ]
+}

@@ -358,11 +358,12 @@ def main():
                 F_est_cmp = F_b
                 F_gt_cmp = wrench_world_tip_to_body_tip(F_gt_world_tip, T_tip)
             else:  # world_base
-                # shift GT and EST from tip-origin to base-origin consistently
+                # Shift each wrench from its own physical tip to the common base origin.
                 p_tip = T_tip[:3, 3]
+                p_gt_tip = T_all[si, -1, :3, 3]
                 F_est_world_tip = wrench_body_tip_to_world_tip(F_b, T_tip)
                 F_est_cmp = wrench_world_tip_to_world_base(F_est_world_tip, p_tip)
-                F_gt_cmp = wrench_world_tip_to_world_base(F_gt_world_tip, p_tip)
+                F_gt_cmp = wrench_world_tip_to_world_base(F_gt_world_tip, p_gt_tip)
 
             moment_err.append(float(np.linalg.norm(F_est_cmp[:3] - F_gt_cmp[:3])))
             force_err.append(float(np.linalg.norm(F_est_cmp[3:] - F_gt_cmp[3:])))

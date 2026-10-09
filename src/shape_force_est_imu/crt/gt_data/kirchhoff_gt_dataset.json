@@ -1,0 +1,27 @@
+{
+  "description": "Kirchhoff-rod GT dataset for cross-model robustness study",
+  "n_samples": 50,
+  "num_points": 100,
+  "length_m": 0.1,
+  "backbone_radius": 0.0005,
+  "youngs_modulus": 60000000000.0,
+  "tendon_offset": 0.008,
+  "num_disks": 40,
+  "inextensible": true,
+  "tau_max": 4.0,
+  "force_range": 0.4,
+  "moment_range": 0.04,
+  "min_deflection": 0.001,
+  "rng_seed": 123,
+  "date": "2026-04-19T18:51:44",
+  "git_hash": "d58d4f7",
+  "array_layout": {
+    "case_id": "(N,) int32",
+    "tau": "(N, 4)  cable tensions [N]",
+    "f_ext": "(N, 3)  tip forces [N]",
+    "l_ext": "(N, 3)  tip moments [N\u00b7m]",
+    "positions": "(N, num_pts, 3)  backbone centreline p(s) [m]",
+    "orientations": "(N, num_pts, 9)  R(s) flattened row-major",
+    "T_tip": "(N, 4, 4)  tip homogeneous transform"
+  }
+}

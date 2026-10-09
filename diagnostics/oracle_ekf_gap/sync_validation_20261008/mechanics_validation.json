@@ -1,0 +1,160 @@
+{
+  "prepared_repo": "C:\\Users\\guoqi\\AppData\\Local\\Temp\\shape_force_sync_20261008\\prepared_repo",
+  "python": "C:\\Users\\guoqi\\OneDrive\\Desktop\\shape_force_IMU\\shape-force-est-IMU\\.venv\\Scripts\\python.exe",
+  "bytecode_disabled": true,
+  "scope": "Two existing mechanics checks plus one body-transverse-load shooting equivalence case; no dataset generation.",
+  "tests": [
+    {
+      "path": "tests/check_conventions.py",
+      "argv": [
+        "C:\\Users\\guoqi\\OneDrive\\Desktop\\shape_force_IMU\\shape-force-est-IMU\\.venv\\Scripts\\python.exe",
+        "-B",
+        "C:\\Users\\guoqi\\AppData\\Local\\Temp\\shape_force_sync_20261008\\prepared_repo\\tests\\check_conventions.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.8566635998431593,
+      "passed": true
+    },
+    {
+      "path": "tests/check_wrench_covariance.py",
+      "argv": [
+        "C:\\Users\\guoqi\\OneDrive\\Desktop\\shape_force_IMU\\shape-force-est-IMU\\.venv\\Scripts\\python.exe",
+        "-B",
+        "C:\\Users\\guoqi\\AppData\\Local\\Temp\\shape_force_sync_20261008\\prepared_repo\\tests\\check_wrench_covariance.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2.4158310999628156,
+      "passed": true
+    }
+  ],
+  "body_load_check": {
+    "type": "one body-transverse force, zero tip moment",
+    "tau_N": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "body_force_N": [
+      0.02,
+      -0.01,
+      0.0
+    ],
+    "body_moment_Nm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "world_force_from_solved_tip_N": [
+      0.019037688752831065,
+      -0.009970101002344797,
+      -0.006177660799457504
+    ],
+    "world_moment_from_solved_tip_Nm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "shooting_initialization": "default zero initial guess separately for both solves",
+    "length_m": 0.1,
+    "backbone_radius_m": 0.0005,
+    "E_Pa": 60000000000.0,
+    "num_disks": 20,
+    "inextensible": true,
+    "tip_position_difference_m": 3.529906531158615e-18,
+    "tip_orientation_difference_rad": 5.44711346730352e-17,
+    "tip_body_solution": [
+      [
+        0.9537500215774983,
+        0.0037311678718902463,
+        0.30057773491540296,
+        0.01569689140393805
+      ],
+      [
+        0.0014228145147725962,
+        0.9998557292640248,
+        -0.01692620030208804,
+        -0.001130651568130764
+      ],
+      [
+        -0.30059752483912916,
+        0.01657103026749213,
+        0.9536071146001608,
+        0.098359243838526
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "tip_world_solution": [
+      [
+        0.9537500215774983,
+        0.003731167871890246,
+        0.3005777349154029,
+        0.015696891403938047
+      ],
+      [
+        0.0014228145147725934,
+        0.9998557292640248,
+        -0.016926200302088037,
+        -0.0011306515681307634
+      ],
+      [
+        -0.3005975248391291,
+        0.016571030267492123,
+        0.9536071146001608,
+        0.098359243838526
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ambiguous_inputs": [
+      {
+        "component": "force",
+        "rejected": true,
+        "message": "Specify either f_ext (world) or f_ext_body, not both"
+      },
+      {
+        "component": "moment",
+        "rejected": true,
+        "message": "Specify either l_ext (world) or l_ext_body, not both"
+      }
+    ],
+    "acceptance_tolerances": {
+      "position_error_m": 1e-07,
+      "orientation_error_rad": 1e-06
+    },
+    "elapsed_seconds": 4.326291800010949,
+    "passed": true
+  },
+  "production_source_sha256_before": {
+    "src\\shape_force_est_imu\\crt\\cosserat_rod_model.py": "150b3c27cadd35d9197fb6183e8e81c90b5eeb83b2689ba417a6d3f078114c81",
+    "src\\shape_force_est_imu\\crt\\virtual_work.py": "4b99bfac70f140e24ae7634440ac087bf1f4fb75ca59b3776cea1e3081762b82",
+    "src\\shape_force_est_imu\\crt\\evaluate_kirchhoff_wrench_constrained.py": "9cdb3036db092f4afcc98effeb3f5fe578aeec5985fb2d52e968b01c394db109",
+    "src\\shape_force_est_imu\\crt\\generate_kirchhoff_gt_dataset_constrained.py": "6a8eb4824a6d979dee4816f4b39f5083507a1b7fe355f797bc9f0aa8e9fcfe06",
+    "scripts\\force_est\\force_est_curve_fit.py": "08cc49ed102051508ccc96ed91c03b298dae5b25c93d420fc6d8a3de42e1cd0d",
+    "src\\shape_force_est_imu\\crt\\compare_oracle_vs_ekf_wrench_estimation.py": "5837280fd814b12a04d31ef26110a223cd93b1ca98145e951ac9db295ab749ed"
+  },
+  "production_source_sha256_after": {
+    "src\\shape_force_est_imu\\crt\\cosserat_rod_model.py": "150b3c27cadd35d9197fb6183e8e81c90b5eeb83b2689ba417a6d3f078114c81",
+    "src\\shape_force_est_imu\\crt\\virtual_work.py": "4b99bfac70f140e24ae7634440ac087bf1f4fb75ca59b3776cea1e3081762b82",
+    "src\\shape_force_est_imu\\crt\\evaluate_kirchhoff_wrench_constrained.py": "9cdb3036db092f4afcc98effeb3f5fe578aeec5985fb2d52e968b01c394db109",
+    "src\\shape_force_est_imu\\crt\\generate_kirchhoff_gt_dataset_constrained.py": "6a8eb4824a6d979dee4816f4b39f5083507a1b7fe355f797bc9f0aa8e9fcfe06",
+    "scripts\\force_est\\force_est_curve_fit.py": "08cc49ed102051508ccc96ed91c03b298dae5b25c93d420fc6d8a3de42e1cd0d",
+    "src\\shape_force_est_imu\\crt\\compare_oracle_vs_ekf_wrench_estimation.py": "5837280fd814b12a04d31ef26110a223cd93b1ca98145e951ac9db295ab749ed"
+  },
+  "production_sources_unchanged": true,
+  "passed": true,
+  "limitations": [
+    "A single modest transverse body load was checked; nonzero body moment shooting and broader boundary-condition cases were not run.",
+    "Existing covariance check verifies symmetry/PSD/model-noise addition, not Monte Carlo calibration.",
+    "No original CLI, recovered diagnostic, dataset generation, production edits, or commits were performed."
+  ]
+}

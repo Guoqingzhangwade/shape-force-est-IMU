@@ -1,0 +1,23 @@
+# Preserve archived evidence bytes and hashes across Windows/Linux checkouts.
+diagnostics/oracle_ekf_gap/** -text
+src/shape_force_est_imu/crt/gt_data/** -text
+src/shape_force_est_imu/crt/gt_data_seq/** -text
+src/shape_force_est_imu/crt/gt_data_constrained/** -text
+meas_model_comparison_results.csv -text
+meas_model_comparison_results.json -text
+sensor_best_by_count.csv -text
+sensor_placement_results.csv -text
+sensor_placement_results.json -text
+so3_alpha_sweep_results.csv -text
+so3_alpha_sweep_results.json -text
+scripts/force_est/debug_output/followup/FOLLOWUP_SUMMARY.md -text
+scripts/force_est/debug_output/followup/followup_compare_results.json -text
+scripts/force_est/debug_output/followup/followup_compare_results_v2.json -text
+scripts/force_est/debug_output/followup/followup_compare_summary.md -text
+scripts/force_est/debug_output/followup/followup_compare_summary_v2.md -text
+scripts/force_est/debug_output/followup/kirchhoff_compare_v2.txt -text
+scripts/force_est/debug_output/followup/s10_fitted_o11_results.txt -text
+scripts/force_est/debug_output/followup/s10_new_orders_results.txt -text
+scripts/shape_est/so3_alpha_sweep_results.csv -text
+scripts/shape_est/so3_alpha_sweep_results.json -text
+src/shape_force_est_imu/crt/debug_constrained/debug_constrained_results.csv -text

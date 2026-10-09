@@ -1,0 +1,619 @@
+[
+  {
+    "file": "artifacts/data/dataset.npz",
+    "arrays": {
+      "shapes": [
+        100,
+        4,
+        4
+      ],
+      "tensions": [
+        100,
+        4
+      ],
+      "wrenches": [
+        100,
+        6
+      ]
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_force_only.npz",
+    "arrays": {
+      "tau": [
+        10,
+        4
+      ],
+      "f_ext": [
+        10,
+        3
+      ],
+      "l_ext": [
+        10,
+        3
+      ],
+      "T": [
+        10,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 10,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2026-01-12T16:03:31",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_fx_fz_neg2.npz",
+    "arrays": {
+      "tau": [
+        1,
+        4
+      ],
+      "f_ext": [
+        1,
+        3
+      ],
+      "l_ext": [
+        1,
+        3
+      ],
+      "T": [
+        1,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 1,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2026-01-12T20:15:43",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_fx_neg05_tau10_inext.npz",
+    "arrays": {
+      "tau": [
+        1,
+        4
+      ],
+      "f_ext": [
+        1,
+        3
+      ],
+      "l_ext": [
+        1,
+        3
+      ],
+      "T": [
+        1,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 1,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2026-01-13T15:17:21",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_fx_neg2.npz",
+    "arrays": {
+      "tau": [
+        1,
+        4
+      ],
+      "f_ext": [
+        1,
+        3
+      ],
+      "l_ext": [
+        1,
+        3
+      ],
+      "T": [
+        1,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 1,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2026-01-12T20:18:45",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_fx_neg2_inext.npz",
+    "arrays": {
+      "tau": [
+        1,
+        4
+      ],
+      "f_ext": [
+        1,
+        3
+      ],
+      "l_ext": [
+        1,
+        3
+      ],
+      "T": [
+        1,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 1,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2026-01-13T15:18:27",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_fx_neg2_tau10.npz",
+    "arrays": {
+      "tau": [
+        1,
+        4
+      ],
+      "f_ext": [
+        1,
+        3
+      ],
+      "l_ext": [
+        1,
+        3
+      ],
+      "T": [
+        1,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 1,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2026-01-12T20:42:59",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_inext_1.npz",
+    "arrays": {
+      "tau": [
+        1,
+        4
+      ],
+      "f_ext": [
+        1,
+        3
+      ],
+      "l_ext": [
+        1,
+        3
+      ],
+      "T": [
+        1,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 1,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2026-01-26T13:44:05",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_inext_2.npz",
+    "arrays": {
+      "tau": [
+        2,
+        4
+      ],
+      "f_ext": [
+        2,
+        3
+      ],
+      "l_ext": [
+        2,
+        3
+      ],
+      "T": [
+        2,
+        20,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 2,
+      "n_disks": 20,
+      "length_m": 0.375,
+      "youngs_modulus": 60000000000.0,
+      "backbone_radius": 0.0008,
+      "tendon_offset": 0.012,
+      "date": "2026-01-26T17:09:37",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_inext_20.npz",
+    "arrays": {
+      "tau": [
+        5,
+        4
+      ],
+      "f_ext": [
+        5,
+        3
+      ],
+      "l_ext": [
+        5,
+        3
+      ],
+      "T": [
+        5,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 5,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2026-01-26T15:57:26",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_inext_5.npz",
+    "arrays": {
+      "tau": [
+        5,
+        4
+      ],
+      "f_ext": [
+        5,
+        3
+      ],
+      "l_ext": [
+        5,
+        3
+      ],
+      "T": [
+        5,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 5,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2026-01-13T16:08:31",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_inext_large.npz",
+    "arrays": {
+      "tau": [
+        1,
+        4
+      ],
+      "f_ext": [
+        1,
+        3
+      ],
+      "l_ext": [
+        1,
+        3
+      ],
+      "T": [
+        1,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 1,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2026-01-13T16:44:13",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_inplane_xz_c02_n3.npz",
+    "arrays": {
+      "tau": [
+        3,
+        4
+      ],
+      "f_ext": [
+        3,
+        3
+      ],
+      "l_ext": [
+        3,
+        3
+      ],
+      "T": [
+        3,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 3,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2026-01-12T18:00:15",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_samples.npz",
+    "arrays": {
+      "tau": [
+        10,
+        4
+      ],
+      "f_ext": [
+        10,
+        3
+      ],
+      "l_ext": [
+        10,
+        3
+      ],
+      "T": [
+        10,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 10,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2025-05-23T20:20:44",
+      "git_hash": "f26dfe7",
+      "rng_seed": null
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_samples_10.npz",
+    "arrays": {
+      "tau": [
+        10,
+        4
+      ],
+      "f_ext": [
+        10,
+        3
+      ],
+      "l_ext": [
+        10,
+        3
+      ],
+      "T": [
+        10,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 10,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2025-06-02T11:45:03",
+      "git_hash": "46eb152",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_gt_samples_100.npz",
+    "arrays": {
+      "tau": [
+        100,
+        4
+      ],
+      "f_ext": [
+        100,
+        3
+      ],
+      "l_ext": [
+        100,
+        3
+      ],
+      "T": [
+        100,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 100,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2025-06-02T11:15:33",
+      "git_hash": "46eb152",
+      "rng_seed": null
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_inext_zero.npz",
+    "arrays": {
+      "tau": [
+        1,
+        4
+      ],
+      "f_ext": [
+        1,
+        3
+      ],
+      "l_ext": [
+        1,
+        3
+      ],
+      "T": [
+        1,
+        40,
+        4,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "n_samples": 1,
+      "n_disks": 40,
+      "length_m": 0.1,
+      "date": "2026-01-12T21:54:56",
+      "git_hash": "c894161",
+      "rng_seed": 22
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_meas_samples.npz",
+    "arrays": {
+      "tau_meas": [
+        10,
+        4
+      ],
+      "q_meas": [
+        10,
+        3,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "tau_noise_sigma_N": 0.02,
+      "ori_noise_sigma_deg": 1.0,
+      "s_locations": [
+        0.3076923076923077,
+        0.6410256410256411,
+        1.0
+      ],
+      "n_samples": 10,
+      "date": "2025-05-23T20:21:01",
+      "gt_file": "tdcr_gt_samples.npz",
+      "rng_seed": null
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_meas_samples_10.npz",
+    "arrays": {
+      "tau_meas": [
+        10,
+        4
+      ],
+      "q_meas": [
+        10,
+        3,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "tau_noise_sigma_N": 0.02,
+      "ori_noise_sigma_deg": 1.0,
+      "s_locations": [
+        0.3076923076923077,
+        0.6410256410256411,
+        1.0
+      ],
+      "n_samples": 10,
+      "date": "2025-06-02T11:45:07",
+      "gt_file": "tdcr_gt_samples_10.npz",
+      "rng_seed": null
+    }
+  },
+  {
+    "file": "artifacts/data/tdcr_meas_samples_100.npz",
+    "arrays": {
+      "tau_meas": [
+        100,
+        4
+      ],
+      "q_meas": [
+        100,
+        3,
+        4
+      ],
+      "meta": []
+    },
+    "metadata": {
+      "tau_noise_sigma_N": 0.02,
+      "ori_noise_sigma_deg": 1.0,
+      "s_locations": [
+        0.3076923076923077,
+        0.6410256410256411,
+        1.0
+      ],
+      "n_samples": 100,
+      "date": "2025-06-02T11:16:38",
+      "gt_file": "tdcr_gt_samples_100.npz",
+      "rng_seed": null
+    }
+  }
+]

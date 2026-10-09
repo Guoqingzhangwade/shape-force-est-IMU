@@ -1,0 +1,334 @@
+{
+  "config": {
+    "estimator": "SO(3)-analytic EKF",
+    "alpha": 1.0,
+    "P0_diag": [
+      1.0,
+      0.5,
+      1.0,
+      0.5,
+      0.25
+    ],
+    "num_shapes": 3,
+    "num_noise_realizations": 2,
+    "shape_bank_seed": 123,
+    "noise_seed_base": 1000,
+    "steps": 15,
+    "meas_std_deg": 0.5,
+    "gamma": 10,
+    "nis_burnin": 10
+  },
+  "all_configs": {
+    "1-IMU [0.25]": {
+      "n_sensors": 1,
+      "nis_dof": 3,
+      "total_runs": 6,
+      "rmse_final_mean": 0.5433644977430471,
+      "rmse_final_std": 0.1491459690501362,
+      "rmse_mean_mean": 0.5433220263718455,
+      "rmse_mean_std": 0.14826687898659385,
+      "nis_mean_full": 2.9601152626681753,
+      "nis_mean_postburnin": 3.3247913974009418,
+      "time_per_step_mean": 0.01055583333493107,
+      "imu_pos": [
+        0.25
+      ]
+    },
+    "1-IMU [0.50]": {
+      "n_sensors": 1,
+      "nis_dof": 3,
+      "total_runs": 6,
+      "rmse_final_mean": 0.5321821160009312,
+      "rmse_final_std": 0.14420129458819025,
+      "rmse_mean_mean": 0.5264594652933524,
+      "rmse_mean_std": 0.13045819309099652,
+      "nis_mean_full": 2.9360502305071265,
+      "nis_mean_postburnin": 3.3256567614212202,
+      "time_per_step_mean": 0.01008081888883478,
+      "imu_pos": [
+        0.5
+      ]
+    },
+    "1-IMU [0.75]": {
+      "n_sensors": 1,
+      "nis_dof": 3,
+      "total_runs": 6,
+      "rmse_final_mean": 0.562126778021436,
+      "rmse_final_std": 0.12606637877002375,
+      "rmse_mean_mean": 0.5546252264154329,
+      "rmse_mean_std": 0.12284218345767249,
+      "nis_mean_full": 2.8759634252225585,
+      "nis_mean_postburnin": 3.331408040983622,
+      "time_per_step_mean": 0.010046029996333852,
+      "imu_pos": [
+        0.75
+      ]
+    },
+    "1-IMU [1.00]": {
+      "n_sensors": 1,
+      "nis_dof": 3,
+      "total_runs": 6,
+      "rmse_final_mean": 0.572889175892876,
+      "rmse_final_std": 0.12733740032826615,
+      "rmse_mean_mean": 0.5736531201963162,
+      "rmse_mean_std": 0.12552100747664896,
+      "nis_mean_full": 2.82791413787576,
+      "nis_mean_postburnin": 3.356825761085989,
+      "time_per_step_mean": 0.009987698898961147,
+      "imu_pos": [
+        1.0
+      ]
+    },
+    "2-IMU [0.25,0.50]": {
+      "n_sensors": 2,
+      "nis_dof": 6,
+      "total_runs": 6,
+      "rmse_final_mean": 0.03590973436668516,
+      "rmse_final_std": 0.020862230325153427,
+      "rmse_mean_mean": 0.06558825647391613,
+      "rmse_mean_std": 0.018858366676339222,
+      "nis_mean_full": 6.084053101662943,
+      "nis_mean_postburnin": 5.8218372694895635,
+      "time_per_step_mean": 0.019866366668914753,
+      "imu_pos": [
+        0.25,
+        0.5
+      ]
+    },
+    "2-IMU [0.25,0.75]": {
+      "n_sensors": 2,
+      "nis_dof": 6,
+      "total_runs": 6,
+      "rmse_final_mean": 0.01914312409435807,
+      "rmse_final_std": 0.00786364197412311,
+      "rmse_mean_mean": 0.03688693353207228,
+      "rmse_mean_std": 0.013949200906565106,
+      "nis_mean_full": 6.915748051214326,
+      "nis_mean_postburnin": 5.890649959381414,
+      "time_per_step_mean": 0.019603454445799192,
+      "imu_pos": [
+        0.25,
+        0.75
+      ]
+    },
+    "2-IMU [0.25,1.00]": {
+      "n_sensors": 2,
+      "nis_dof": 6,
+      "total_runs": 6,
+      "rmse_final_mean": 0.026588286100236568,
+      "rmse_final_std": 0.011184740201859264,
+      "rmse_mean_mean": 0.0503417845696579,
+      "rmse_mean_std": 0.01568928103766877,
+      "nis_mean_full": 11.385868060562425,
+      "nis_mean_postburnin": 6.577869221265156,
+      "time_per_step_mean": 0.019666779998482927,
+      "imu_pos": [
+        0.25,
+        1.0
+      ]
+    },
+    "2-IMU [0.50,0.75]": {
+      "n_sensors": 2,
+      "nis_dof": 6,
+      "total_runs": 6,
+      "rmse_final_mean": 0.025181580901014373,
+      "rmse_final_std": 0.011161826407954203,
+      "rmse_mean_mean": 0.04229265212566522,
+      "rmse_mean_std": 0.015322741089141601,
+      "nis_mean_full": 6.946462550481112,
+      "nis_mean_postburnin": 5.923718581185522,
+      "time_per_step_mean": 0.019809431106679973,
+      "imu_pos": [
+        0.5,
+        0.75
+      ]
+    },
+    "2-IMU [0.50,1.00]": {
+      "n_sensors": 2,
+      "nis_dof": 6,
+      "total_runs": 6,
+      "rmse_final_mean": 0.018222378322632116,
+      "rmse_final_std": 0.008735524777635999,
+      "rmse_mean_mean": 0.03481980336918082,
+      "rmse_mean_std": 0.012688638354709946,
+      "nis_mean_full": 11.528282898530266,
+      "nis_mean_postburnin": 6.504420367710504,
+      "time_per_step_mean": 0.019884518885778055,
+      "imu_pos": [
+        0.5,
+        1.0
+      ]
+    },
+    "2-IMU [0.75,1.00]": {
+      "n_sensors": 2,
+      "nis_dof": 6,
+      "total_runs": 6,
+      "rmse_final_mean": 0.04089854489461938,
+      "rmse_final_std": 0.013516466075194251,
+      "rmse_mean_mean": 0.06880162138814257,
+      "rmse_mean_std": 0.01948748380251908,
+      "nis_mean_full": 12.034141889052362,
+      "nis_mean_postburnin": 6.969669320247955,
+      "time_per_step_mean": 0.019450767778067125,
+      "imu_pos": [
+        0.75,
+        1.0
+      ]
+    },
+    "3-IMU [0.25,0.50,0.75]": {
+      "n_sensors": 3,
+      "nis_dof": 9,
+      "total_runs": 6,
+      "rmse_final_mean": 0.02436269443171504,
+      "rmse_final_std": 0.01749624024088061,
+      "rmse_mean_mean": 0.03823423822650237,
+      "rmse_mean_std": 0.015059942122799918,
+      "nis_mean_full": 10.46225416936141,
+      "nis_mean_postburnin": 10.471607932816113,
+      "time_per_step_mean": 0.029031627780447402,
+      "imu_pos": [
+        0.25,
+        0.5,
+        0.75
+      ]
+    },
+    "3-IMU [0.25,0.50,1.00]": {
+      "n_sensors": 3,
+      "nis_dof": 9,
+      "total_runs": 6,
+      "rmse_final_mean": 0.018896693697474518,
+      "rmse_final_std": 0.010936598316845453,
+      "rmse_mean_mean": 0.032141909756210625,
+      "rmse_mean_std": 0.009877259232059205,
+      "nis_mean_full": 15.030426328925339,
+      "nis_mean_postburnin": 10.911226038813965,
+      "time_per_step_mean": 0.028869627773140866,
+      "imu_pos": [
+        0.25,
+        0.5,
+        1.0
+      ]
+    },
+    "3-IMU [0.25,0.75,1.00]": {
+      "n_sensors": 3,
+      "nis_dof": 9,
+      "total_runs": 6,
+      "rmse_final_mean": 0.026563075477234622,
+      "rmse_final_std": 0.013774161387053925,
+      "rmse_mean_mean": 0.04620694648145327,
+      "rmse_mean_std": 0.011507847888026584,
+      "nis_mean_full": 15.810292100132903,
+      "nis_mean_postburnin": 11.17805596153776,
+      "time_per_step_mean": 0.02867324555085765,
+      "imu_pos": [
+        0.25,
+        0.75,
+        1.0
+      ]
+    },
+    "3-IMU [0.33,0.67,1.00]": {
+      "n_sensors": 3,
+      "nis_dof": 9,
+      "total_runs": 6,
+      "rmse_final_mean": 0.02022376882580302,
+      "rmse_final_std": 0.011798139772733382,
+      "rmse_mean_mean": 0.03535725066646403,
+      "rmse_mean_std": 0.009836944882195471,
+      "nis_mean_full": 15.427764326487713,
+      "nis_mean_postburnin": 11.01305197314417,
+      "time_per_step_mean": 0.028866899996582002,
+      "imu_pos": [
+        0.33,
+        0.67,
+        1.0
+      ]
+    },
+    "4-IMU [0.25,0.50,0.75,1.00]": {
+      "n_sensors": 4,
+      "nis_dof": 12,
+      "total_runs": 6,
+      "rmse_final_mean": 0.014642038362623871,
+      "rmse_final_std": 0.006259131842124541,
+      "rmse_mean_mean": 0.027745475688676035,
+      "rmse_mean_std": 0.009230898990949749,
+      "nis_mean_full": 20.579164882491757,
+      "nis_mean_postburnin": 13.927909209347177,
+      "time_per_step_mean": 0.03917608777992427,
+      "imu_pos": [
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ]
+    },
+    "4-IMU [0.20,0.40,0.60,0.80]": {
+      "n_sensors": 4,
+      "nis_dof": 12,
+      "total_runs": 6,
+      "rmse_final_mean": 0.01833334214255258,
+      "rmse_final_std": 0.0070448490974940724,
+      "rmse_mean_mean": 0.02986576731211148,
+      "rmse_mean_std": 0.009384238453837778,
+      "nis_mean_full": 14.92660556995859,
+      "nis_mean_postburnin": 13.04405053332385,
+      "time_per_step_mean": 0.039083547776357995,
+      "imu_pos": [
+        0.2,
+        0.4,
+        0.6,
+        0.8
+      ]
+    },
+    "5-IMU [0.20,0.40,0.60,0.80,1.00]": {
+      "n_sensors": 5,
+      "nis_dof": 15,
+      "total_runs": 6,
+      "rmse_final_mean": 0.011717713689622605,
+      "rmse_final_std": 0.0026151340266750457,
+      "rmse_mean_mean": 0.025237213953402778,
+      "rmse_mean_std": 0.008310466931448813,
+      "nis_mean_full": 23.562891024375816,
+      "nis_mean_postburnin": 17.127511043843924,
+      "time_per_step_mean": 0.04841569667268131,
+      "imu_pos": [
+        0.2,
+        0.4,
+        0.6,
+        0.8,
+        1.0
+      ]
+    }
+  },
+  "best_by_count": {
+    "1": {
+      "config": "1-IMU [0.50]",
+      "rmse_final_mean": 0.5321821160009312,
+      "rmse_final_std": 0.14420129458819025,
+      "nis_mean_postburnin": 3.3256567614212202
+    },
+    "2": {
+      "config": "2-IMU [0.50,1.00]",
+      "rmse_final_mean": 0.018222378322632116,
+      "rmse_final_std": 0.008735524777635999,
+      "nis_mean_postburnin": 6.504420367710504
+    },
+    "3": {
+      "config": "3-IMU [0.25,0.50,1.00]",
+      "rmse_final_mean": 0.018896693697474518,
+      "rmse_final_std": 0.010936598316845453,
+      "nis_mean_postburnin": 10.911226038813965
+    },
+    "4": {
+      "config": "4-IMU [0.25,0.50,0.75,1.00]",
+      "rmse_final_mean": 0.014642038362623871,
+      "rmse_final_std": 0.006259131842124541,
+      "nis_mean_postburnin": 13.927909209347177
+    },
+    "5": {
+      "config": "5-IMU [0.20,0.40,0.60,0.80,1.00]",
+      "rmse_final_mean": 0.011717713689622605,
+      "rmse_final_std": 0.0026151340266750457,
+      "nis_mean_postburnin": 17.127511043843924
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "versions": {
+    "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+    "executable": "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\.venv\\Scripts\\python.exe",
+    "numpy": "2.2.4",
+    "scipy": "1.15.2",
+    "matplotlib": "3.10.1"
+  },
+  "console_entrypoints_repaired": [
+    "f2py",
+    "fonttools",
+    "ipdb3",
+    "ipython",
+    "ipython3",
+    "jsonschema",
+    "jupyter",
+    "jupyter-dejavu",
+    "jupyter-execute",
+    "jupyter-kernel",
+    "jupyter-kernelspec",
+    "jupyter-migrate",
+    "jupyter-nbconvert",
+    "jupyter-run",
+    "jupyter-troubleshoot",
+    "jupyter-trust",
+    "normalizer",
+    "numpy-config",
+    "pip",
+    "pip3",
+    "pipreqs",
+    "pyftmerge",
+    "pyftsubset",
+    "pygmentize",
+    "pywin32_postinstall",
+    "pywin32_testall",
+    "tqdm",
+    "ttx"
+  ],
+  "pip": "pip 25.0.1 from C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\.venv\\lib\\site-packages\\pip (python 3.10)",
+  "packages_reinstalled": false,
+  "global_packages_modified": false,
+  "canonical_repo_body_commit": "317e402cc1e9d5580759e8779616fc0f6cf18da6",
+  "tests": [
+    {
+      "test": "tests/check_conventions.py",
+      "exit_code": 0,
+      "stdout": "[pull_jacobian FD] max_abs=1.193e-11, max_rel=1.277e-07\n[body_jacobian FD] max_abs=6.749e-11, max_rel=5.809e-08\n[known-direction subspace] err=5.551e-17\n[tip-origin wrench transform] passed\nAll convention checks passed.\n",
+      "stderr": ""
+    },
+    {
+      "test": "tests/check_wrench_covariance.py",
+      "exit_code": 0,
+      "stdout": "[Sigma_b] shape=(5, 5)\n[Sigma_b] min_eig=4.734e-11\n[Sigma_b] trace=3.523e-07\nGeneralized-load covariance checks passed.\n",
+      "stderr": ""
+    }
+  ]
+}

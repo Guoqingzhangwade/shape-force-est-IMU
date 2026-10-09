@@ -1,0 +1,73 @@
+python.exe : error: fsmonitor_ipc__send_query: unspecified error on '.git/fsmonitor--daemon.ipc'
+At line:2 char:26
++ ... ND = 'Agg'; & 'C:\Users\guoqi\OneDrive\Desktop\shape_force_IMU\shape- ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (error: fsmonito...or--daemon.ipc':String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Original A/D states saved.
+B_noiseless_sparse start 0 success True residual 0.00118067121209566
+B_noiseless_sparse start 1 success True residual 0.0011806712120958401
+B_noiseless_sparse start 2 success True residual 0.0011806712120964753
+C_noisy_sparse start 0 success True residual 0.006178004200973514
+C_noisy_sparse start 1 success True residual 0.006178004200981776
+C_noisy_sparse start 2 success True residual 0.006178004200970962
+error: fsmonitor_ipc__send_query: unspecified error on '.git/fsmonitor--daemon.ipc'
+[
+  {
+    "method": "A_dense_oracle",
+    "sample_count": 1,
+    "fit_residual_noisy_norm_rad": 0.03187744244611936,
+    "fit_residual_noiseless_norm_rad": 0.0016865635552829623,
+    "shape_rms_all100_mm": 0.014392438953909955,
+    "historical_rms_field_mean20_mm": 0.012106294046678647,
+    "tip_mm": 0.022636705087648194,
+    "force_error_N": 0.0009898345951409682,
+    "force_direction_deg": 0.20004873050107758,
+    "force_error_over_F0": 0.003360790798081068,
+    "moment_error_world_tip_Nm": 3.8882382284149735e-05,
+    "moment_error_common_world_base_Nm": 3.322496323012122e-05
+  },
+  {
+    "method": "B_noiseless_sparse",
+    "sample_count": 1,
+    "fit_residual_noisy_norm_rad": 0.032154458012909844,
+    "fit_residual_noiseless_norm_rad": 0.00118067121209566,
+    "shape_rms_all100_mm": 0.020299473893196748,
+    "historical_rms_field_mean20_mm": 0.01362579708391908,
+    "tip_mm": 0.05113890099489424,
+    "force_error_N": 0.0322490660054157,
+    "force_direction_deg": 5.3857636532209545,
+    "force_error_over_F0": 0.1094954296503192,
+    "moment_error_world_tip_Nm": 0.0003260520644614865,
+    "moment_error_common_world_base_Nm": 0.00012255917008426363
+  },
+  {
+    "method": "C_noisy_sparse",
+    "sample_count": 1,
+    "fit_residual_noisy_norm_rad": 0.006178004200970961,
+    "fit_residual_noiseless_norm_rad": 0.03158210929332342,
+    "shape_rms_all100_mm": 0.6619000505254643,
+    "historical_rms_field_mean20_mm": 0.49742203456296186,
+    "tip_mm": 1.5846682645768346,
+    "force_error_N": 0.7786971064308691,
+    "force_direction_deg": 94.03072217868696,
+    "force_error_over_F0": 2.6439145314096755,
+    "moment_error_world_tip_Nm": 0.006570166768076926,
+    "moment_error_common_world_base_Nm": 0.004402330474724041
+  },
+  {
+    "method": "D_original_ekf",
+    "sample_count": 1,
+    "fit_residual_noisy_norm_rad": 0.008386661578903042,
+    "fit_residual_noiseless_norm_rad": 0.030468622665992273,
+    "shape_rms_all100_mm": 0.554543226335568,
+    "historical_rms_field_mean20_mm": 0.4208455575972142,
+    "tip_mm": 1.3585337468486123,
+    "force_error_N": 0.6491484809741672,
+    "force_direction_deg": 89.66313785977962,
+    "force_error_over_F0": 2.2040573770161895,
+    "moment_error_world_tip_Nm": 0.005088918962506384,
+    "moment_error_common_world_base_Nm": 0.0036269193337003435
+  }
+]

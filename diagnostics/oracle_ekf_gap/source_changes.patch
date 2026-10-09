@@ -1,0 +1,33 @@
+diff --git a/scripts/force_est/force_est_curve_fit.py b/scripts/force_est/force_est_curve_fit.py
+index 13d718b..e8260ed 100644
+--- a/scripts/force_est/force_est_curve_fit.py
++++ b/scripts/force_est/force_est_curve_fit.py
+@@ -358,11 +358,12 @@ def main():
+                 F_est_cmp = F_b
+                 F_gt_cmp = wrench_world_tip_to_body_tip(F_gt_world_tip, T_tip)
+             else:  # world_base
+-                # shift GT and EST from tip-origin to base-origin consistently
++                # Shift each wrench from its own physical tip to the common base origin.
+                 p_tip = T_tip[:3, 3]
++                p_gt_tip = T_all[si, -1, :3, 3]
+                 F_est_world_tip = wrench_body_tip_to_world_tip(F_b, T_tip)
+                 F_est_cmp = wrench_world_tip_to_world_base(F_est_world_tip, p_tip)
+-                F_gt_cmp = wrench_world_tip_to_world_base(F_gt_world_tip, p_tip)
++                F_gt_cmp = wrench_world_tip_to_world_base(F_gt_world_tip, p_gt_tip)
+ 
+             moment_err.append(float(np.linalg.norm(F_est_cmp[:3] - F_gt_cmp[:3])))
+             force_err.append(float(np.linalg.norm(F_est_cmp[3:] - F_gt_cmp[3:])))
+diff --git a/src/shape_force_est_imu/crt/virtual_work.py b/src/shape_force_est_imu/crt/virtual_work.py
+index 5920efe..94b5f84 100644
+--- a/src/shape_force_est_imu/crt/virtual_work.py
++++ b/src/shape_force_est_imu/crt/virtual_work.py
+@@ -186,7 +186,8 @@ def cable_jacobian(m, r_list, L, order_x, order_y, order_z, n_int=200):
+         integrand = np.zeros((len(s_vals), n_params))
+         for idx, s in enumerate(s_vals):
+             kappa = curvature_from_modal(s, m, order_x, order_y, order_z)
+-            t_dir = cable_dir_body(kappa, r_i)
++            # Modal curvature is normalized by L; routing offsets are physical lengths.
++            t_dir = cable_dir_body(kappa / L, r_i)
+             t_hat = t_dir / np.linalg.norm(t_dir)
+             moment_arm = np.cross(r_i, t_hat)
+             for i_param in range(n_params):

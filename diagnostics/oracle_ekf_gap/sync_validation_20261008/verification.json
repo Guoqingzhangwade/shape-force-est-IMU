@@ -1,0 +1,42 @@
+{
+  "scope": "Verification in isolated checkout before installation in the canonical repo; no full aggregate simulation rebuild.",
+  "base_commit": "bc4d13ab8f282ac03ac03a5d248fda995d97c02f",
+  "abcd_metric_deltas_from_historical": {
+    "A_dense_oracle": {
+      "shape_rms_all100_mm": 0.0,
+      "force_error_N": 0.0,
+      "force_direction_deg": 0.0,
+      "moment_error_common_world_base_Nm": 0.0
+    },
+    "B_noiseless_sparse": {
+      "shape_rms_all100_mm": 0.0,
+      "force_error_N": 0.0,
+      "force_direction_deg": 0.0,
+      "moment_error_common_world_base_Nm": 0.0
+    },
+    "C_noisy_sparse": {
+      "shape_rms_all100_mm": 0.0,
+      "force_error_N": 0.0,
+      "force_direction_deg": 0.0,
+      "moment_error_common_world_base_Nm": 0.0
+    },
+    "D_original_ekf": {
+      "shape_rms_all100_mm": 0.0,
+      "force_error_N": 0.0,
+      "force_direction_deg": 0.0,
+      "moment_error_common_world_base_Nm": 0.0
+    }
+  },
+  "cached_original_states_identical": true,
+  "jacobian_relative_errors": {
+    "original": 0.10360181691936961,
+    "corrected_in_memory": 1.5299144367283356e-10
+  },
+  "cli_world_base_force_error_N": 0.008438969738645798,
+  "cli_world_base_moment_error_Nm": 0.00027495608927345064,
+  "existing_tests_and_body_load_equivalence": "mechanics_validation.json",
+  "legacy_compatibility_check": "legacy_compatibility.json",
+  "scientific_artifact_files_verified_in_git_index": 214,
+  "archived_bytes_preserved_by_gitattributes": true,
+  "production_ekf_derivative_patch_applied": false
+}

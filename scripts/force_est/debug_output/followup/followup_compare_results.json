@@ -1,0 +1,198 @@
+{
+  "(1,1,0)": {
+    "0": {
+      "oracle": {
+        "force_err_N": 0.12499755054667078,
+        "moment_err_Nm": 0.0018525410850101713,
+        "force_dir_err_deg": 26.051241683343815,
+        "moment_dir_err_deg": 1.6032544522752337,
+        "nrmse_force": 0.4412101516525549,
+        "nrmse_moment": 0.044465780748067146,
+        "force_gt_norm_N": 0.28330615258522635,
+        "moment_gt_norm_Nm": 0.041662173783966056
+      },
+      "2-IMU [0.5,1.0]": {
+        "force_err_N": 0.5064278277750827,
+        "moment_err_Nm": 0.06521911149176529,
+        "force_dir_err_deg": 82.89932606985276,
+        "moment_dir_err_deg": 77.29830740157772,
+        "nrmse_force": 1.7875638179829068,
+        "nrmse_moment": 1.565427474533262,
+        "force_gt_norm_N": 0.28330615258522635,
+        "moment_gt_norm_Nm": 0.041662173783966056
+      },
+      "3-IMU [0.25,0.5,1.0]": {
+        "force_err_N": 0.5062050045503578,
+        "moment_err_Nm": 0.0650640406403274,
+        "force_dir_err_deg": 82.92458749451555,
+        "moment_dir_err_deg": 77.50548230169541,
+        "nrmse_force": 1.786777307620563,
+        "nrmse_moment": 1.561705372747641,
+        "force_gt_norm_N": 0.28330615258522635,
+        "moment_gt_norm_Nm": 0.041662173783966056
+      }
+    },
+    "1": {
+      "oracle": {
+        "force_err_N": 0.07303857781206424,
+        "moment_err_Nm": 0.0014070533036878816,
+        "force_dir_err_deg": 18.727804232150856,
+        "moment_dir_err_deg": 1.5850191403906237,
+        "nrmse_force": 0.32112587490371647,
+        "nrmse_moment": 0.034432344422357354,
+        "force_gt_norm_N": 0.2274453213514556,
+        "moment_gt_norm_Nm": 0.04086428987797392
+      },
+      "2-IMU [0.5,1.0]": {
+        "force_err_N": 0.3379677024542701,
+        "moment_err_Nm": 0.041966663606325054,
+        "force_dir_err_deg": 149.58169394487146,
+        "moment_dir_err_deg": 40.71081745493047,
+        "nrmse_force": 1.4859294552405675,
+        "nrmse_moment": 1.0269764562314916,
+        "force_gt_norm_N": 0.22744532135145562,
+        "moment_gt_norm_Nm": 0.04086428987797392
+      },
+      "3-IMU [0.25,0.5,1.0]": {
+        "force_err_N": 0.34217057159058795,
+        "moment_err_Nm": 0.04195749217025936,
+        "force_dir_err_deg": 149.46483563437883,
+        "moment_dir_err_deg": 40.38511336160341,
+        "nrmse_force": 1.5044080465403415,
+        "nrmse_moment": 1.026752019783609,
+        "force_gt_norm_N": 0.22744532135145562,
+        "moment_gt_norm_Nm": 0.04086428987797392
+      }
+    },
+    "2": {
+      "oracle": {
+        "force_err_N": 0.24127510155432047,
+        "moment_err_Nm": 0.003035397963591677,
+        "force_dir_err_deg": 53.20773560944271,
+        "moment_dir_err_deg": 1.7464317729859602,
+        "nrmse_force": 0.8026702646452962,
+        "nrmse_moment": 0.11328006041813923,
+        "force_gt_norm_N": 0.3005905565221585,
+        "moment_gt_norm_Nm": 0.026795518578239978
+      },
+      "2-IMU [0.5,1.0]": {
+        "force_err_N": 0.34938654721761697,
+        "moment_err_Nm": 0.054642749859386976,
+        "force_dir_err_deg": 35.97863295425678,
+        "moment_dir_err_deg": 69.77546391824625,
+        "nrmse_force": 1.1623337448084439,
+        "nrmse_moment": 2.039249574431518,
+        "force_gt_norm_N": 0.3005905565221585,
+        "moment_gt_norm_Nm": 0.02679551857823998
+      },
+      "3-IMU [0.25,0.5,1.0]": {
+        "force_err_N": 0.34885075501740764,
+        "moment_err_Nm": 0.054707290486268614,
+        "force_dir_err_deg": 35.86494183955538,
+        "moment_dir_err_deg": 69.73079700572683,
+        "nrmse_force": 1.160551279629209,
+        "nrmse_moment": 2.0416582095430496,
+        "force_gt_norm_N": 0.3005905565221585,
+        "moment_gt_norm_Nm": 0.02679551857823998
+      }
+    }
+  },
+  "(3,3,2)": {
+    "0": {
+      "oracle": {
+        "force_err_N": 0.013256448739646456,
+        "moment_err_Nm": 0.001275636122698497,
+        "force_dir_err_deg": 1.5006535765205693,
+        "moment_dir_err_deg": 1.126312731787004,
+        "nrmse_force": 0.04679195498802927,
+        "nrmse_moment": 0.03061856851931271,
+        "force_gt_norm_N": 0.28330615258522635,
+        "moment_gt_norm_Nm": 0.041662173783966056
+      },
+      "2-IMU [0.5,1.0]": {
+        "force_err_N": 2.4362215858424614,
+        "moment_err_Nm": 0.15861180284532733,
+        "force_dir_err_deg": 51.68502998695624,
+        "moment_dir_err_deg": 98.49085300917517,
+        "nrmse_force": 8.599254070562337,
+        "nrmse_moment": 3.8070937840157284,
+        "force_gt_norm_N": 0.28330615258522635,
+        "moment_gt_norm_Nm": 0.041662173783966056
+      },
+      "3-IMU [0.25,0.5,1.0]": {
+        "force_err_N": 2.4205129530198968,
+        "moment_err_Nm": 0.15858877840052873,
+        "force_dir_err_deg": 51.68706551428117,
+        "moment_dir_err_deg": 98.49085300917517,
+        "nrmse_force": 8.543806517873614,
+        "nrmse_moment": 3.8065411377491807,
+        "force_gt_norm_N": 0.28330615258522635,
+        "moment_gt_norm_Nm": 0.041662173783966056
+      }
+    },
+    "1": {
+      "oracle": {
+        "force_err_N": 0.012795825039254197,
+        "moment_err_Nm": 0.0010823947381768608,
+        "force_dir_err_deg": 3.1927393788307326,
+        "moment_dir_err_deg": 1.2903677453557616,
+        "nrmse_force": 0.05625890637436077,
+        "nrmse_moment": 0.026487545516697943,
+        "force_gt_norm_N": 0.2274453213514556,
+        "moment_gt_norm_Nm": 0.04086428987797392
+      },
+      "2-IMU [0.5,1.0]": {
+        "force_err_N": 2.629538292731735,
+        "moment_err_Nm": 0.04366220182183429,
+        "force_dir_err_deg": 88.06930440242803,
+        "moment_dir_err_deg": 149.54396555949887,
+        "nrmse_force": 11.561188759987413,
+        "nrmse_moment": 1.068468385261235,
+        "force_gt_norm_N": 0.22744532135145562,
+        "moment_gt_norm_Nm": 0.04086428987797392
+      },
+      "3-IMU [0.25,0.5,1.0]": {
+        "force_err_N": 2.5538779281290127,
+        "moment_err_Nm": 0.04294730339455556,
+        "force_dir_err_deg": 88.12591202509232,
+        "moment_dir_err_deg": 149.5439655594941,
+        "nrmse_force": 11.228535777051453,
+        "nrmse_moment": 1.050973931561048,
+        "force_gt_norm_N": 0.22744532135145562,
+        "moment_gt_norm_Nm": 0.04086428987797392
+      }
+    },
+    "2": {
+      "oracle": {
+        "force_err_N": 0.034261666050844616,
+        "moment_err_Nm": 0.0023647386058950814,
+        "force_dir_err_deg": 2.9723527418802647,
+        "moment_dir_err_deg": 2.106477155766686,
+        "nrmse_force": 0.11398117907341838,
+        "nrmse_moment": 0.08825127227532667,
+        "force_gt_norm_N": 0.3005905565221585,
+        "moment_gt_norm_Nm": 0.026795518578239978
+      },
+      "2-IMU [0.5,1.0]": {
+        "force_err_N": 1.619364130001856,
+        "moment_err_Nm": 0.124523348815889,
+        "force_dir_err_deg": 7.278212118605592,
+        "moment_dir_err_deg": 58.76745615740536,
+        "nrmse_force": 5.387275464447582,
+        "nrmse_moment": 4.647170699370767,
+        "force_gt_norm_N": 0.3005905565221585,
+        "moment_gt_norm_Nm": 0.02679551857823998
+      },
+      "3-IMU [0.25,0.5,1.0]": {
+        "force_err_N": 1.6139326429415846,
+        "moment_err_Nm": 0.12457965177203267,
+        "force_dir_err_deg": 7.434334373250769,
+        "moment_dir_err_deg": 58.800311146540594,
+        "nrmse_force": 5.369206077560996,
+        "nrmse_moment": 4.649271907301381,
+        "force_gt_norm_N": 0.3005905565221585,
+        "moment_gt_norm_Nm": 0.02679551857823998
+      }
+    }
+  }
+}

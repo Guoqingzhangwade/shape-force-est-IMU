@@ -1,0 +1,65 @@
+Loading datasets...
+  GT: 50 cases, using first 3
+  2-IMU positions: [0.50505051 1.        ]
+  3-IMU positions: [0.25252525 0.50505051 1.        ]
+
+=== Order (1,1,0) ===
+  case 0 ... done
+  case 1 ... done
+  case 2 ... done
+
+=== Order (2,2,0) ===
+  case 0 ... done
+  case 1 ... done
+  case 2 ... done
+
+=== Order (2,2,1) ===
+  case 0 ... done
+  case 1 ... done
+  case 2 ... done
+
+=== Order (3,3,2) ===
+  case 0 ... done
+  case 1 ... done
+  case 2 ... done
+
+Saved raw results -> C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU\scripts\force_est\debug_output\followup\followup_compare_results_v2.json
+
+## Follow-up Study: Oracle vs EKF Wrench Estimation
+
+Dataset: kirchhoff_gt_dataset.npz (N=3 cases, 5 noise realizations)
+
+
+### Order (1,1,0)
+
+| Method | F-dir (°) | NRMSE-F | M-dir (°) | NRMSE-M |
+|---|---|---|---|---|
+| oracle | 32.7° | 0.522 | 1.6° | 0.064 |
+| 2-IMU [0.5,1.0] | 89.5° | 1.479 | 62.6° | 1.544 |
+| 3-IMU [0.25,0.5,1.0] | 89.4° | 1.484 | 62.5° | 1.543 |
+
+### Order (2,2,0)
+
+| Method | F-dir (°) | NRMSE-F | M-dir (°) | NRMSE-M |
+|---|---|---|---|---|
+| oracle | 6.4° | 0.136 | 2.1° | 0.057 |
+| 2-IMU [0.5,1.0] | 48.0° | 8.435 | 103.0° | 3.200 |
+| 3-IMU [0.25,0.5,1.0] | 48.1° | 8.306 | 103.0° | 3.194 |
+
+### Order (2,2,1)
+
+| Method | F-dir (°) | NRMSE-F | M-dir (°) | NRMSE-M |
+|---|---|---|---|---|
+| oracle | 2.1° | 0.064 | 1.5° | 0.048 |
+| 2-IMU [0.5,1.0] | 48.4° | 8.432 | 102.5° | 3.181 |
+| 3-IMU [0.25,0.5,1.0] | 48.5° | 8.303 | 102.5° | 3.175 |
+
+### Order (3,3,2)
+
+| Method | F-dir (°) | NRMSE-F | M-dir (°) | NRMSE-M |
+|---|---|---|---|---|
+| oracle | 2.6° | 0.072 | 1.5° | 0.048 |
+| 2-IMU [0.5,1.0] | 49.0° | 8.516 | 102.3° | 3.174 |
+| 3-IMU [0.25,0.5,1.0] | 49.1° | 8.381 | 102.3° | 3.169 |
+
+Saved summary -> C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU\scripts\force_est\debug_output\followup\followup_compare_summary_v2.md

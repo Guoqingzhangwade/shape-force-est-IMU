@@ -1,0 +1,11 @@
+case,case_label,method,method_label,layout,n_runs,force_err_mN_mean,force_err_mN_std,nrmse_force,force_dir_err_deg_mean,moment_err_mN_m_mean,moment_err_mN_m_std,nrmse_moment,moment_dir_err_deg_mean
+local_transverse_force,Local transverse force,direct_6d_baseline,Direct 6D baseline,2-IMU,250,87.658,50.950,36.29%,20.301,N/A,N/A,N/A,N/A
+local_transverse_force,Local transverse force,direct_6d_baseline,Direct 6D baseline,3-IMU,250,85.161,51.365,34.94%,19.432,N/A,N/A,N/A,N/A
+local_transverse_force,Local transverse force,transverse_force_2d,Local transverse 2D,GT,50,5.841,5.464,2.08%,1.194,N/A,N/A,N/A,N/A
+local_transverse_force,Local transverse force,transverse_force_2d,Local transverse 2D,2-IMU,250,16.937,11.094,7.07%,2.104,N/A,N/A,N/A,N/A
+local_transverse_force,Local transverse force,transverse_force_2d,Local transverse 2D,3-IMU,250,17.410,10.880,7.33%,2.163,N/A,N/A,N/A,N/A
+local_moment_only,Local moment only,direct_6d_baseline,Direct 6D baseline,2-IMU,250,32.216,16.236,N/A,N/A,1.789,0.820,10.87%,4.767
+local_moment_only,Local moment only,direct_6d_baseline,Direct 6D baseline,3-IMU,250,25.822,14.680,N/A,N/A,1.531,0.778,9.27%,4.276
+local_moment_only,Local moment only,moment_only_3d,Local moment 3D,GT,50,0.000,0.000,N/A,N/A,0.477,0.542,2.02%,1.159
+local_moment_only,Local moment only,moment_only_3d,Local moment 3D,2-IMU,250,0.000,0.000,N/A,N/A,0.862,0.580,4.69%,2.077
+local_moment_only,Local moment only,moment_only_3d,Local moment 3D,3-IMU,250,0.000,0.000,N/A,N/A,0.876,0.619,4.79%,2.146

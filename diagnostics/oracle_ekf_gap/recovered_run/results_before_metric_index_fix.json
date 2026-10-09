@@ -1,0 +1,559 @@
+{
+  "scope": "one recovered fixed physical sample; no aggregate table rerun",
+  "recovered_repo": "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU",
+  "branch": "fix/wrench-conventions",
+  "head": "bc4d13ab8f282ac03ac03a5d248fda995d97c02f",
+  "preexisting_status": " M src/shape_force_est_imu/crt/cosserat_rod_model.py\n M src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_constrained.py\n M src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset_constrained.py\n?? src/shape_force_est_imu/crt/src/\n",
+  "recovered_repo_status_preserved": true,
+  "hashes": {
+    "compare_oracle_vs_ekf_wrench_estimation.py": "3954c3ff97151b722c2329a72cd31f4fe8ce0d7fcf1f285fc04f41a28b59cd9e",
+    "evaluate_kirchhoff_shape_estimation.py": "90f89487f18a23d0cfb65919451378e33d86e5187b04d4ae5ed8ee8a46cb1826",
+    "virtual_work.py": "10dd7179bd42013e6303a31cd7291ae17cfe638ab40cd950c71811aeae2a8cb5",
+    "cosserat_rod_model.py": "150b3c27cadd35d9197fb6183e8e81c90b5eeb83b2689ba417a6d3f078114c81",
+    "evaluate_kirchhoff_wrench_constrained.py": "9cdb3036db092f4afcc98effeb3f5fe578aeec5985fb2d52e968b01c394db109",
+    "generate_kirchhoff_gt_dataset_constrained.py": "6a8eb4824a6d979dee4816f4b39f5083507a1b7fe355f797bc9f0aa8e9fcfe06",
+    "gt_data/kirchhoff_gt_dataset.npz": "ae8ec9a3629a136e02b7919bb47eabe537e80e448457295fe9465494a608ba3a",
+    "gt_data/kirchhoff_imu_3imu.npz": "ef709d85eb766e58dd8cf1358fd089a1623931c576ed857ecfcfdd7f026fd6e3"
+  },
+  "case_index": 0,
+  "case_id": 0,
+  "noise_realization": 0,
+  "gt_metadata": {
+    "description": "Kirchhoff-rod GT dataset for cross-model robustness study",
+    "n_samples": 50,
+    "num_points": 100,
+    "length_m": 0.1,
+    "backbone_radius": 0.0005,
+    "youngs_modulus": 60000000000.0,
+    "tendon_offset": 0.008,
+    "num_disks": 40,
+    "inextensible": true,
+    "tau_max": 4.0,
+    "force_range": 0.4,
+    "moment_range": 0.04,
+    "min_deflection": 0.001,
+    "rng_seed": 123,
+    "date": "2026-04-19T18:51:44",
+    "git_hash": "d58d4f7",
+    "array_layout": {
+      "case_id": "(N,) int32",
+      "tau": "(N, 4)  cable tensions [N]",
+      "f_ext": "(N, 3)  tip forces [N]",
+      "l_ext": "(N, 3)  tip moments [N\u00b7m]",
+      "positions": "(N, num_pts, 3)  backbone centreline p(s) [m]",
+      "orientations": "(N, num_pts, 9)  R(s) flattened row-major",
+      "T_tip": "(N, 4, 4)  tip homogeneous transform"
+    }
+  },
+  "imu_metadata": {
+    "description": "Kirchhoff-rod synthetic IMU measurements (Step 2)",
+    "source_dataset": "gt_data\\kirchhoff_gt_dataset.npz",
+    "n_cases": 50,
+    "n_imu": 3,
+    "imu_positions_norm": [
+      0.25,
+      0.5,
+      1.0
+    ],
+    "imu_arc_indices": [
+      25,
+      50,
+      99
+    ],
+    "imu_actual_s": [
+      0.25252525252525254,
+      0.5050505050505051,
+      1.0
+    ],
+    "num_pts_per_case": 100,
+    "num_noise_realizations": 5,
+    "meas_std_deg": 0.5,
+    "meas_std_rad": 0.008726646259971648,
+    "noise_convention": "R_meas = R_noise @ R_true  (left-multiply); R_noise = Rot.from_rotvec(xi), xi ~ N(0, sigma^2 I_3)",
+    "imu_mapping": "nearest-neighbour: idx = round(s * (num_pts-1))",
+    "rng_seed": 1234,
+    "date": "2026-04-19T20:39:10",
+    "array_layout": {
+      "case_id": "(N,)",
+      "imu_positions": "(n_imu,)  normalised arc-length s",
+      "imu_arc_indices": "(n_imu,)  stored array indices",
+      "R_true": "(N, n_imu, 3, 3)  noise-free",
+      "R_meas": "(N, n_noise, n_imu, 3, 3)  noisy"
+    }
+  },
+  "order": [
+    2,
+    2,
+    1
+  ],
+  "nominal_s": [
+    0.25,
+    0.5,
+    1.0
+  ],
+  "actual_s_used": [
+    0.25252525252525254,
+    0.5050505050505051,
+    1.0
+  ],
+  "reason_for_actual_s": "manuscript table generator uses meta imu_actual_s; original compare CLI uses nominal positions",
+  "gamma": 10,
+  "steps": 30,
+  "sigma_deg": 0.5,
+  "alpha": 1.0,
+  "offline_seed": 1234,
+  "offline_prior": null,
+  "offline_max_nfev": 120,
+  "original_ekf_elapsed_seconds": 1.869383899960667,
+  "original_P0_diag": [
+    1.0,
+    0.5,
+    1.0,
+    0.5,
+    0.25,
+    0.25,
+    0.25,
+    0.25
+  ],
+  "original_Q_diag": [
+    1.0000000000000002e-10,
+    1e-12,
+    1.0000000000000002e-10,
+    1e-12,
+    1.0000000000000002e-10,
+    1e-12,
+    1e-12,
+    1e-12
+  ],
+  "oracle_fit": {
+    "objective": "linear LS of curvature from adjacent GT orientation differences",
+    "initialization": "none; linear least squares",
+    "convergence": "direct linear solution",
+    "residual_norm_normalized_curvature": 0.07749096519125191,
+    "residual_component_rms_normalized_curvature": 0.004496481859412569
+  },
+  "wrench_settings": {
+    "L_m": 0.1,
+    "EI_Nm2": 0.0029452431127404317,
+    "GJ_Nm2": 0.0022655716251849473,
+    "pinv_rcond": 1e-08,
+    "order": [
+      "Mx",
+      "My",
+      "Mz",
+      "Fx",
+      "Fy",
+      "Fz"
+    ],
+    "tau_N": [
+      0.0,
+      1.8584180048511385,
+      0.0,
+      0.0
+    ],
+    "gt_world_tip": [
+      -0.006151483190043126,
+      0.038461135870769235,
+      0.014786379086789064,
+      -0.2185188371486375,
+      0.04105181526631296,
+      0.1755751758284505
+    ]
+  },
+  "trials": {
+    "B_noiseless_sparse": [
+      {
+        "start_index": 0,
+        "initial_state": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "state": [
+          -0.6345769416482259,
+          0.18219572581962107,
+          0.3833261584564438,
+          0.517772224687119,
+          0.4553505592035828,
+          -0.198761151201622,
+          0.9439555833806191,
+          0.42440062870696044
+        ],
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "nfev": 6,
+        "njev": 6,
+        "cost_scaled": 0.009152362409526646,
+        "residual_norm_rad": 0.00118067121209566,
+        "elapsed_seconds": 0.3849029999691993
+      },
+      {
+        "start_index": 1,
+        "initial_state": [
+          -0.016038368053963015,
+          0.000640999140037641,
+          0.007408912958767258,
+          0.0015261919356565306,
+          0.008637438913233318,
+          0.02913099222503971,
+          -0.014788233606644014,
+          0.009454729746458598
+        ],
+        "state": [
+          -0.634576946778546,
+          0.18219576327778123,
+          0.3833261173982113,
+          0.5177722181479711,
+          0.4553505982295282,
+          -0.19876118918707272,
+          0.9439555841799792,
+          0.42440062689333174
+        ],
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "nfev": 11,
+        "njev": 11,
+        "cost_scaled": 0.00915236240952944,
+        "residual_norm_rad": 0.0011806712120958401,
+        "elapsed_seconds": 0.6923541999422014
+      },
+      {
+        "start_index": 2,
+        "initial_state": [
+          -0.16661354573179643,
+          0.03437445814526797,
+          -0.05124437092848577,
+          0.1323758956688572,
+          -0.08602801935850234,
+          0.051949319901836016,
+          -0.1265143717549522,
+          -0.21591390112963427
+        ],
+        "state": [
+          -0.6345769382660448,
+          0.18219570860689088,
+          0.38332617228434174,
+          0.5177722103713112,
+          0.45535065764996213,
+          -0.19876125640409642,
+          0.9439555838348522,
+          0.4244006278669964
+        ],
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "nfev": 7,
+        "njev": 7,
+        "cost_scaled": 0.009152362409539285,
+        "residual_norm_rad": 0.0011806712120964753,
+        "elapsed_seconds": 0.48031279980205
+      }
+    ],
+    "C_noisy_sparse": [
+      {
+        "start_index": 0,
+        "initial_state": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "state": [
+          -0.43196024795859295,
+          -1.3146846532852392,
+          1.9359741895875104,
+          0.5070346783527737,
+          0.6572015123633363,
+          -0.5196513381440518,
+          0.9011266642651135,
+          0.5153447619172541
+        ],
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "nfev": 6,
+        "njev": 6,
+        "cost_scaled": 0.25059457160375936,
+        "residual_norm_rad": 0.006178004200973514,
+        "elapsed_seconds": 0.38027280010282993
+      },
+      {
+        "start_index": 1,
+        "initial_state": [
+          -0.016038368053963015,
+          0.000640999140037641,
+          0.007408912958767258,
+          0.0015261919356565306,
+          0.008637438913233318,
+          0.02913099222503971,
+          -0.014788233606644014,
+          0.009454729746458598
+        ],
+        "state": [
+          -0.43196008931045443,
+          -1.3146857132148617,
+          1.9359752938392145,
+          0.5070346474477928,
+          0.6572018063690223,
+          -0.5196517101516113,
+          0.9011266519164145,
+          0.5153447936560792
+        ],
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "nfev": 10,
+        "njev": 10,
+        "cost_scaled": 0.25059457160442966,
+        "residual_norm_rad": 0.006178004200981776,
+        "elapsed_seconds": 0.6800520999822766
+      },
+      {
+        "start_index": 2,
+        "initial_state": [
+          -0.16661354573179643,
+          0.03437445814526797,
+          -0.05124437092848577,
+          0.1323758956688572,
+          -0.08602801935850234,
+          0.051949319901836016,
+          -0.1265143717549522,
+          -0.21591390112963427
+        ],
+        "state": [
+          -0.4319602055260875,
+          -1.3146849586265315,
+          1.935974523199233,
+          0.507034713219742,
+          0.6572012979966975,
+          -0.5196511286310265,
+          0.9011266577350034,
+          0.5153447776963366
+        ],
+        "success": true,
+        "status": 2,
+        "message": "`ftol` termination condition is satisfied.",
+        "nfev": 8,
+        "njev": 8,
+        "cost_scaled": 0.2505945716035523,
+        "residual_norm_rad": 0.006178004200970962,
+        "elapsed_seconds": 0.5354464000556618
+      }
+    ]
+  },
+  "metrics": [
+    {
+      "method": "A_dense_oracle",
+      "sample_count": 1,
+      "state": [
+        -0.6331831581430235,
+        0.17433913229535114,
+        0.38806140081848484,
+        0.5138000351216645,
+        0.4937477146805458,
+        -0.2447693340070389,
+        0.9417583544386687,
+        0.4288591210143117
+      ],
+      "three_imu_observation_vectors": 1,
+      "fit_residual_noisy_norm_rad": 0.03187744244611936,
+      "fit_residual_noiseless_norm_rad": 0.0016865635552829623,
+      "shape_rms_all100_mm": 0.014392438953909955,
+      "shape_mean_all100_mm": 0.012125601560472632,
+      "historical_rms_field_mean20_mm": 0.011990881570659816,
+      "tip_mm": 0.022636705087648194,
+      "orientation_rms_all100_deg": 0.0683716493324201,
+      "force_error_N": 0.0009898345951409682,
+      "force_direction_deg": 0.20004873050107758,
+      "force_error_over_F0": 0.003360790798081068,
+      "historical_nrmse_field_relative_vector": 0.0034938690392302667,
+      "force_relative_magnitude_error": 0.00013468466421851029,
+      "moment_error_world_tip_Nm": 3.8882382284149735e-05,
+      "moment_error_common_world_base_Nm": 3.322496323012122e-05,
+      "moment_direction_world_tip_deg": 0.05344065518434179,
+      "generalized_residual_norm_Nm": 1.2423158899711316e-06,
+      "world_tip_wrench": [
+        -0.0061737290618916795,
+        0.03844541060952972,
+        0.014814122139914801,
+        -0.2179331228322445,
+        0.040744627579578356,
+        0.17631161794459324
+      ],
+      "world_base_wrench": [
+        -0.003937255903721241,
+        0.015463741402601153,
+        0.022889489770715934,
+        -0.2179331228322445,
+        0.040744627579578356,
+        0.17631161794459324
+      ],
+      "information": "100 dense noiseless GT orientations; adjacent SO(3) differences and axiswise linear LS; positions excluded from fitting"
+    },
+    {
+      "method": "B_noiseless_sparse",
+      "sample_count": 1,
+      "state": [
+        -0.6345769416482259,
+        0.18219572581962107,
+        0.3833261584564438,
+        0.517772224687119,
+        0.4553505592035828,
+        -0.198761151201622,
+        0.9439555833806191,
+        0.42440062870696044
+      ],
+      "three_imu_observation_vectors": 1,
+      "fit_residual_noisy_norm_rad": 0.032154458012909844,
+      "fit_residual_noiseless_norm_rad": 0.00118067121209566,
+      "shape_rms_all100_mm": 0.020299473893196748,
+      "shape_mean_all100_mm": 0.013095990168993543,
+      "historical_rms_field_mean20_mm": 0.013336863390931458,
+      "tip_mm": 0.05113890099489424,
+      "orientation_rms_all100_deg": 0.07511865044339926,
+      "force_error_N": 0.0322490660054157,
+      "force_direction_deg": 5.3857636532209545,
+      "force_error_over_F0": 0.1094954296503192,
+      "historical_nrmse_field_relative_vector": 0.1138311530163973,
+      "force_relative_magnitude_error": 0.0599876070993801,
+      "moment_error_world_tip_Nm": 0.0003260520644614865,
+      "moment_error_common_world_base_Nm": 0.00012255917008426363,
+      "moment_direction_world_tip_deg": 0.37090409070560354,
+      "generalized_residual_norm_Nm": 6.4903941086980635e-06,
+      "world_tip_wrench": [
+        -0.0064444892165451805,
+        0.03860250709922098,
+        0.014808095277502894,
+        -0.21271450448655524,
+        0.0502890581692774,
+        0.20592291584514988
+      ],
+      "world_base_wrench": [
+        -0.004079688354880335,
+        0.015489093365910166,
+        0.022895486835593462,
+        -0.21271450448655524,
+        0.0502890581692774,
+        0.20592291584514988
+      ],
+      "information": "one noiseless orientation triplet; 3 GT-independent starts; no prior",
+      "delta_b_norm_Nm": 5.282945951695021e-05,
+      "delta_A_times_oracle_wrench_norm_Nm": 2.7845821392802867e-05,
+      "net_generalized_perturbation_norm_Nm": 4.157737361779222e-05
+    },
+    {
+      "method": "C_noisy_sparse",
+      "sample_count": 1,
+      "state": [
+        -0.4319602055260875,
+        -1.3146849586265315,
+        1.935974523199233,
+        0.507034713219742,
+        0.6572012979966975,
+        -0.5196511286310265,
+        0.9011266577350034,
+        0.5153447776963366
+      ],
+      "three_imu_observation_vectors": 1,
+      "fit_residual_noisy_norm_rad": 0.006178004200970961,
+      "fit_residual_noiseless_norm_rad": 0.03158210929332342,
+      "shape_rms_all100_mm": 0.6619000505254643,
+      "shape_mean_all100_mm": 0.48327123215254264,
+      "historical_rms_field_mean20_mm": 0.48772781924432823,
+      "tip_mm": 1.5846682645768346,
+      "orientation_rms_all100_deg": 1.6192778920902742,
+      "force_error_N": 0.7786971064308691,
+      "force_direction_deg": 94.03072217868696,
+      "force_error_over_F0": 2.6439145314096755,
+      "historical_nrmse_field_relative_vector": 2.748606408032792,
+      "force_relative_magnitude_error": 1.4909150077283373,
+      "moment_error_world_tip_Nm": 0.006570166768076926,
+      "moment_error_common_world_base_Nm": 0.004402330474724041,
+      "moment_direction_world_tip_deg": 8.72329056083902,
+      "generalized_residual_norm_Nm": 0.00015585244179991192,
+      "world_tip_wrench": [
+        -5.969098698206106e-05,
+        0.03730463111764612,
+        0.012613902189082104,
+        -0.40798533868847375,
+        -0.19138230342990173,
+        -0.5430666047715765
+      ],
+      "world_base_wrench": [
+        -0.0017980993136992632,
+        0.011614778373459152,
+        0.02297327294302192,
+        -0.40798533868847375,
+        -0.19138230342990173,
+        -0.5430666047715765
+      ],
+      "information": "one saved noisy orientation triplet, same as D; 3 GT-independent starts; no prior",
+      "delta_b_norm_Nm": 0.001233144678545895,
+      "delta_A_times_oracle_wrench_norm_Nm": 0.0008843604690946853,
+      "net_generalized_perturbation_norm_Nm": 0.0006675542544197493
+    },
+    {
+      "method": "D_original_ekf",
+      "sample_count": 1,
+      "state": [
+        -0.4586788362402868,
+        -1.0919107551659117,
+        1.6778621468346475,
+        0.5111126955297438,
+        0.6275720581821072,
+        -0.46812322704548076,
+        0.9057856031179616,
+        0.4983688521584927
+      ],
+      "three_imu_observation_vectors": 1,
+      "fit_residual_noisy_norm_rad": 0.008386661578903042,
+      "fit_residual_noiseless_norm_rad": 0.030468622665992273,
+      "shape_rms_all100_mm": 0.554543226335568,
+      "shape_mean_all100_mm": 0.40821999932950837,
+      "historical_rms_field_mean20_mm": 0.41240629346000524,
+      "tip_mm": 1.3585337468486123,
+      "orientation_rms_all100_deg": 1.4369592592914817,
+      "force_error_N": 0.6491484809741672,
+      "force_direction_deg": 89.66313785977962,
+      "force_error_over_F0": 2.2040573770161895,
+      "historical_nrmse_field_relative_vector": 2.2913320979814773,
+      "force_relative_magnitude_error": 1.0674896973487031,
+      "moment_error_world_tip_Nm": 0.005088918962506384,
+      "moment_error_common_world_base_Nm": 0.0036269193337003435,
+      "moment_direction_world_tip_deg": 6.52392987796217,
+      "generalized_residual_norm_Nm": 0.00012673945426881102,
+      "world_tip_wrench": [
+        -0.0014988503069965967,
+        0.037254786032839986,
+        0.013114606515211439,
+        -0.3736583754611656,
+        -0.157560203201843,
+        -0.4226544958890674
+      ],
+      "world_base_wrench": [
+        -0.0020338022996863265,
+        0.012376062939005145,
+        0.022862014856246726,
+        -0.3736583754611656,
+        -0.157560203201843,
+        -0.4226544958890674
+      ],
+      "information": "same saved noisy triplet reused 30 updates; zero initialization; original P0/Q/analytic H",
+      "delta_b_norm_Nm": 0.0011043480038177144,
+      "delta_A_times_oracle_wrench_norm_Nm": 0.0007962562905425373,
+      "net_generalized_perturbation_norm_Nm": 0.0006487099902533147
+    }
+  ],
+  "fk_max_abs_difference": 2.220446049250313e-16
+}

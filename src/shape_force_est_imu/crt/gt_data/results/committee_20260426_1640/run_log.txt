@@ -1,0 +1,512 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260426164023
+Username: DESKTOP-HU6LGK2\Guoqing Zhang
+RunAs User: DESKTOP-HU6LGK2\Guoqing Zhang
+Configuration Name: 
+Machine: DESKTOP-HU6LGK2 (Microsoft Windows NT 10.0.19045.0)
+Host Application: C:\windows\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command try { . "c:\Users\Guoqing Zhang\AppData\Local\Programs\Microsoft VS Code\ce099c1ed2\resources\app\out\vs\workbench\contrib\terminal\common\scripts\shellIntegration.ps1" } catch {}
+Process ID: 14292
+PSVersion: 5.1.19041.6456
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.19041.6456
+BuildVersion: 10.0.19041.6456
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is .\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1640\run_log.txt
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) python -B .\tests\check_conventions.py
+python -B .\tests\check_wrench_covariance.py
+
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) python -B .\src\shape_force_est_imu\crt\diagnose_wrench_observability_vs_order.py `
+  --orders "1,1,0;1,2,0;2,2,0;2,2,1;3,3,2" `
+  --save-dir "$OUT\observability_full"
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) Import-Csv "$OUT\observability_full\kirchhoff_wrench_observability_summary.csv" |
+  Select-Object order_label,n_m,n_cases,smallest_nonzero_sigma_med,cond_nonzero_med |
+  Format-Table -AutoSize
+>> TerminatingError(Import-Csv): "Could not find a part of the path 'C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1640\observability_full\kirchhoff_wrench_observability_summary.csv'."
+Import-Csv : Could not find a part of the path 'C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-for
+ce-est-IMU\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1640\observability_full\kirchhoff_wrench_obser
+vability_summary.csv'.
+At line:1 char:1
++ Import-Csv "$OUT\observability_full\kirchhoff_wrench_observability_su ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OpenError: (:) [Import-Csv], DirectoryNotFoundException
+    + FullyQualifiedErrorId : FileOpenFailure,Microsoft.PowerShell.Commands.ImportCsvCommand
+Import-Csv : Could not find a part of the path 'C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-forc
+e-est-IMU\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1640\observability_full\kirchhoff_wrench_observa
+bility_summary.csv'.
+At line:1 char:1
++ Import-Csv "$OUT\observability_full\kirchhoff_wrench_observability_su ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OpenError: (:) [Import-Csv], DirectoryNotFoundException
+    + FullyQualifiedErrorId : FileOpenFailure,Microsoft.PowerShell.Commands.ImportCsvCommand
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) Import-Csv "$OUT\observability_full\kirchhoff_wrench_observability_summary.csv" |
+  Select-Object order_label,n_m,n_cases,smallest_nonzero_sigma_med,cond_nonzero_med |
+  Format-Table -AutoSize
+>> TerminatingError(Import-Csv): "Could not find a part of the path 'C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1640\observability_full\kirchhoff_wrench_observability_summary.csv'."
+Import-Csv : Could not find a part of the path 'C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-for
+ce-est-IMU\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1640\observability_full\kirchhoff_wrench_obser
+vability_summary.csv'.
+At line:1 char:1
++ Import-Csv "$OUT\observability_full\kirchhoff_wrench_observability_su ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OpenError: (:) [Import-Csv], DirectoryNotFoundException
+    + FullyQualifiedErrorId : FileOpenFailure,Microsoft.PowerShell.Commands.ImportCsvCommand
+Import-Csv : Could not find a part of the path 'C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-forc
+e-est-IMU\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1640\observability_full\kirchhoff_wrench_observa
+bility_summary.csv'.
+At line:1 char:1
++ Import-Csv "$OUT\observability_full\kirchhoff_wrench_observability_su ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OpenError: (:) [Import-Csv], DirectoryNotFoundException
+    + FullyQualifiedErrorId : FileOpenFailure,Microsoft.PowerShell.Commands.ImportCsvCommand
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) $ROOT = (git rev-parse --show-toplevel).Trim()
+Set-Location $ROOT
+
+$OBS_SUMMARY = Get-ChildItem -Path $ROOT -Recurse -Filter "kirchhoff_wrench_observability_summary.csv" |
+  Where-Object { $_.FullName -like "*committee_20260426_1640*observability_full*" } |
+  Sort-Object LastWriteTime -Descending |
+  Select-Object -First 1
+
+$OBS_SUMMARY.FullName
+$OBS = $OBS_SUMMARY.DirectoryName
+$OBS
+C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU\src\shape_force_est_imu\crt\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1640\observability_full\kirchhoff_wrench_observability_summary.csv
+C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU\src\shape_force_est_imu\crt\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1640\observability_full
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) Import-Csv (Join-Path $OBS "kirchhoff_wrench_observability_summary.csv") |
+  Select-Object order_label,n_m,n_cases,smallest_nonzero_sigma_med,cond_nonzero_med |
+  Format-Table -AutoSize
+
+order_label n_m n_cases smallest_nonzero_sigma_med cond_nonzero_med
+----------- --- ------- -------------------------- ----------------
+(1,1,0)     5   50      0.007206719693240373       153.0281215425709
+(1,2,0)     6   50      0.000146710827453814       7716.409980362267
+(2,2,0)     7   50      0.00022670322544008243     5104.283395256185
+(2,2,1)     8   50      0.0002268179644939378      5114.547347552157
+(3,3,2)     11  50      0.0003608563232802808      3292.3400689058653
+
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) Import-Csv (Join-Path $OBS "wrench_component_observability_summary.csv") |
+  Select-Object `
+    order_label,
+    raw_effective_rank_mean,
+    scaled_effective_rank_mean,
+    observable_fraction_Mx_mean,
+    observable_fraction_My_mean,
+    observable_fraction_Mz_mean,
+    observable_fraction_Fx_mean,
+    observable_fraction_Fy_mean,
+    observable_fraction_Fz_mean,
+    weakest_dominant_component,
+    null_dominant_component |
+  Format-List
+
+
+order_label                 : (1,1,0)
+raw_effective_rank_mean     : 3.0
+scaled_effective_rank_mean  : 5.0
+observable_fraction_Mx_mean : 0.9949547909948729
+observable_fraction_My_mean : 0.9941590001646435
+observable_fraction_Mz_mean : 0.9999871361081206
+observable_fraction_Fx_mean : 0.8271370830485084
+observable_fraction_Fy_mean : 0.8389202755411286
+observable_fraction_Fz_mean : 0.34484171414272624
+weakest_dominant_component  : Fy
+null_dominant_component     : Fz
+
+order_label                 : (1,2,0)
+raw_effective_rank_mean     : 3.02
+scaled_effective_rank_mean  : 5.0
+observable_fraction_Mx_mean : 0.9950158380906141
+observable_fraction_My_mean : 0.9952711678239933
+observable_fraction_Mz_mean : 0.999989974958536
+observable_fraction_Fx_mean : 0.836339374417742
+observable_fraction_Fy_mean : 0.8390128755772973
+observable_fraction_Fz_mean : 0.3343707691318173
+weakest_dominant_component  : Fz
+null_dominant_component     :
+
+order_label                 : (2,2,0)
+raw_effective_rank_mean     : 3.0
+scaled_effective_rank_mean  : 5.0
+observable_fraction_Mx_mean : 0.995977517570204
+observable_fraction_My_mean : 0.9952824713491546
+observable_fraction_Mz_mean : 0.9999910304597143
+observable_fraction_Fx_mean : 0.8355408135425261
+observable_fraction_Fy_mean : 0.8476390807271325
+observable_fraction_Fz_mean : 0.32556908635126824
+weakest_dominant_component  : Fz
+null_dominant_component     :
+
+order_label                 : (2,2,1)
+raw_effective_rank_mean     : 3.0
+scaled_effective_rank_mean  : 5.0
+observable_fraction_Mx_mean : 0.9959783712388273
+observable_fraction_My_mean : 0.9952834363839407
+observable_fraction_Mz_mean : 0.9999911303039752
+observable_fraction_Fx_mean : 0.8352451290345395
+observable_fraction_Fy_mean : 0.8485942879333415
+observable_fraction_Fz_mean : 0.32490764510537606
+weakest_dominant_component  : Fz
+null_dominant_component     :
+
+order_label                 : (3,3,2)
+raw_effective_rank_mean     : 4.12
+scaled_effective_rank_mean  : 5.0
+observable_fraction_Mx_mean : 0.9965805594799346
+observable_fraction_My_mean : 0.9959997993054239
+observable_fraction_Mz_mean : 0.9999939348682685
+observable_fraction_Fx_mean : 0.8415203662020546
+observable_fraction_Fy_mean : 0.8543644016746381
+observable_fraction_Fz_mean : 0.3115409384696804
+weakest_dominant_component  : Fz
+null_dominant_component     :
+
+
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) $ROOT = (git rev-parse --show-toplevel).Trim()
+Set-Location $ROOT
+
+$STAMP = Get-Date -Format "yyyyMMdd_HHmm"
+$OUT = Join-Path $ROOT "src\shape_force_est_imu\crt\gt_data\results\committee_$STAMP"
+
+New-Item -ItemType Directory -Force -Path $OUT | Out-Null
+$OUT
+C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1647
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) python -B .\src\shape_force_est_imu\crt\evaluate_kirchhoff_wrench_constrained.py `
+  --cases force_only `
+  --n-noise 5 `
+  --steps 20 `
+  --save-dir "$OUT\constrained_force_only_full"
+==============================
+  Moment metrics are N/A for force-only cases when the GT moment norm is zero.
+  constrained_summary.csv metric columns: force_err_N_mean, moment_err_Nm_mean, nrmse_forc
+e_mean, nrmse_moment_mean, force_dir_err_deg_mean, moment_dir_err_deg_mean
+
+Saving results …
+  CSV  -> C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-I
+MU\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1647\constrained_force_o
+nly_full\constrained_results.csv
+  CSV  -> C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-I
+MU\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1647\constrained_force_o
+nly_full\constrained_summary.csv
+  JSON -> C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-I
+MU\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1647\constrained_force_o
+nly_full\constrained_results.json
+  NPZ  -> C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-I
+MU\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1647\constrained_force_o
+nly_full\constrained_wrench_est_data.npz
+  MD   -> C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-I
+MU\src\shape_force_est_imu\crt\gt_data\results\committee_20260426_1647\constrained_force_o
+nly_full\constrained_study_summary.md
+Done.
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) Import-Csv "$OUT\constrained_force_only_full\constrained_summary.csv" |
+  Select-Object `
+    constrained_case,
+    method,
+    layout_name,
+    n_runs,
+    nrmse_force_mean,
+    force_dir_err_deg_mean,
+    nrmse_moment_mean,
+    moment_dir_err_deg_mean |
+  Format-Table -AutoSize
+
+constrained_case method                              layout_name n_runs nrmse_force_mean     force_dir_err_deg_mean nrmse_moment_mean
+---------------- ------                              ----------- ------ ----------------     ---------------------- -----------------
+force_only       direct_6d_baseline                  2-IMU       250    0.5314534677400985   34.34819450334624      nan
+force_only       direct_6d_baseline                  3-IMU       250    0.5291227628067363   34.26100166983374      nan
+force_only       force_only_3d                       2-IMU       250    0.46391690610267733  16.15095510292742      nan
+force_only       force_only_3d                       3-IMU       250    0.4541070295059398   14.573897589949688     nan
+force_only       force_only_3d                       GT          50     0.03712849115873576  1.8618664713110247     nan
+force_only       known_direction_1d_oracle_direction 2-IMU       250    0.06783597870222301  2.399410032088814e-07  nan
+force_only       known_direction_1d_oracle_direction 3-IMU       250    0.06484036514282093  1.9221610995823718e-07 nan
+force_only       known_direction_1d_oracle_direction GT          50     0.014233869624555709 3.2271781408688957e-07 nan
+
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) python -B .\scripts\force_est\generate_final_wrench_artifacts.py `
+  --out-dir "$OUT\final_wrench_committee" `
+  --n-cases-ekf 20 `
+  --n-noise 3 `
+  --max-cases-oracle 50 `
+  --max-cases-constrained 50
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) python -B .\src\shape_force_est_imu\crt\evaluate_kirchhoff_wrench_constrained.py `
+  --cases transverse_force `
+  --n-noise 5 `
+  --steps 20 `
+  --save-dir "$OUT\constrained_transverse_force_full"
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) python -B - <<'PY'
+import numpy as np
+from pathlib import Path
+
+p = Path("src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_transverse_force.npz")
+d = np.load(p, allow_pickle=True)
+
+print("keys:", d.files)
+
+for k in ["f_ext", "l_ext", "T_tip", "R_tip", "R", "m_gt"]:
+    if k in d.files:
+        arr = d[k]
+        print(k, arr.shape, arr.dtype)
+
+# Try common force key
+f = d["f_ext"]
+print("world force norm mean:", np.linalg.norm(f, axis=1).mean())
+
+# Try to find tip rotations
+R_tip = None
+for key in ["R_tip", "R"]:
+    if key in d.files:
+        arr = d[key]
+        if arr.ndim == 3 and arr.shape[-2:] == (3,3):
+            R_tip = arr
+            print("using rotation key:", key)
+            break
+        if arr.ndim == 4 and arr.shape[-2:] == (3,3):
+            R_tip = arr[:, -1]
+            print("using final rotation from key:", key)
+            break
+
+if R_tip is not None:
+    f_body = np.einsum("nij,nj->ni", np.transpose(R_tip, (0,2,1)), f)
+    ratio = np.abs(f_body[:,2]) / np.maximum(np.linalg.norm(f_body, axis=1), 1e-12)
+    print("|Fz_body|/|F| mean:", ratio.mean())
+    print("|Fz_body|/|F| median:", np.median(ratio))
+    print("|Fz_body|/|F| max:", ratio.max())
+    print("first 5 f_world:", f[:5])
+    print("first 5 f_body:", f_body[:5])
+else:
+    print("Could not find tip rotations in dataset.")
+PY
+At line:1 char:14
++ python -B - <<'PY'
++              ~
+Missing file specification after redirection operator.
+
+At line:1 char:13
++ python -B - <<'PY'
++             ~
+The '<' operator is reserved for future use.
+
+At line:1 char:14
++ python -B - <<'PY'
++              ~
+The '<' operator is reserved for future use.
+
+At line:3 char:1
++ from pathlib import Path
++ ~~~~
+The 'from' keyword is not supported in this version of the language.
+
+At line:6 char:14
++ d = np.load(p, allow_pickle=True)
++              ~
+Missing argument in parameter list.
+
+At line:8 char:15
++ print("keys:", d.files)
++               ~
+Missing expression after ','.
+
+At line:8 char:16
++ print("keys:", d.files)
++                ~~~~~~~
+Unexpected token 'd.files' in expression or statement.
+
+At line:8 char:15
++ print("keys:", d.files)
++               ~
+Missing closing ')' in expression.
+
+At line:8 char:23
++ print("keys:", d.files)
++                       ~
+Unexpected token ')' in expression or statement.
+
+At line:10 char:4
++ for k in ["f_ext", "l_ext", "T_tip", "R_tip", "R", "m_gt"]:
++    ~
+Missing opening '(' after keyword 'for'.
+
+Not all parse errors were reported.  Correct the reported errors and try again.
+At line:1 char:14
++ python -B - <<'PY'
++              ~
+Missing file specification after redirection operator.
+
+At line:1 char:13
++ python -B - <<'PY'
++             ~
+The '<' operator is reserved for future use.
+
+At line:1 char:14
++ python -B - <<'PY'
++              ~
+The '<' operator is reserved for future use.
+
+At line:3 char:1
++ from pathlib import Path
++ ~~~~
+The 'from' keyword is not supported in this version of the language.
+
+At line:6 char:14
++ d = np.load(p, allow_pickle=True)
++              ~
+Missing argument in parameter list.
+
+At line:8 char:15
++ print("keys:", d.files)
++               ~
+Missing expression after ','.
+
+At line:8 char:16
++ print("keys:", d.files)
++                ~~~~~~~
+Unexpected token 'd.files' in expression or statement.
+
+At line:8 char:15
++ print("keys:", d.files)
++               ~
+Missing closing ')' in expression.
+
+At line:8 char:23
++ print("keys:", d.files)
++                       ~
+Unexpected token ')' in expression or statement.
+
+At line:10 char:4
++ for k in ["f_ext", "l_ext", "T_tip", "R_tip", "R", "m_gt"]:
++    ~
+Missing opening '(' after keyword 'for'.
+
+Not all parse errors were reported.  Correct the reported errors and try again.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : MissingFileSpecification
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) @'
+import numpy as np
+from pathlib import Path
+
+p = Path("src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_transverse_force.npz")
+d = np.load(p, allow_pickle=True)
+
+print("file:", p)
+print("keys:", d.files)
+
+for k in ["f_ext", "l_ext", "T_tip", "R_tip", "R", "T", "m_gt"]:
+    if k in d.files:
+        arr = d[k]
+        print(k, type(arr), getattr(arr, "shape", None), getattr(arr, "dtype", None))
+
+f = d["f_ext"]
+print("world force norm mean:", np.linalg.norm(f, axis=1).mean())
+print("world force norm min/max:", np.linalg.norm(f, axis=1).min(), np.linalg.norm(f, axis=1).max())
+
+if "l_ext" in d.files:
+    l = d["l_ext"]
+    print("moment norm mean:", np.linalg.norm(l, axis=1).mean())
+    print("moment norm min/max:", np.linalg.norm(l, axis=1).min(), np.linalg.norm(l, axis=1).max())
+
+R_tip = None
+for key in ["R_tip", "R"]:
+    if key in d.files:
+        arr = d[key]
+        if arr.ndim == 3 and arr.shape[-2:] == (3, 3):
+            R_tip = arr
+            print("using rotation key:", key)
+            break
+        if arr.ndim == 4 and arr.shape[-2:] == (3, 3):
+            R_tip = arr[:, -1]
+            print("using final rotation from key:", key)
+            break
+
+if R_tip is not None:
+    f_body = np.einsum("nij,nj->ni", np.transpose(R_tip, (0, 2, 1)), f)
+    ratio = np.abs(f_body[:, 2]) / np.maximum(np.linalg.norm(f_body, axis=1), 1e-12)
+    print("|Fz_body|/|F| mean:", ratio.mean())
+    print("|Fz_body|/|F| median:", np.median(ratio))
+    print("|Fz_body|/|F| max:", ratio.max())
+    print("first 5 f_world:")
+    print(f[:5])
+    print("first 5 f_body:")
+    print(f_body[:5])
+else:
+    print("Could not find tip rotations in dataset.")
+'@ | python -B -
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) @'
+import numpy as np
+from pathlib import Path
+
+p = Path("src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_transverse_force.npz")
+d = np.load(p, allow_pickle=True)
+
+f = d["f_ext"]
+l = d["l_ext"]
+T_tip = d["T_tip"]
+R_tip = T_tip[:, :3, :3]
+
+f_body = np.einsum("nij,nj->ni", np.transpose(R_tip, (0, 2, 1)), f)
+
+force_norm = np.linalg.norm(f_body, axis=1)
+fz_ratio = np.abs(f_body[:, 2]) / np.maximum(force_norm, 1e-12)
+
+print("file:", p)
+print("N:", len(f))
+print("world force norm mean:", np.linalg.norm(f, axis=1).mean())
+print("moment norm mean:", np.linalg.norm(l, axis=1).mean())
+
+print("\nBody-frame force statistics:")
+print("|Fx_body|/|F| mean:", np.mean(np.abs(f_body[:, 0]) / force_norm))
+print("|Fy_body|/|F| mean:", np.mean(np.abs(f_body[:, 1]) / force_norm))
+print("|Fz_body|/|F| mean:", fz_ratio.mean())
+print("|Fz_body|/|F| median:", np.median(fz_ratio))
+print("|Fz_body|/|F| max:", fz_ratio.max())
+
+print("\nFirst 10 forces:")
+for i in range(min(10, len(f))):
+    print(
+        f"case {i:02d}: "
+        f"f_world={f[i]}, "
+        f"f_body={f_body[i]}, "
+        f"|Fz|/|F|={fz_ratio[i]:.3f}"
+    )
+'@ | python -B -
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B
+(.venv) $ROOT = (git rev-parse --show-toplevel).Trim()
+Set-Location $ROOT
+
+$STAMP = Get-Date -Format "yyyyMMdd_HHmm"
+$OBS_OUT = Join-Path $ROOT "src\shape_force_est_imu\crt\gt_data\results\committee_$STAMP\observability_full"
+New-Item -ItemType Directory -Force -Path $OBS_OUT | Out-Null
+
+python -B .\src\shape_force_est_imu\crt\diagnose_wrench_observability_vs_order.py `
+  --orders "1,1,0;1,2,0;2,2,0;2,2,1;3,3,2" `
+  --save-dir "$OBS_OUT"
+
+]633;D;0]633;A]633;P;Cwd=C:\x5cUsers\x5cGuoqing Zhang\x5cOneDrive - stevens.edu\x5cDocuments\x5cGitHub\x5cshape-force-est-IMUPS C:\Users\Guoqing Zhang\OneDrive - stevens.edu\Documents\GitHub\shape-force-est-IMU> ]633;B

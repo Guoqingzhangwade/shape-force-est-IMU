@@ -60,3 +60,6 @@ __pycache__/
 /sensor_placement_results.json
 /so3_alpha_sweep_results.csv
 /so3_alpha_sweep_results.json
+
+# Duplicate observability output from an accidental relative path; archived before sync.
+/src/shape_force_est_imu/crt/src/

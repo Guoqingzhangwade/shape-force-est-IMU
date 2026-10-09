@@ -1,0 +1,94 @@
+{
+  "complexity_score": {
+    "definition": "Equal-weight average of four GT-shape terms. Each term is robust-scaled to [0,1] using the 5th/95th percentiles across all cases.",
+    "components": [
+      "tip deflection from the straight-tip reference",
+      "maximum lateral deflection",
+      "total tangent change along arclength",
+      "3-D nonplanarity from centered-shape SVD"
+    ]
+  },
+  "selection_rule": "Cases were split into low / medium / high complexity terciles. Within each band, the case with the strongest 2-IMU vs 3-IMU layout-separation score was selected.",
+  "curve_aggregation": {
+    "position_error": "mean with plus/minus one standard deviation band across the 5 saved noise realizations",
+    "orientation_error": "mean with plus/minus one standard deviation band across the 5 saved noise realizations",
+    "orientation_metric": "local SO(3) error ||log(R_est(s) R_gt(s)^T)|| in degrees"
+  },
+  "frame_locations_s": [
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "selected_cases": [
+    {
+      "case_id": 23,
+      "category": "low",
+      "complexity_score": 0.157912,
+      "visibility_score": 0.501286,
+      "selection_metrics": {
+        "pos_gap_mm": 0.24316,
+        "ori_gap_deg": 0.211616,
+        "shape_gap_mm": 0.304505
+      },
+      "mean_centerline_error_mm": {
+        "2-IMU": 0.684935,
+        "3-IMU": 0.441775
+      },
+      "representative_noise_realization": {
+        "2-IMU": 3,
+        "3-IMU": 1
+      },
+      "num_realizations": {
+        "2-IMU": 5,
+        "3-IMU": 5
+      }
+    },
+    {
+      "case_id": 4,
+      "category": "medium",
+      "complexity_score": 0.41195,
+      "visibility_score": 0.863011,
+      "selection_metrics": {
+        "pos_gap_mm": 0.300528,
+        "ori_gap_deg": 0.508736,
+        "shape_gap_mm": 0.494542
+      },
+      "mean_centerline_error_mm": {
+        "2-IMU": 0.884703,
+        "3-IMU": 0.584224
+      },
+      "representative_noise_realization": {
+        "2-IMU": 0,
+        "3-IMU": 4
+      },
+      "num_realizations": {
+        "2-IMU": 5,
+        "3-IMU": 5
+      }
+    },
+    {
+      "case_id": 41,
+      "category": "high",
+      "complexity_score": 0.935308,
+      "visibility_score": 0.958363,
+      "selection_metrics": {
+        "pos_gap_mm": 0.440095,
+        "ori_gap_deg": 0.729206,
+        "shape_gap_mm": 0.68032
+      },
+      "mean_centerline_error_mm": {
+        "2-IMU": 1.922726,
+        "3-IMU": 1.482631
+      },
+      "representative_noise_realization": {
+        "2-IMU": 4,
+        "3-IMU": 3
+      },
+      "num_realizations": {
+        "2-IMU": 5,
+        "3-IMU": 5
+      }
+    }
+  ]
+}

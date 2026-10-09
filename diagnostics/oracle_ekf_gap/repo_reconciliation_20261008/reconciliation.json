@@ -1,0 +1,40 @@
+{
+  "date_client": "2026-10-08",
+  "new_repo": "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU",
+  "new_branch": "fix/wrench-conventions",
+  "new_head": "bc4d13ab8f282ac03ac03a5d248fda995d97c02f",
+  "original_repo": "C:\\Users\\guoqi\\OneDrive\\Desktop\\shape_force_IMU\\shape-force-est-IMU",
+  "original_branch": "diagnostic/oracle-ekf-gap",
+  "original_head": "d58d4f795adce27fdbc7a54dd99efb81bbe3df8f",
+  "live_GitHub_heads_verified_by_readonly_git_ls_remote": {
+    "cleanup-tests": "d58d4f795adce27fdbc7a54dd99efb81bbe3df8f",
+    "fix/wrench-conventions": "bc4d13ab8f282ac03ac03a5d248fda995d97c02f",
+    "main": "920e3640f8f03133d106abb8c8f46f8c26a1527b"
+  },
+  "new_status": " M src/shape_force_est_imu/crt/cosserat_rod_model.py\n M src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_constrained.py\n M src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset_constrained.py\n?? src/shape_force_est_imu/crt/src/\n",
+  "snapshot_sha256": {
+    "src/shape_force_est_imu/crt/cosserat_rod_model.py": "150b3c27cadd35d9197fb6183e8e81c90b5eeb83b2689ba417a6d3f078114c81",
+    "src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_constrained.py": "9cdb3036db092f4afcc98effeb3f5fe578aeec5985fb2d52e968b01c394db109",
+    "src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset_constrained.py": "6a8eb4824a6d979dee4816f4b39f5083507a1b7fe355f797bc9f0aa8e9fcfe06"
+  },
+  "snapshot_scope": "Three modified tracked source files plus binary-capable git diff patch only; NOT a complete repo/data backup.",
+  "branch_relationship": "d58d4f7 is an ancestor of bc4d13a; 0 commits exclusive to d58 and28 exclusive to bc4.",
+  "important_uncommitted_features": [
+    "tip-body wrench boundaries inside rod shooting",
+    "local transverse-force/moment-only sampling and saved body loads",
+    "near-zero direction metrics omitted as NaN"
+  ],
+  "full_backup_still_required": [
+    "new repo .git and working tree including ignored GT/IMU/results and untracked nested outputs",
+    "old repo diagnostics and uncommitted diagnostic fixes",
+    "other device uncommitted/unpushed work; not yet inspected"
+  ],
+  "inventory_note": "Broad whole-repository metadata scan was stopped; no complete ignored-file inventory or full archive was created.",
+  "actions_not_performed": [
+    "No branch switch",
+    "No pull or fetch",
+    "No commit or push",
+    "No deletion",
+    "No source modification in either repo during this reconciliation"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "output": "diagnostics\\oracle_ekf_gap\\sync_validation_20261008\\legacy_compatibility.json",
+  "fit": {
+    "state": [
+      -0.5646602578068727,
+      -0.29257858507720735,
+      0.38838230421415526,
+      1.6483014327378305,
+      -0.5020319868216494,
+      -0.041458105910866704,
+      -1.203248468450445,
+      0.4975364882313522
+    ],
+    "objective": 4.847161897255169e-05,
+    "success": true,
+    "status": 0,
+    "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+    "nit": 37,
+    "nfev": 369,
+    "elapsed_seconds": 28.990697599947453
+  },
+  "metrics": {
+    "information": "one static shape; noiseless full GT poses at 20 disks; no EKF/no IMU sequence",
+    "sample_count": 1,
+    "fit_position_sum_m2": 6.577922980439187e-08,
+    "fit_rotation_sum_rad2": 4.8405839742747304e-05,
+    "shape_rms_mm": 0.05734946809011914,
+    "shape_mean_distance_mm": 0.05319683671140258,
+    "tip_error_mm": 0.055615931025803145,
+    "orientation_rms_deg": 0.08913669224431141,
+    "force_error_N": 0.008438969738645798,
+    "force_direction_deg": 3.435817229352902,
+    "force_relative_magnitude_error": 0.0015379439776553414,
+    "force_relative_vector_error": 0.059930952000585166,
+    "force_error_over_F0": 0.061482410362628116,
+    "moment_error_world_tip_couples_Nm": 0.000707270153428629,
+    "moment_direction_world_tip_deg": 0.7117624239306796,
+    "moment_error_over_M0": 0.013740910768985537,
+    "moment_error_common_world_base_Nm": 0.00027495608927343974,
+    "moment_error_legacy_gt_shift_Nm": 0.0002755618230645808,
+    "gt_shift_geometry_error_Nm": 1.3281405053505106e-06,
+    "generalized_load_residual_norm_Nm": 3.7861939282401724e-05
+  },
+  "fk_5d": {
+    "state": [
+      0.6,
+      -0.2,
+      -0.4,
+      0.3,
+      0.25
+    ],
+    "point_count": 21,
+    "gamma": 26,
+    "mechanics_L_m": 0.375,
+    "ekf_L_mm": 375.0,
+    "max_position_difference_m": 5.594315114139762e-17,
+    "max_orientation_difference_rad": 0.0
+  },
+  "pull_5d_relative_error": 1.5755013447076676e-09,
+  "pull_8d_relative_error": 2.2382787927217076e-09
+}

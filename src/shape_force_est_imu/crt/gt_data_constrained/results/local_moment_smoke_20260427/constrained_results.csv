@@ -1,0 +1,17 @@
+case_id,constrained_case,method,layout_name,noise_real,valid,force_err_N,moment_err_Nm,force_dir_err_deg,moment_dir_err_deg,nrmse_force,nrmse_moment,force_gt_norm_N,moment_gt_norm_Nm
+0,local_moment_only,moment_only_3d,GT,-1,True,0.0,0.0009512324207061816,nan,1.7079228406795852,nan,0.029805661583569436,0.0,0.03191448772372007
+0,local_moment_only,known_direction_1d_oracle_direction,GT,-1,False,nan,nan,nan,nan,nan,nan,0.0,0.03191448772372007
+1,local_moment_only,moment_only_3d,GT,-1,True,0.0,9.645438227397591e-05,nan,0.9282796301099997,nan,0.016200919880187258,0.0,0.00595363615074313
+1,local_moment_only,known_direction_1d_oracle_direction,GT,-1,False,nan,nan,nan,nan,nan,nan,0.0,0.00595363615074313
+0,local_moment_only,direct_6d_baseline,2-IMU,0,True,0.005530474715216183,0.0009060830096669872,nan,1.6258104185043616,nan,0.028390962045539953,0.0,0.03191448772372007
+0,local_moment_only,moment_only_3d,2-IMU,0,True,0.0,0.0006922508413030838,nan,1.2247269392001585,nan,0.021690802224238005,0.0,0.03191448772372007
+0,local_moment_only,known_direction_1d_oracle_direction,2-IMU,0,False,nan,nan,nan,nan,nan,nan,0.0,0.03191448772372007
+1,local_moment_only,direct_6d_baseline,2-IMU,0,True,0.03294630123938818,0.0016277328852200242,nan,15.048564548628585,nan,0.2734014716396217,0.0,0.00595363615074313
+1,local_moment_only,moment_only_3d,2-IMU,0,True,0.0,0.0004906683130338489,nan,4.719313955646219,nan,0.08241489748623687,0.0,0.00595363615074313
+1,local_moment_only,known_direction_1d_oracle_direction,2-IMU,0,False,nan,nan,nan,nan,nan,nan,0.0,0.00595363615074313
+0,local_moment_only,direct_6d_baseline,3-IMU,0,True,0.014673166702714374,0.0012294479933852517,nan,1.9858858287934111,nan,0.03852319373033455,0.0,0.03191448772372007
+0,local_moment_only,moment_only_3d,3-IMU,0,True,0.0,0.0008020599676695349,nan,1.2681512123030267,nan,0.025131531942886656,0.0,0.03191448772372007
+0,local_moment_only,known_direction_1d_oracle_direction,3-IMU,0,False,nan,nan,nan,nan,nan,nan,0.0,0.03191448772372007
+1,local_moment_only,direct_6d_baseline,3-IMU,0,True,0.02196382278241065,0.0016520455607997064,nan,11.58363158017271,nan,0.2774851400002835,0.0,0.00595363615074313
+1,local_moment_only,moment_only_3d,3-IMU,0,True,0.0,0.0009321803161102744,nan,8.829885512459432,nan,0.15657327597923834,0.0,0.00595363615074313
+1,local_moment_only,known_direction_1d_oracle_direction,3-IMU,0,False,nan,nan,nan,nan,nan,nan,0.0,0.00595363615074313

@@ -1,0 +1,33 @@
+{
+  "description": "Constrained Kirchhoff-rod GT dataset \u2014 transverse_force",
+  "constrained_case": "transverse_force",
+  "n_samples": 50,
+  "num_points": 100,
+  "length_m": 0.1,
+  "backbone_radius": 0.0005,
+  "youngs_modulus": 60000000000.0,
+  "tendon_offset": 0.008,
+  "num_disks": 40,
+  "tau_max": 4.0,
+  "force_range": 0.4,
+  "moment_range": 0.04,
+  "min_deflection": 0.0005,
+  "rng_seed": 456,
+  "date": "2026-04-23T00:34:51",
+  "git_hash": "e29f238",
+  "wrench_frame": "world (global reference)",
+  "constrained_case_notes": {
+    "force_only": "l_ext = 0 identically; f_ext random 3D world force",
+    "transverse_force": "l_ext = 0; f_ext[2] = 0 (zero world-z force component)",
+    "moment_only": "f_ext = 0 identically; l_ext random 3D world moment"
+  },
+  "array_layout": {
+    "case_id": "(N,) int32",
+    "tau": "(N, 4)  cable tensions [N]",
+    "f_ext": "(N, 3)  tip forces [N] \u2014 world frame",
+    "l_ext": "(N, 3)  tip moments [N\u00b7m] \u2014 world frame",
+    "positions": "(N, num_pts, 3)  backbone centreline p(s) [m]",
+    "orientations": "(N, num_pts, 9)  R(s) flattened row-major",
+    "T_tip": "(N, 4, 4)  tip homogeneous transform"
+  }
+}

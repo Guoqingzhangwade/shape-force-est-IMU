@@ -1,0 +1,6 @@
+case,case_label,method,method_label,layout,n_runs,force_err_mN_mean,force_err_mN_std,nrmse_force,force_dir_err_deg_mean,moment_err_mN_m_mean,moment_err_mN_m_std,nrmse_moment,moment_dir_err_deg_mean
+local_moment_only,Local moment only,direct_6d_baseline,Direct 6D baseline,2-IMU,250,32.216,16.236,N/A,N/A,1.789,0.820,10.87%,4.767
+local_moment_only,Local moment only,direct_6d_baseline,Direct 6D baseline,3-IMU,250,25.822,14.680,N/A,N/A,1.531,0.778,9.27%,4.276
+local_moment_only,Local moment only,moment_only_3d,Local moment 3D,GT,50,0.000,0.000,N/A,N/A,0.477,0.542,2.02%,1.159
+local_moment_only,Local moment only,moment_only_3d,Local moment 3D,2-IMU,250,0.000,0.000,N/A,N/A,0.862,0.580,4.69%,2.077
+local_moment_only,Local moment only,moment_only_3d,Local moment 3D,3-IMU,250,0.000,0.000,N/A,N/A,0.876,0.619,4.79%,2.146

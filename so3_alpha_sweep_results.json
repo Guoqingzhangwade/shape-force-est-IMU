@@ -1,0 +1,83 @@
+{
+  "config": {
+    "imu_pos": [
+      0.25,
+      0.5,
+      0.75
+    ],
+    "nis_dof": 9,
+    "nis_burnin": 5,
+    "P0_diag": [
+      1.0,
+      0.5,
+      1.0,
+      0.5,
+      0.25
+    ],
+    "num_shapes": 2,
+    "num_noise_realizations": 2,
+    "shape_bank_seed": 123,
+    "noise_seed_base": 1000,
+    "steps": 20,
+    "meas_std_deg": 0.5,
+    "gamma": 10,
+    "alpha_objective": "rmse_mean"
+  },
+  "best_alpha": 0.5,
+  "results": [
+    {
+      "alpha": 0.5,
+      "num_shapes": 2,
+      "num_noise_realizations": 2,
+      "num_total_runs": 4,
+      "imu_layout": [
+        0.25,
+        0.5,
+        0.75
+      ],
+      "nis_dof": 9,
+      "nis_burnin": 5,
+      "rmse_mean_mean": 0.028998898824707544,
+      "rmse_mean_std": 0.013454287069395278,
+      "rmse_final_mean": 0.015039368971563744,
+      "rmse_final_std": 0.007678995537468658,
+      "nis_mean_full_mean": 20.27926269796849,
+      "nis_mean_full_std": 2.9415790062693503,
+      "nis_std_full_mean": 9.643249405079082,
+      "nis_std_full_std": 0.710002053713044,
+      "nis_mean_postburnin_mean": 20.213770248259692,
+      "nis_mean_postburnin_std": 2.326130248883352,
+      "nis_std_postburnin_mean": 10.543577175104172,
+      "nis_std_postburnin_std": 1.0373552889384614,
+      "time_per_step_mean": 0.03266611250001006,
+      "time_per_step_std": 0.0003137436107696475
+    },
+    {
+      "alpha": 1.0,
+      "num_shapes": 2,
+      "num_noise_realizations": 2,
+      "num_total_runs": 4,
+      "imu_layout": [
+        0.25,
+        0.5,
+        0.75
+      ],
+      "nis_dof": 9,
+      "nis_burnin": 5,
+      "rmse_mean_mean": 0.02912479529786878,
+      "rmse_mean_std": 0.013445825356302708,
+      "rmse_final_mean": 0.015052039780314434,
+      "rmse_final_std": 0.007651469822256054,
+      "nis_mean_full_mean": 10.245437628496436,
+      "nis_mean_full_std": 1.4913556924295106,
+      "nis_std_full_mean": 4.816329486881807,
+      "nis_std_full_std": 0.35820517609509683,
+      "nis_mean_postburnin_mean": 10.114287116923112,
+      "nis_mean_postburnin_std": 1.1671280351604154,
+      "nis_std_postburnin_mean": 5.270787215910859,
+      "nis_std_postburnin_std": 0.5230832054326257,
+      "time_per_step_mean": 0.031956012500450014,
+      "time_per_step_std": 0.0005415383776383306
+    }
+  ]
+}

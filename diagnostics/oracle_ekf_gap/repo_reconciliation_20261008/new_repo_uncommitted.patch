@@ -1,0 +1,462 @@
+diff --git a/src/shape_force_est_imu/crt/cosserat_rod_model.py b/src/shape_force_est_imu/crt/cosserat_rod_model.py
+index 9d0e538..89dd7b7 100644
+--- a/src/shape_force_est_imu/crt/cosserat_rod_model.py
++++ b/src/shape_force_est_imu/crt/cosserat_rod_model.py
+@@ -167,14 +167,22 @@ class CosseratRodModel:
+                            tau: np.ndarray,
+                            f_ext: np.ndarray | None = None,
+                            l_ext: np.ndarray | None = None,
++                           f_ext_body: np.ndarray | None = None,
++                           l_ext_body: np.ndarray | None = None,
+                            guess: np.ndarray | None = None,
+                            return_states: bool = False,
+                            s_eval: Union[None, Sequence[float]] = None,
+                            solver_opts: dict | None = None):
+         tau = np.asarray(tau, dtype=float).ravel()
+         assert tau.size == self.n_tendon, "tau length ≠ n_tendon"
++        if f_ext_body is not None and f_ext is not None:
++            raise ValueError("Specify either f_ext (world) or f_ext_body, not both")
++        if l_ext_body is not None and l_ext is not None:
++            raise ValueError("Specify either l_ext (world) or l_ext_body, not both")
+         f_ext = np.zeros(3) if f_ext is None else np.asarray(f_ext, dtype=float)
+         l_ext = np.zeros(3) if l_ext is None else np.asarray(l_ext, dtype=float)
++        f_ext_body = None if f_ext_body is None else np.asarray(f_ext_body, dtype=float)
++        l_ext_body = None if l_ext_body is None else np.asarray(l_ext_body, dtype=float)
+ 
+         def shoot(x):
+             """Residual of tip equilibrium for optimiser."""
+@@ -222,8 +230,11 @@ class CosseratRodModel:
+             Lmom = sum([-ti / max(norm(pb), 1e-12) * np.cross(R_L @ ri, R_L @ pb)
+                         for ti, ri, pb in zip(tau, self.r, pb_dot)])
+ 
+-            res = np.hstack([n_L - F - f_ext,
+-                             m_L - Lmom - l_ext])
++            f_tip = f_ext if f_ext_body is None else R_L @ f_ext_body
++            l_tip = l_ext if l_ext_body is None else R_L @ l_ext_body
++
++            res = np.hstack([n_L - F - f_tip,
++                             m_L - Lmom - l_tip])
+             return res
+ 
+         # Default guess
+diff --git a/src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_constrained.py b/src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_constrained.py
+index ab4dde4..e1ad04d 100644
+--- a/src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_constrained.py
++++ b/src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_constrained.py
+@@ -197,12 +197,16 @@ def _make_S_moment_only() -> np.ndarray:
+ _S_MATRICES: Dict[str, np.ndarray] = {
+     "force_only"       : make_S_force_only(),
+     "transverse_force" : make_S_transverse(),
++    "local_transverse_force": make_S_transverse(),
++    "local_moment_only": _make_S_moment_only(),
+     "moment_only"      : _make_S_moment_only(),
+ }
+ 
+ _SUBSPACE_METHOD_NAMES: Dict[str, str] = {
+     "force_only": "force_only_3d",
+     "transverse_force": "transverse_force_2d",
++    "local_transverse_force": "transverse_force_2d",
++    "local_moment_only": "moment_only_3d",
+     "moment_only": "moment_only_3d",
+ }
+ 
+@@ -370,7 +374,7 @@ def synthesize_R_meas(
+ def _angle_deg(a: np.ndarray, b: np.ndarray) -> float:
+     na, nb = np.linalg.norm(a), np.linalg.norm(b)
+     if na < 1e-12 or nb < 1e-12:
+-        return 0.0
++        return float("nan")
+     return float(np.degrees(np.arccos(np.clip(a @ b / (na * nb), -1.0, 1.0))))
+ 
+ 
+@@ -388,11 +392,13 @@ def wrench_metrics(
+     # This is reported as NaN rather than a meaninglessly large number.
+     nrmse_f = fe / fn if fn > 1e-10 else float("nan")
+     nrmse_m = me / mn if mn > 1e-10 else float("nan")
++    dir_f = _angle_deg(f_est, f_gt) if fn > 1e-10 else float("nan")
++    dir_m = _angle_deg(l_est, l_gt) if mn > 1e-10 else float("nan")
+     return {
+         "force_err_N"        : fe,
+         "moment_err_Nm"      : me,
+-        "force_dir_err_deg"  : _angle_deg(f_est, f_gt),
+-        "moment_dir_err_deg" : _angle_deg(l_est, l_gt),
++        "force_dir_err_deg"  : dir_f,
++        "moment_dir_err_deg" : dir_m,
+         "nrmse_force"        : nrmse_f,
+         "nrmse_moment"       : nrmse_m,
+         "force_gt_norm_N"    : fn,
+@@ -731,7 +737,7 @@ def print_summary_table(summary: List[Dict]) -> None:
+     print(hdr)
+     print("-" * w)
+ 
+-    _case_order  = ["force_only", "transverse_force", "moment_only"]
++    _case_order  = ["force_only", "transverse_force", "local_transverse_force", "local_moment_only", "moment_only"]
+     _method_order = [
+         "direct_6d_baseline",
+         "force_only_3d",
+@@ -762,7 +768,7 @@ def print_summary_table(summary: List[Dict]) -> None:
+             f"{_pct(nrmf)}  {_pct(nrmm)}"
+         )
+     print(sep)
+-    print("  Moment metrics are N/A for force-only cases when the GT moment norm is zero.")
++    print("  Normalized/direction metrics are N/A when the corresponding GT norm is zero.")
+     print("  constrained_summary.csv metric columns: " + ", ".join(SUMMARY_METRIC_COLUMNS))
+ 
+ 
+@@ -794,8 +800,8 @@ def write_markdown_summary(summary: List[Dict], path: Path) -> None:
+         "",
+         "## Results",
+         "",
+-        "Moment metrics are reported as N/A for force-only cases when the "
+-        "ground-truth moment norm is zero.",
++        "Normalized and direction metrics are reported as N/A when the "
++        "corresponding ground-truth force or moment norm is zero.",
+         "",
+         "Main `constrained_summary.csv` metric columns: "
+         + ", ".join(f"`{name}`" for name in SUMMARY_METRIC_COLUMNS)
+@@ -804,7 +810,7 @@ def write_markdown_summary(summary: List[Dict], path: Path) -> None:
+     ]
+ 
+     # Table
+-    _case_order   = ["force_only", "transverse_force", "moment_only"]
++    _case_order   = ["force_only", "transverse_force", "local_transverse_force", "local_moment_only", "moment_only"]
+     _method_order = [
+         "direct_6d_baseline",
+         "force_only_3d",
+@@ -883,6 +889,8 @@ def write_markdown_summary(summary: List[Dict], path: Path) -> None:
+ _CASE_FILES = {
+     "force_only"       : "kirchhoff_gt_force_only.npz",
+     "transverse_force" : "kirchhoff_gt_transverse_force.npz",
++    "local_transverse_force": "kirchhoff_gt_local_transverse_force.npz",
++    "local_moment_only": "kirchhoff_gt_local_moment_only.npz",
+     "moment_only"      : "kirchhoff_gt_moment_only.npz",
+ }
+ 
+@@ -897,7 +905,13 @@ def main() -> None:
+     parser.add_argument("--save-dir",  default="gt_data_constrained/results",
+                         help="output folder for results (NEW — does not overwrite old results)")
+     parser.add_argument("--cases", nargs="+",
+-                        choices=["force_only", "transverse_force", "moment_only"],
++                        choices=[
++                            "force_only",
++                            "transverse_force",
++                            "local_transverse_force",
++                            "local_moment_only",
++                            "moment_only",
++                        ],
+                         default=["force_only", "transverse_force", "moment_only"])
+     parser.add_argument("--gamma",         type=int,   default=GAMMA_DEFAULT)
+     parser.add_argument("--alpha",         type=float, default=ALPHA_DEFAULT)
+diff --git a/src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset_constrained.py b/src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset_constrained.py
+index 7066847..250d89a 100644
+--- a/src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset_constrained.py
++++ b/src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset_constrained.py
+@@ -127,6 +127,34 @@ def sample_tip_wrench_constrained(
+     return f_ext, l_ext
+ 
+ 
++def sample_local_transverse_body_wrench(
++    force_range: float = 0.4,
++) -> tuple[np.ndarray, np.ndarray]:
++    """Sample force-only tip-body transverse load: f_b = [Fx, Fy, 0]."""
++    f_min = 0.25 * force_range
++    f_mag = np.random.uniform(f_min, force_range)
++    phi = np.random.uniform(0.0, 2.0 * np.pi)
++    f_body = np.array([f_mag * np.cos(phi), f_mag * np.sin(phi), 0.0])
++    l_body = np.zeros(3)
++    return f_body, l_body
++
++
++def sample_local_moment_body_wrench(
++    moment_range: float = 0.04,
++) -> tuple[np.ndarray, np.ndarray]:
++    """Sample moment-only tip-body load with random 3-D moment direction."""
++    m_min = min(0.005, 0.25 * moment_range)
++    m_max = min(0.035, 0.875 * moment_range)
++    if m_max <= m_min:
++        m_max = moment_range
++    m_mag = np.random.uniform(m_min, m_max)
++    direction = np.random.normal(size=3)
++    direction /= max(np.linalg.norm(direction), 1e-12)
++    f_body = np.zeros(3)
++    l_body = m_mag * direction
++    return f_body, l_body
++
++
+ def _tip_lateral_deflection(T_tip: np.ndarray) -> float:
+     p = T_tip[:3, 3]
+     return float(np.sqrt(p[0]**2 + p[1]**2))
+@@ -220,6 +248,7 @@ def generate_one_case(
+     pos_list, ori_list, T_tip_list.
+     """
+     case_ids, tau_list, f_list, l_list = [], [], [], []
++    f_body_list, l_body_list = [], []
+     pos_list, ori_list, T_tip_list     = [], [], []
+ 
+     attempts = n_rejected = n_solver_fail = 0
+@@ -242,15 +271,32 @@ def generate_one_case(
+             )
+             break
+ 
+-        tau        = sample_tensions(n_tendon=rod.n_tendon, tau_max=tau_max)
+-        f_ext, l_ext = sample_tip_wrench_constrained(
+-            case, force_range=force_range, moment_range=moment_range
+-        )
++        tau = sample_tensions(n_tendon=rod.n_tendon, tau_max=tau_max)
++        if case == "local_transverse_force":
++            f_body, l_body = sample_local_transverse_body_wrench(
++                force_range=force_range
++            )
++            load_kwargs = {"f_ext_body": f_body, "l_ext_body": l_body}
++            f_ext = np.zeros(3)
++            l_ext = np.zeros(3)
++        elif case == "local_moment_only":
++            f_body, l_body = sample_local_moment_body_wrench(
++                moment_range=moment_range
++            )
++            load_kwargs = {"f_ext_body": f_body, "l_ext_body": l_body}
++            f_ext = np.zeros(3)
++            l_ext = np.zeros(3)
++        else:
++            f_body = l_body = None
++            f_ext, l_ext = sample_tip_wrench_constrained(
++                case, force_range=force_range, moment_range=moment_range
++            )
++            load_kwargs = {"f_ext": f_ext, "l_ext": l_ext}
+ 
+         # ---- STEP 1: fast check (no forced intermediate eval points) --------
+         try:
+             T_tip_check = rod.forward_kinematics(
+-                tau=tau, f_ext=f_ext, l_ext=l_ext,
++                tau=tau, **load_kwargs,
+                 return_states=False,        # only need T_tip for the check
+                 s_eval=_S_EVAL_CHECK,       # None → solver uses adaptive grid
+                 solver_opts=_fast_opts,
+@@ -269,7 +315,7 @@ def generate_one_case(
+         # is then resampled to the uniform num_pts grid via linear interpolation.
+         try:
+             _, traj = rod.forward_kinematics(
+-                tau=tau, f_ext=f_ext, l_ext=l_ext,
++                tau=tau, **load_kwargs,
+                 return_states=True,
+                 s_eval=None,           # adaptive grid → resampled below
+                 solver_opts=_full_opts,
+@@ -281,12 +327,19 @@ def generate_one_case(
+         # Resample adaptive solution to the uniform 100-point arc-length grid
+         traj_y_resampled = _resample_trajectory(traj, s_eval)
+         T_tip      = _build_T_tip(traj_y_resampled)
++        if case in ("local_transverse_force", "local_moment_only"):
++            R_tip = T_tip[:3, :3]
++            f_ext = R_tip @ f_body
++            l_ext = R_tip @ l_body
+         positions, orientations = _extract_states(traj_y_resampled)
+         k = len(case_ids)
+         case_ids.append(k)
+         tau_list.append(tau)
+         f_list.append(f_ext)
+         l_list.append(l_ext)
++        if case in ("local_transverse_force", "local_moment_only"):
++            f_body_list.append(f_body)
++            l_body_list.append(l_body)
+         pos_list.append(positions)
+         ori_list.append(orientations)
+         T_tip_list.append(T_tip)
+@@ -308,6 +361,8 @@ def generate_one_case(
+         "tau_list": tau_list,
+         "f_list":   f_list,
+         "l_list":   l_list,
++        "f_body_list": f_body_list,
++        "l_body_list": l_body_list,
+         "pos_list": pos_list,
+         "ori_list": ori_list,
+         "T_tip_list": T_tip_list,
+@@ -331,6 +386,16 @@ def pack_and_save(
+     pos_arr      = np.stack(data["pos_list"],     axis=0)
+     ori_arr      = np.stack(data["ori_list"],     axis=0)
+     T_tip_arr    = np.stack(data["T_tip_list"],   axis=0)
++    has_body_wrench = (
++        len(data.get("f_body_list", [])) == len(data["case_ids"])
++        and len(data.get("l_body_list", [])) == len(data["case_ids"])
++        and len(data["case_ids"]) > 0
++    )
++    if has_body_wrench:
++        f_body_arr = np.vstack(data["f_body_list"])
++        l_body_arr = np.vstack(data["l_body_list"])
++    else:
++        f_body_arr = l_body_arr = None
+ 
+     meta = {
+         "description"       : f"Constrained Kirchhoff-rod GT dataset — {case}",
+@@ -350,9 +415,23 @@ def pack_and_save(
+         "date"              : datetime.datetime.now().isoformat(timespec="seconds"),
+         "git_hash"          : _git_hash(),
+         "wrench_frame"      : "world (global reference)",
++        "force_frame"       : "tip_body" if case in ("local_transverse_force", "local_moment_only") else "world",
++        "moment_frame"      : "tip_body" if case == "local_moment_only" else "world",
++        "constraint"        : case,
++        "body_force_has_zero_Fz": bool(case == "local_transverse_force"),
++        "body_force_zero"   : bool(case == "local_moment_only"),
++        "body_moment_only"  : bool(case == "local_moment_only"),
+         "constrained_case_notes": {
+             "force_only"       : "l_ext = 0 identically; f_ext random 3D world force",
+             "transverse_force" : "l_ext = 0; f_ext[2] = 0 (zero world-z force component)",
++            "local_transverse_force": (
++                "l_ext_body = 0; f_ext_body = [Fx,Fy,0] in the tip/body frame; "
++                "f_ext is saved in the world frame as R_tip @ f_ext_body"
++            ),
++            "local_moment_only": (
++                "f_ext_body = 0; l_ext_body is a random 3D moment in the tip/body frame; "
++                "l_ext is saved in the world frame as R_tip @ l_ext_body"
++            ),
+             "moment_only"      : "f_ext = 0 identically; l_ext random 3D world moment",
+         },
+         "array_layout": {
+@@ -365,21 +444,27 @@ def pack_and_save(
+             "T_tip"        : "(N, 4, 4)  tip homogeneous transform",
+         },
+     }
++    if has_body_wrench:
++        meta["array_layout"]["f_ext_body"] = "(N, 3) intended tip/body-frame force [N]"
++        meta["array_layout"]["l_ext_body"] = "(N, 3) intended tip/body-frame moment [N*m]"
+ 
+     npz_path  = save_dir / f"{stem}.npz"
+     json_path = save_dir / f"{stem}.json"
+ 
+-    np.savez_compressed(
+-        npz_path,
+-        case_id      = case_id_arr,
+-        tau          = tau_arr,
+-        f_ext        = f_arr,
+-        l_ext        = l_arr,
+-        positions    = pos_arr,
+-        orientations = ori_arr,
+-        T_tip        = T_tip_arr,
+-        meta         = json.dumps(meta),
+-    )
++    arrays = {
++        "case_id": case_id_arr,
++        "tau": tau_arr,
++        "f_ext": f_arr,
++        "l_ext": l_arr,
++        "positions": pos_arr,
++        "orientations": ori_arr,
++        "T_tip": T_tip_arr,
++        "meta": json.dumps(meta),
++    }
++    if has_body_wrench:
++        arrays["f_ext_body"] = f_body_arr
++        arrays["l_ext_body"] = l_body_arr
++    np.savez_compressed(npz_path, **arrays)
+     json_path.write_text(json.dumps(meta, indent=2))
+ 
+     print(f"  Saved: {npz_path}")
+@@ -387,6 +472,11 @@ def pack_and_save(
+     print(f"  Shapes:  tau={tau_arr.shape}  positions={pos_arr.shape}"
+           f"  orientations={ori_arr.shape}")
+ 
++    if case == "local_transverse_force":
++        validate_local_transverse_dataset(npz_path)
++    elif case == "local_moment_only":
++        validate_local_moment_dataset(npz_path)
++
+     if args.plot:
+         fig_path = save_dir / f"{stem}_overview.png"
+         _plot_overview(
+@@ -397,6 +487,73 @@ def pack_and_save(
+         )
+ 
+ 
++def validate_local_transverse_dataset(npz_path: Path) -> None:
++    """Print body-frame transverse-force checks for a saved dataset."""
++    data = np.load(npz_path, allow_pickle=True)
++    if "T_tip" not in data or "f_ext" not in data or "l_ext" not in data:
++        print("  Validation skipped: missing T_tip/f_ext/l_ext arrays.")
++        return
++
++    R_tip = data["T_tip"][:, :3, :3]
++    f_world = data["f_ext"]
++    l_world = data["l_ext"]
++    f_body_check = np.einsum("nij,nj->ni", np.transpose(R_tip, (0, 2, 1)), f_world)
++    force_norm = np.linalg.norm(f_body_check, axis=1)
++    ratio = np.abs(f_body_check[:, 2]) / np.maximum(force_norm, 1e-12)
++    moment_norm = np.linalg.norm(l_world, axis=1)
++
++    print("  Local transverse validation:")
++    print(f"    mean |Fz_body|/|F|   = {np.mean(ratio):.3e}")
++    print(f"    median |Fz_body|/|F| = {np.median(ratio):.3e}")
++    print(f"    max |Fz_body|/|F|    = {np.max(ratio):.3e}")
++    print(f"    moment norm mean/max  = {np.mean(moment_norm):.3e} / {np.max(moment_norm):.3e} N*m")
++    print(
++        "    force norm mean/min/max = "
++        f"{np.mean(force_norm):.3e} / {np.min(force_norm):.3e} / {np.max(force_norm):.3e} N"
++    )
++    if "f_ext_body" in data:
++        f_body_saved = data["f_ext_body"]
++        max_body_err = np.max(np.linalg.norm(f_body_check - f_body_saved, axis=1))
++        print(f"    max ||R_tip^T f_world - f_ext_body|| = {max_body_err:.3e} N")
++
++
++def validate_local_moment_dataset(npz_path: Path) -> None:
++    """Print body-frame moment-only checks for a saved dataset."""
++    data = np.load(npz_path, allow_pickle=True)
++    if "T_tip" not in data or "f_ext" not in data or "l_ext" not in data:
++        print("  Validation skipped: missing T_tip/f_ext/l_ext arrays.")
++        return
++
++    R_tip = data["T_tip"][:, :3, :3]
++    f_world = data["f_ext"]
++    l_world = data["l_ext"]
++    f_body_check = np.einsum("nij,nj->ni", np.transpose(R_tip, (0, 2, 1)), f_world)
++    l_body_check = np.einsum("nij,nj->ni", np.transpose(R_tip, (0, 2, 1)), l_world)
++    force_norm = np.linalg.norm(f_body_check, axis=1)
++    moment_norm = np.linalg.norm(l_body_check, axis=1)
++    moment_unit = l_body_check / np.maximum(moment_norm[:, None], 1e-12)
++
++    print("  Local moment-only validation:")
++    print(f"    mean ||f_body|| / max ||f_body|| = {np.mean(force_norm):.3e} / {np.max(force_norm):.3e} N")
++    print(
++        "    mean/min/max ||mu_body|| = "
++        f"{np.mean(moment_norm):.3e} / {np.min(moment_norm):.3e} / {np.max(moment_norm):.3e} N*m"
++    )
++    print(
++        "    mean moment direction = "
++        f"[{np.mean(moment_unit[:, 0]):.3f}, {np.mean(moment_unit[:, 1]):.3f}, {np.mean(moment_unit[:, 2]):.3f}]"
++    )
++    print(f"    max force norm = {np.max(force_norm):.3e} N")
++    if "f_ext_body" in data:
++        f_body_saved = data["f_ext_body"]
++        max_force_err = np.max(np.linalg.norm(f_body_check - f_body_saved, axis=1))
++        print(f"    max ||R_tip^T f_world - f_ext_body|| = {max_force_err:.3e} N")
++    if "l_ext_body" in data:
++        l_body_saved = data["l_ext_body"]
++        max_moment_err = np.max(np.linalg.norm(l_body_check - l_body_saved, axis=1))
++        print(f"    max ||R_tip^T l_world - l_ext_body|| = {max_moment_err:.3e} N*m")
++
++
+ # ---------------------------------------------------------------------------
+ # Main
+ # ---------------------------------------------------------------------------
+@@ -404,6 +561,8 @@ def pack_and_save(
+ _CASE_STEMS = {
+     "force_only"       : "kirchhoff_gt_force_only",
+     "transverse_force" : "kirchhoff_gt_transverse_force",
++    "local_transverse_force": "kirchhoff_gt_local_transverse_force",
++    "local_moment_only": "kirchhoff_gt_local_moment_only",
+     "moment_only"      : "kirchhoff_gt_moment_only",
+ }
+ 
+@@ -443,7 +602,13 @@ def main() -> None:
+     parser.add_argument("--save-dir",   default="gt_data_constrained",
+                         help="output folder (separate from gt_data/ to preserve original)")
+     parser.add_argument("--cases", nargs="+",
+-                        choices=["force_only", "transverse_force", "moment_only"],
++                        choices=[
++                            "force_only",
++                            "transverse_force",
++                            "local_transverse_force",
++                            "local_moment_only",
++                            "moment_only",
++                        ],
+                         default=["force_only", "transverse_force", "moment_only"],
+                         help="which constrained cases to generate")
+     parser.add_argument("--quick", action="store_true",

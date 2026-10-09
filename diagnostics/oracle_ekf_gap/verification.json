@@ -1,0 +1,27 @@
+{
+  "same_fit_and_config_before_after": true,
+  "before_source_hashes_match_HEAD_with_CRLF_checkout": true,
+  "source_hash_note": "Initial direct blob hash check failed because Git stores LF and working tree uses CRLF; explicit CRLF checkout transformation matches all three baseline hashes.",
+  "after_source_hashes_match_worktree": true,
+  "pull_fd_relative_errors_below_1e_7": true,
+  "original_cli_exit_code": 0,
+  "original_cli_matches_diagnostic_world_base": true,
+  "syntax_checked": [
+    "diagnostics/oracle_ekf_gap/diagnose.py",
+    "src/shape_force_est_imu/crt/virtual_work.py",
+    "scripts/force_est/force_est_curve_fit.py"
+  ],
+  "manuscript_still_byte_identical_to_zip": true,
+  "git_diff_check_exit_code": 0,
+  "tracked_modified_files": [
+    "scripts/force_est/force_est_curve_fit.py",
+    "src/shape_force_est_imu/crt/virtual_work.py"
+  ],
+  "python_version": "Python 3.10.11",
+  "git_warning": "error: fsmonitor_ipc__send_query: unspecified error on '.git/fsmonitor--daemon.ipc'",
+  "tests_not_run": [
+    "No aggregate Monte Carlo",
+    "No original 8D Oracle/EKF table reconstruction: source data missing",
+    "No new estimator or broad parameter sweep"
+  ]
+}

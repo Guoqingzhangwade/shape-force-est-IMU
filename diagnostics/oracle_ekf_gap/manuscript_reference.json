@@ -1,0 +1,148 @@
+{
+  "archive": "C:\\Users\\guoqi\\Downloads\\paper_T_RO_2026_shape_wrench_estimation_IMU_v6.zip",
+  "archive_sha256": "399cdcfe0386edcf6b242871023d0dd5e60bbd477076a9f331fa502f97cf2bfc",
+  "reference_directory": "C:\\Users\\guoqi\\AppData\\Local\\Temp\\oracle_ekf_manuscript_reference_du88vs8z",
+  "archive_entries": 83,
+  "all_extracted_bytes_equal_archive": true,
+  "mismatches": [],
+  "active_tex_graph": [
+    {
+      "file": "ms.tex",
+      "sha256": "b32a4fd00822abda87a6965df3d49f352b952f4b019f8b0e915548ec1ece87ed",
+      "includes": [
+        {
+          "file": "paper_fmt/preamble_TRO_LW.tex",
+          "line": 8,
+          "kind": "input"
+        },
+        {
+          "file": "paper_fmt/algo_preamble.tex",
+          "line": 9,
+          "kind": "input"
+        },
+        {
+          "file": "paper_fmt/tables_preamble.tex",
+          "line": 10,
+          "kind": "input"
+        },
+        {
+          "file": "paper_fmt/title_authors.tex",
+          "line": 47,
+          "kind": "input"
+        },
+        {
+          "file": "content/abstract.tex",
+          "line": 51,
+          "kind": "input"
+        },
+        {
+          "file": "content/intro_v2.tex",
+          "line": 53,
+          "kind": "input"
+        },
+        {
+          "file": "content/modeling_v2.tex",
+          "line": 54,
+          "kind": "input"
+        },
+        {
+          "file": "content/estimation_framework_formulation_v2.tex",
+          "line": 55,
+          "kind": "input"
+        },
+        {
+          "file": "content/sim_study_v3.tex",
+          "line": 56,
+          "kind": "input"
+        },
+        {
+          "file": "content/conclusion.tex",
+          "line": 59,
+          "kind": "input"
+        },
+        {
+          "file": "content/appendix.tex",
+          "line": 60,
+          "kind": "input"
+        },
+        {
+          "file": "paper_fmt/bio_authors.tex",
+          "line": 73,
+          "kind": "input"
+        }
+      ]
+    },
+    {
+      "file": "paper_fmt/preamble_TRO_LW.tex",
+      "sha256": "bd7d88aa2aef78e2c3086cac0768740202ef425bfaa9b3cc6507c7c4c0b02b14",
+      "includes": []
+    },
+    {
+      "file": "paper_fmt/algo_preamble.tex",
+      "sha256": "472755178e8ccbd1e026b9294221721cd0ee16a8847b1ab7c5e07b5aa8ea212d",
+      "includes": []
+    },
+    {
+      "file": "paper_fmt/tables_preamble.tex",
+      "sha256": "7002b3b34104d0c4c1c3cc4bcd5c3c9f2b4dd1712e361f926620332d75ea67ca",
+      "includes": []
+    },
+    {
+      "file": "paper_fmt/title_authors.tex",
+      "sha256": "67bb9e843ab1a8189ff206262c9b471013bead3c7eb6eb36a449e30545f0bb44",
+      "includes": []
+    },
+    {
+      "file": "content/abstract.tex",
+      "sha256": "76c81b2634ce30f7c9845368b4d187b5755d68fb6cbdc5588cc0dcd40b0dad51",
+      "includes": []
+    },
+    {
+      "file": "content/intro_v2.tex",
+      "sha256": "d003d7e07e6840833bbb79f5c232ad91b3f2b830b77a4dae33c209651191d82c",
+      "includes": [
+        {
+          "file": "content/tab_lit_overview_v2.tex",
+          "line": 15,
+          "kind": "input"
+        }
+      ]
+    },
+    {
+      "file": "content/tab_lit_overview_v2.tex",
+      "sha256": "e6fcd8b36205d498a9e189c5d2a6362de204fe4c9a59107c18aff97d73d08e85",
+      "includes": []
+    },
+    {
+      "file": "content/modeling_v2.tex",
+      "sha256": "44ba4b5f9a1a85c8be43e5081b32be77b93a5f094260d7d4128c932ac0474255",
+      "includes": []
+    },
+    {
+      "file": "content/estimation_framework_formulation_v2.tex",
+      "sha256": "883dd7c68da64d80a6b0496095b52c9e5b00babba0db08a3a81d2692e1da71aa",
+      "includes": []
+    },
+    {
+      "file": "content/sim_study_v3.tex",
+      "sha256": "c8215853a59e6c4852fe4ddae4b8941fdd2fff91dc73f5be5689504635df4056",
+      "includes": []
+    },
+    {
+      "file": "content/conclusion.tex",
+      "sha256": "296df36f7abc07c7e9108cecb67b0cae9144d70acc62ff6072378a97346db579",
+      "includes": []
+    },
+    {
+      "file": "content/appendix.tex",
+      "sha256": "04ee2ea794021456893d0f8c3c8781bb55f96c555dc06a9ffd1899c4b12280fb",
+      "includes": []
+    },
+    {
+      "file": "paper_fmt/bio_authors.tex",
+      "sha256": "47c069507a373ef814e2079f7b5f26d1465b4ae06004a7c2eee0418d11028406",
+      "includes": []
+    }
+  ],
+  "parsing_note": "Unescaped percent comments removed; literal input/include traversal from ms.tex."
+}
