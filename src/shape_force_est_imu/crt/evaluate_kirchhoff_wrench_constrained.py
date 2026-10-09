@@ -197,12 +197,16 @@ def _make_S_moment_only() -> np.ndarray:
 _S_MATRICES: Dict[str, np.ndarray] = {
     "force_only"       : make_S_force_only(),
     "transverse_force" : make_S_transverse(),
+    "local_transverse_force": make_S_transverse(),
+    "local_moment_only": _make_S_moment_only(),
     "moment_only"      : _make_S_moment_only(),
 }
 
 _SUBSPACE_METHOD_NAMES: Dict[str, str] = {
     "force_only": "force_only_3d",
     "transverse_force": "transverse_force_2d",
+    "local_transverse_force": "transverse_force_2d",
+    "local_moment_only": "moment_only_3d",
     "moment_only": "moment_only_3d",
 }
 
@@ -370,7 +374,7 @@ def synthesize_R_meas(
 def _angle_deg(a: np.ndarray, b: np.ndarray) -> float:
     na, nb = np.linalg.norm(a), np.linalg.norm(b)
     if na < 1e-12 or nb < 1e-12:
-        return 0.0
+        return float("nan")
     return float(np.degrees(np.arccos(np.clip(a @ b / (na * nb), -1.0, 1.0))))
 
 
@@ -388,11 +392,13 @@ def wrench_metrics(
     # This is reported as NaN rather than a meaninglessly large number.
     nrmse_f = fe / fn if fn > 1e-10 else float("nan")
     nrmse_m = me / mn if mn > 1e-10 else float("nan")
+    dir_f = _angle_deg(f_est, f_gt) if fn > 1e-10 else float("nan")
+    dir_m = _angle_deg(l_est, l_gt) if mn > 1e-10 else float("nan")
     return {
         "force_err_N"        : fe,
         "moment_err_Nm"      : me,
-        "force_dir_err_deg"  : _angle_deg(f_est, f_gt),
-        "moment_dir_err_deg" : _angle_deg(l_est, l_gt),
+        "force_dir_err_deg"  : dir_f,
+        "moment_dir_err_deg" : dir_m,
         "nrmse_force"        : nrmse_f,
         "nrmse_moment"       : nrmse_m,
         "force_gt_norm_N"    : fn,
@@ -731,7 +737,7 @@ def print_summary_table(summary: List[Dict]) -> None:
     print(hdr)
     print("-" * w)
 
-    _case_order  = ["force_only", "transverse_force", "moment_only"]
+    _case_order  = ["force_only", "transverse_force", "local_transverse_force", "local_moment_only", "moment_only"]
     _method_order = [
         "direct_6d_baseline",
         "force_only_3d",
@@ -762,7 +768,7 @@ def print_summary_table(summary: List[Dict]) -> None:
             f"{_pct(nrmf)}  {_pct(nrmm)}"
         )
     print(sep)
-    print("  Moment metrics are N/A for force-only cases when the GT moment norm is zero.")
+    print("  Normalized/direction metrics are N/A when the corresponding GT norm is zero.")
     print("  constrained_summary.csv metric columns: " + ", ".join(SUMMARY_METRIC_COLUMNS))
 
 
@@ -794,8 +800,8 @@ def write_markdown_summary(summary: List[Dict], path: Path) -> None:
         "",
         "## Results",
         "",
-        "Moment metrics are reported as N/A for force-only cases when the "
-        "ground-truth moment norm is zero.",
+        "Normalized and direction metrics are reported as N/A when the "
+        "corresponding ground-truth force or moment norm is zero.",
         "",
         "Main `constrained_summary.csv` metric columns: "
         + ", ".join(f"`{name}`" for name in SUMMARY_METRIC_COLUMNS)
@@ -804,7 +810,7 @@ def write_markdown_summary(summary: List[Dict], path: Path) -> None:
     ]
 
     # Table
-    _case_order   = ["force_only", "transverse_force", "moment_only"]
+    _case_order   = ["force_only", "transverse_force", "local_transverse_force", "local_moment_only", "moment_only"]
     _method_order = [
         "direct_6d_baseline",
         "force_only_3d",
@@ -883,6 +889,8 @@ def write_markdown_summary(summary: List[Dict], path: Path) -> None:
 _CASE_FILES = {
     "force_only"       : "kirchhoff_gt_force_only.npz",
     "transverse_force" : "kirchhoff_gt_transverse_force.npz",
+    "local_transverse_force": "kirchhoff_gt_local_transverse_force.npz",
+    "local_moment_only": "kirchhoff_gt_local_moment_only.npz",
     "moment_only"      : "kirchhoff_gt_moment_only.npz",
 }
 
@@ -897,7 +905,13 @@ def main() -> None:
     parser.add_argument("--save-dir",  default="gt_data_constrained/results",
                         help="output folder for results (NEW — does not overwrite old results)")
     parser.add_argument("--cases", nargs="+",
-                        choices=["force_only", "transverse_force", "moment_only"],
+                        choices=[
+                            "force_only",
+                            "transverse_force",
+                            "local_transverse_force",
+                            "local_moment_only",
+                            "moment_only",
+                        ],
                         default=["force_only", "transverse_force", "moment_only"])
     parser.add_argument("--gamma",         type=int,   default=GAMMA_DEFAULT)
     parser.add_argument("--alpha",         type=float, default=ALPHA_DEFAULT)

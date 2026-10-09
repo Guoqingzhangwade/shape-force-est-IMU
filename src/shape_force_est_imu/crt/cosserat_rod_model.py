@@ -167,14 +167,22 @@ class CosseratRodModel:
                            tau: np.ndarray,
                            f_ext: np.ndarray | None = None,
                            l_ext: np.ndarray | None = None,
+                           f_ext_body: np.ndarray | None = None,
+                           l_ext_body: np.ndarray | None = None,
                            guess: np.ndarray | None = None,
                            return_states: bool = False,
                            s_eval: Union[None, Sequence[float]] = None,
                            solver_opts: dict | None = None):
         tau = np.asarray(tau, dtype=float).ravel()
         assert tau.size == self.n_tendon, "tau length ≠ n_tendon"
+        if f_ext_body is not None and f_ext is not None:
+            raise ValueError("Specify either f_ext (world) or f_ext_body, not both")
+        if l_ext_body is not None and l_ext is not None:
+            raise ValueError("Specify either l_ext (world) or l_ext_body, not both")
         f_ext = np.zeros(3) if f_ext is None else np.asarray(f_ext, dtype=float)
         l_ext = np.zeros(3) if l_ext is None else np.asarray(l_ext, dtype=float)
+        f_ext_body = None if f_ext_body is None else np.asarray(f_ext_body, dtype=float)
+        l_ext_body = None if l_ext_body is None else np.asarray(l_ext_body, dtype=float)
 
         def shoot(x):
             """Residual of tip equilibrium for optimiser."""
@@ -222,8 +230,11 @@ class CosseratRodModel:
             Lmom = sum([-ti / max(norm(pb), 1e-12) * np.cross(R_L @ ri, R_L @ pb)
                         for ti, ri, pb in zip(tau, self.r, pb_dot)])
 
-            res = np.hstack([n_L - F - f_ext,
-                             m_L - Lmom - l_ext])
+            f_tip = f_ext if f_ext_body is None else R_L @ f_ext_body
+            l_tip = l_ext if l_ext_body is None else R_L @ l_ext_body
+
+            res = np.hstack([n_L - F - f_tip,
+                             m_L - Lmom - l_tip])
             return res
 
         # Default guess
