@@ -1,0 +1,37 @@
+{
+  "source_head": "9a994c4dde921c07150072fa55c8bf3f19d0364f",
+  "diagnostic_scope": "Local sensitivity on one saved physical case; fixed tensions; no refitting or new estimator.",
+  "production_modified": false,
+  "existing_data_and_historical_results_modified": false,
+  "planned_existing_file_edit": "diagnostics/oracle_ekf_gap/README.md (index only)",
+  "case_count": 1,
+  "controlled_perturbations": 8,
+  "H_fd_max_relative_error": 3.7163906344937564e-10,
+  "full_wrench_derivative_max_relative_error": 3.734383309499543e-09,
+  "A_half_step_relative_change": 4.566079831912962e-09,
+  "all_original_body_pinv_modes_retained": true,
+  "original_row_weighting_preserved": true,
+  "fixed_observations_and_tensions": true,
+  "no_refitting_or_ekf_updates": true,
+  "response_operator_interpretation": "State-induced residual changes; compensating external residual increments has opposite sign. Norms are not EKF covariance.",
+  "maximum_H_direction_gain_A": 1.7174553315617795,
+  "full_response_operator_norm_A": 1.7454960649861024,
+  "diagnostic_script_hashes": {
+    "diagnose_sensitivity.py": "ddf75040d64f9ca5e749c32c47333768f527125c1eb3db8b96733de3e3b0a3e7",
+    "render_figures.py": "9837664eed4b392da2917cc23e991a776b7f746be38556def6b9317a53649028",
+    "sensitivity_math.py": "750942aedc4940dbf2d3f83e09c208a8c0e731e54c559fd3539303b7666a6096"
+  },
+  "results_sha256": "0925633e818a3fe7e71af5ab9d7545c2430c9f1f71e270b2a27b7c070c451d0b",
+  "figure_sha256": {
+    "controlled_perturbations.png": "077a8b696539cedfd9da95613685cb2745f0eed238ba8fa5c0194365d66498fd",
+    "local_sensitivity_spectra.png": "3ce169c1bfe62b32b011823a63d03e59a3fb5c7a7c2262aaaabf0dae8a2899ff"
+  },
+  "preexisting_file_preservation": {
+    "baseline_tracked_noncache_files": 461,
+    "all_unchanged_except_readme_index": true,
+    "permitted_index_file": "diagnostics/oracle_ekf_gap/README.md",
+    "index_original_sha256": "5ae89763a3a0b2e2f1eb7fdd99de31661ab8cd4195e32c0ede3febb8bb74f176",
+    "index_updated_sha256": "9f7afb30513a5e1c2c5fdab5319516284ccc4430af07c2477a1af88dd92fa9af",
+    "no_production_dataset_or_historical_report_edits": true
+  }
+}

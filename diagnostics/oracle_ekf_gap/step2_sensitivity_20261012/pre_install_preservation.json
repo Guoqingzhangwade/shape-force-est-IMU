@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-12T18:59:28.756171+00:00",
+  "scope": "Pre-install preservation of every baseline tracked non-cache file; read-only NEW",
+  "baseline_manifest_sha256": "5d9851d7c35c0b94a3ffb4d9bcc66a7438940af251ea28f54a4654a6921ec4d9",
+  "repo_root": "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU",
+  "baseline_head": "9a994c4dde921c07150072fa55c8bf3f19d0364f",
+  "current_head_before": "9a994c4dde921c07150072fa55c8bf3f19d0364f",
+  "current_head_after": "9a994c4dde921c07150072fa55c8bf3f19d0364f",
+  "status_before": "",
+  "status_after": "",
+  "baseline_tracked_hashed_count": 461,
+  "unchanged_tracked_count": 461,
+  "production_python_count": 49,
+  "production_python_unchanged_count": 49,
+  "changed_files": [],
+  "missing_files": [],
+  "added_tracked_paths": [],
+  "removed_tracked_paths": [],
+  "excluded_tracked_cache_count": 12,
+  "excluded_tracked_cache_files": [
+    "src/shape_force_est_imu/__pycache__/__init__.cpython-310.pyc",
+    "src/shape_force_est_imu/crt/__pycache__/__init__.cpython-310.pyc",
+    "src/shape_force_est_imu/crt/__pycache__/cosserat_rod_model.cpython-310.pyc",
+    "src/shape_force_est_imu/crt/__pycache__/cosserat_rod_model_inextensible.cpython-310.pyc",
+    "src/shape_force_est_imu/crt/__pycache__/utils.cpython-310.pyc",
+    "src/shape_force_est_imu/crt/__pycache__/virtual_work.cpython-310.pyc",
+    "src/shape_force_est_imu/ekf/__pycache__/__init__.cpython-310.pyc",
+    "src/shape_force_est_imu/ekf/__pycache__/common.cpython-310.pyc",
+    "src/shape_force_est_imu/ekf/__pycache__/ekf.cpython-310.pyc",
+    "src/shape_force_est_imu/ekf/__pycache__/jacobians.cpython-310.pyc",
+    "src/shape_force_est_imu/ekf/__pycache__/kinematics.cpython-310.pyc",
+    "src/shape_force_est_imu/ekf/__pycache__/quat.cpython-310.pyc"
+  ],
+  "saved_step1_dependencies_match": {
+    "compare_oracle_vs_ekf_wrench_estimation.py": true,
+    "evaluate_kirchhoff_shape_estimation.py": true,
+    "virtual_work.py": true,
+    "cosserat_rod_model.py": true,
+    "evaluate_kirchhoff_wrench_constrained.py": true,
+    "generate_kirchhoff_gt_dataset_constrained.py": true,
+    "gt_data/kirchhoff_gt_dataset.npz": true,
+    "gt_data/kirchhoff_imu_3imu.npz": true
+  },
+  "saved_step1_artifacts_match": {
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/after_abcd/results.json": true,
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/after_abcd/original_states.npz": true
+  },
+  "saved_state_checks": {
+    "A_dense_oracle": {
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "sample_count": 1,
+      "orientation_triplets": 1
+    },
+    "B_noiseless_sparse": {
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "sample_count": 1,
+      "orientation_triplets": 1
+    },
+    "C_noisy_sparse": {
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "sample_count": 1,
+      "orientation_triplets": 1
+    },
+    "D_production_ekf": {
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "sample_count": 1,
+      "orientation_triplets": 1
+    }
+  },
+  "information_budget_and_reuse": {
+    "physical_cases": 1,
+    "case_index": 0,
+    "case_id": 0,
+    "noise_realization": 0,
+    "gt_case_id": 0,
+    "imu_case_id": 0,
+    "order": [
+      2,
+      2,
+      1
+    ],
+    "dense_A_orientation_count": 100,
+    "B_noiseless_orientation_triplets": 1,
+    "C_D_same_saved_noisy_orientation_triplets": 1,
+    "D_static_frame_updates": 30,
+    "C_D_noise_is_reused_not_resampled": true,
+    "saved_noisy_frame_sha256": "2b518b05fe3bd9e3e3f13bd7c35dfbfe25a16d074694f854e524eac3f2469e48",
+    "actual_s": [
+      0.25252525252525254,
+      0.5050505050505051,
+      1.0
+    ],
+    "gamma": 10,
+    "alpha": 1.0,
+    "sigma_deg": 0.5,
+    "reuse_from_saved_metrics": [
+      "A_dense_oracle",
+      "B_noiseless_sparse",
+      "C_noisy_sparse",
+      "D_production_ekf"
+    ],
+    "refits_executed_by_this_verifier": 0,
+    "A_matches_npz_oracle": true,
+    "D_matches_npz_ekf": true
+  },
+  "passed": true,
+  "installation_exception_policy": {
+    "only_preexisting_edit_allowed": "diagnostics/oracle_ekf_gap/README.md (index update only)",
+    "require_preedit_raw_backup": true,
+    "baseline_readme_sha256": "5ae89763a3a0b2e2f1eb7fdd99de31661ab8cd4195e32c0ede3febb8bb74f176",
+    "new_step2_folder_must_be_explicitly_allowlisted": true
+  },
+  "candidate_driver_read_only_review": {
+    "path": "C:\\Users\\guoqi\\AppData\\Local\\Temp\\ekf_sensitivity_step2_20261012\\candidate\\diagnostics\\oracle_ekf_gap\\step2_sensitivity_20261012\\diagnose_sensitivity.py",
+    "raw_sha256": "ddf75040d64f9ca5e749c32c47333768f527125c1eb3db8b96733de3e3b0a3e7",
+    "source_commit_constant": "9a994c4dde921c07150072fa55c8bf3f19d0364f",
+    "source_guard": "Checks every saved Step 1 dependency raw hash; only .py files may fall back to equivalent LF/CRLF bytes verified against SOURCE_COMMIT. Binary datasets never normalized.",
+    "saved_state_reuse": "All four states read from saved metrics; A/D cross-checked against NPZ. No batch fitter or state refit called.",
+    "closure_capture": "Existing capture_closures calls production run_ekf_for_order with steps=0 only; no EKF updates and no replacement of saved D.",
+    "observation_budget": "Uses saved static R_meas[0,0] for all local Jacobians and actual-noise calculations. One triplet; no sequence file, resampling or division by sqrt(30).",
+    "head_and_artifact_guards": "Driver records HEAD/status, compares dependency/status preservation, and allows source-equivalent future commits; this pre-install manifest independently pins current HEAD and all saved artifact bytes to the clean 9a994c4 baseline.",
+    "code_review_result": "Consistent with one-case fixed-input A/B/C/D reuse and read-only production scope."
+  }
+}

@@ -1,6 +1,6 @@
 # Oracle–EKF audit evidence and diagnostic runners
 
-Start with [Step 1: production Frechet fix](step1_frechet_20261008/README.md) for the production change and its validation status. [recovered_diagnosis.md](recovered_diagnosis.md) preserves the earlier scientific diagnosis, and [recovered_manuscript_crosscheck.md](recovered_manuscript_crosscheck.md) records manuscript-to-result provenance. The existing reports preserve the original audit language and chronology. This English guide describes the portable runners and the limits of the saved evidence.
+Start with [Step 2: local orientation-to-wrench sensitivity](step2_sensitivity_20261012/README.md) for the latest fixed-case diagnosis. [Step 1: production Frechet fix](step1_frechet_20261008/README.md) records the preceding production correction and its validation. [recovered_diagnosis.md](recovered_diagnosis.md) preserves the earlier scientific diagnosis, and [recovered_manuscript_crosscheck.md](recovered_manuscript_crosscheck.md) records manuscript-to-result provenance. The existing reports preserve the original audit language and chronology. This English guide describes the portable runners and the limits of the saved evidence.
 
 ## Running a new diagnostic
 
