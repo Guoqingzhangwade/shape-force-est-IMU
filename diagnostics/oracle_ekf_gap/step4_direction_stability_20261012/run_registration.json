@@ -1,0 +1,11 @@
+{
+  "protocol_sha256": "6e15b57436946f5b07a658fb18371aac83b968a40eb5466db3c99555bd6d517f",
+  "head": "3508492ce7624d9b0cd53b3d84c0213d56f954dd",
+  "runner_sha256": {
+    "diagnose_recovered.py": "fce4a1cc485eef280223bc5f083f69c28aae7f09ac25e1dc108a55fecd172273",
+    "diagnose_sensitivity.py": "e0862a307322a01e33cade75ba35388805d28b3880b4aade84d7558bc9098f5f",
+    "sensitivity_math.py": "750942aedc4940dbf2d3f83e09c208a8c0e731e54c559fd3539303b7666a6096"
+  },
+  "pair_count": 250,
+  "workers": 6
+}

@@ -1,0 +1,36 @@
+{
+  "source_head": "3508492ce7624d9b0cd53b3d84c0213d56f954dd",
+  "production_modified": false,
+  "existing_data_and_historical_results_modified": false,
+  "tracked_files_modified": [
+    "diagnostics/oracle_ekf_gap/README.md"
+  ],
+  "protocol_sha256": "6e15b57436946f5b07a658fb18371aac83b968a40eb5466db3c99555bd6d517f",
+  "committed_step3_runners_match_registration": true,
+  "run_count": 250,
+  "nonzero_returncodes": 0,
+  "repo_status_after_runs": "",
+  "head_after_runs": "3508492ce7624d9b0cd53b3d84c0213d56f954dd",
+  "first_launch": "Stopped at its opening assertion before any run: protocol source_commit was mistyped; corrected to the real HEAD, no other change.",
+  "case_stability_rule_met": false,
+  "fraction_cases_abs_cos_at_least_0p9": 0.32,
+  "D_fraction_error_aligned": 0.876,
+  "C_fraction_error_aligned": 0.9,
+  "H_fd_max_relative_error": 2.7923046014370578e-09,
+  "J_fd_max_relative_error": 9.118557571612295e-09,
+  "summary_reproduced_byte_for_byte_from_compact_extraction": true,
+  "full_run_outputs_committed": false,
+  "post_hoc_analysis_not_in_protocol": "post_hoc block of results/summary.json and the layout interpretation in README.md",
+  "file_sha256": {
+    "completion.json": "c5da6e8b6355b5e51d3a8620f30a41cdbb4a5a8c861204da2f27679e49663a9d",
+    "orchestration_as_run/run_all.py": "c8d9faa4968eb48e8cd18da98a2bd46ac806eb4b0ea9cc9c3a00570b4be960db",
+    "protocol.json": "6e15b57436946f5b07a658fb18371aac83b968a40eb5466db3c99555bd6d517f",
+    "render_figures.py": "51529de64c497884dd9c8a5619ae91d9cbad65f599a0229d914008162cfbedf6",
+    "results/amplified_direction_summary.png": "66bab72f115550944f2f1d53e2d0af9fcddb501053cae44a623170e053f1eea1",
+    "results/per_run.csv": "3eef911494395c0abc7e172d0b7a9d49abf8d18d002e32e4ed9097fd79d2e0ba",
+    "results/runs_compact.json": "44eff30de8834ac669bc9272f0ba73e0bd4cd630c446cc1e7bd993a4c0e5d0ac",
+    "results/summary.json": "19f52e16f2ac61849c56c5e4488a5b33a834ee75dc37396e20d76d61d2bf5cbb",
+    "run_registration.json": "84f1121240c3ff59ded136e754d485f2c7f38c9c6721757e6ba0ec9a08ff8316",
+    "summarize_stability.py": "befafa0a4c2ada5b742243b95036648e54aecee6a0f477fd3265cc26bb3e2388"
+  }
+}
