@@ -1,0 +1,7 @@
+A: H scaled condition=7.32; wrench condition=740; full derivative FD error=3.71e-09
+B: H scaled condition=7.32; wrench condition=738; full derivative FD error=3.36e-09
+C: H scaled condition=7.32; wrench condition=667; full derivative FD error=4.97e-09
+D: H scaled condition=7.32; wrench condition=669; full derivative FD error=2.18e-09
+{"output": "C:\\Users\\guoqi\\AppData\\Local\\Temp\\ekf_confirmation_step3_20261012\\case_1\\sensitivity_verified", "H_condition_A": 7.319139351021624, "maximum_per_noise_gain_A": 1.558668166309962, "perturbation_count": 8, "inputs_sources_unchanged": true, "elapsed_seconds": 8.260706099681556}
+error: fsmonitor_ipc__send_query: unspecified error on '.git/fsmonitor--daemon.ipc'
+error: fsmonitor_ipc__send_query: unspecified error on '.git/fsmonitor--daemon.ipc'

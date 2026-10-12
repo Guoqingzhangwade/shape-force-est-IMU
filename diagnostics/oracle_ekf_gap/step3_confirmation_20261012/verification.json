@@ -1,0 +1,93 @@
+{
+  "source_head": "a33a6b8c03baaf2cb78f4c2f34f720dcc04c3d5a",
+  "diagnostic_scope": "Preregistered recurrence check of the Step 2 local sensitivity on existing cases 1 and 2, noise 0; case 0 as baseline.",
+  "production_modified": false,
+  "existing_data_and_historical_results_modified": false,
+  "protocol_sha256": "0d71efe030896fc09f080dee477b17d070275a77f21aca6a4b33b6ba48ced2ec",
+  "protocol_and_runner_match_run_registration": true,
+  "selected_case_ids": [
+    1,
+    2
+  ],
+  "new_cases_meeting_recurrence_rule": [
+    1,
+    2
+  ],
+  "descriptive_recurrence_threshold": 10.0,
+  "scaled_wrench_ratio_min_by_case": {
+    "0": 124.1280149626391,
+    "1": 124.96297224209009,
+    "2": 101.71058490579448
+  },
+  "force_ratio_min_by_case": {
+    "0": 173.71908850876594,
+    "1": 195.01817562121957,
+    "2": 134.3101101355796
+  },
+  "new_case_H_fd_max_relative_error": 3.2090111720934405e-10,
+  "new_case_full_wrench_derivative_max_relative_error": 4.97445375141659e-09,
+  "new_case_A_half_step_max_relative_change": 6.414946341900302e-09,
+  "case_0_parity_with_committed_step2_max_relative_difference": 0.0,
+  "post_install_case_1_rerun_from_installed_scripts": {
+    "fit_states_max_abs_difference": 0.0,
+    "sensitivity_max_relative_difference": 0.0,
+    "note": "Rerun outputs were written to a temporary directory and are not preserved."
+  },
+  "first_sensitivity_launch": "Cases 1 and 2 failed before computation on a path-handling error; logs preserved in first_attempt_path_failure/. First-launch script bytes not preserved.",
+  "post_hoc_analysis_not_in_protocol": "post_hoc_saved_state_decomposition in results/confirmation_summary.json",
+  "shared_noise_note": "Existing generator broadcasts each realization/sensor perturbation across cases; these are distinct physical cases with shared noise, not independent noise replicates",
+  "diagnostic_script_hashes": {
+    "diagnose_recovered.py": "fce4a1cc485eef280223bc5f083f69c28aae7f09ac25e1dc108a55fecd172273",
+    "diagnose_sensitivity.py": "e0862a307322a01e33cade75ba35388805d28b3880b4aade84d7558bc9098f5f",
+    "orchestration_as_run/prepare_sensitivity_driver.py": "82dd28f39be09c4c7d506890521044ba037fb354b99bf7ff131707767284fb1c",
+    "orchestration_as_run/run_case_fits.py": "75b94bdf5ae72a4a9f598489102e28a439b91a394d8e04b2881c7151953b19a5",
+    "orchestration_as_run/run_sensitivity.py": "384649ee3fb9eb4be63f742e747148482daa6e3c2697fead5aa8267bc4783917",
+    "render_figures.py": "640f881928554d78505f546d35690cb41cf8b1ece7ee2fb6ff3d582e93227dbd",
+    "sensitivity_math.py": "750942aedc4940dbf2d3f83e09c208a8c0e731e54c559fd3539303b7666a6096",
+    "summarize_confirmation.py": "1fe6582e1ced729c8b03be74b77cf17000836b4d01efd7e7c922545978d2bb48"
+  },
+  "results_sha256": {
+    "case_0/sensitivity_case_0_verified_command.json": "051a171a4dfe871f9c2c9b4010dcb4e4b633e80046fec195cd1b6067094bd545",
+    "case_0/sensitivity_verified/results.json": "94772238f5ebd10d5d631c530e877be1cdb34ed3b6ede6c71b61f7d5a4b46cda",
+    "case_0/sensitivity_verified/summary.csv": "0d0ccd1c232744c9413c928fb42dc7924ac83f63dadcf92d82a38669b7f10730",
+    "case_1/abcd/original_states.npz": "d32d1ac2eff6450781e38897253e948d3112ccfe421df02a1694a64744369c78",
+    "case_1/abcd/results.csv": "3c8ec9448b6112496eea9a2c5887100650059e9ffcf8fe37bdf61ac838cb44aa",
+    "case_1/abcd/results.json": "8c0abfee264c25dd5f051b03ae2248cd1a293920cfb4bd84800360db7352f790",
+    "case_1/abcd_command.json": "c8cdaa675dded39f056d4626b423450a81ee72e1923919405b2a3672e500f2bb",
+    "case_1/sensitivity_case_1_verified_command.json": "bad69ce2ce628742898b6822b01d04aca9ad0ac3c6e50d506f3d0bc4aad52eb4",
+    "case_1/sensitivity_verified/controlled_perturbations.png": "960a430b7237d7292617cd33106775502dbac498bb6b2d05211d14ee3f2915a4",
+    "case_1/sensitivity_verified/local_sensitivity_spectra.png": "dc5edf5ba24da44c37c60272b9867610340e702f7132a7a866510cf348a75ef1",
+    "case_1/sensitivity_verified/results.json": "4545560d00ed51c78e0e72a40b7997e5b2d30a29fc45c5385ceec45944f2210e",
+    "case_1/sensitivity_verified/summary.csv": "b40ea33af4ff0c322f168ee1021a4986a126ad4ae0e81b21f64c90a1f136f0b3",
+    "case_2/abcd/original_states.npz": "76fcfa0cff2395a77e7e14715384656a69d9ac8a71c7bd09270c9ec52b10c021",
+    "case_2/abcd/results.csv": "48534a03e3bf0c9ae1797652d7df0ca0a71318d54b2c54915b6f9e4feac0f1cd",
+    "case_2/abcd/results.json": "920b22292a4d19cc6dcb2d4dd6a422f098d1491820f29ca72c2b7f5b0812e123",
+    "case_2/abcd_command.json": "b84f09ecdae865335b29527409d07c650fe25d5ec791511830b07611a556b384",
+    "case_2/sensitivity_case_2_verified_command.json": "26f07b7a67f1273775cbcf151bad5a9fabc66bb5b3c7586120e66d65460faf0b",
+    "case_2/sensitivity_verified/controlled_perturbations.png": "89c3bfd518aaf390e57dec520db3bcdcbe05ea15fc86375e0897da09636c0488",
+    "case_2/sensitivity_verified/local_sensitivity_spectra.png": "af2bcaa8781737fb988448eb0a68b9433c053bccec2b013b00e561622cb62b33",
+    "case_2/sensitivity_verified/results.json": "0a445d4f2782dea5b6a1075bb490d62ffacbadd4bb723ddacd2382da282a7b03",
+    "case_2/sensitivity_verified/summary.csv": "20c7f3f29615282b2244212614ef59c74b7e57913f20dc446c60777d5009cffa",
+    "first_attempt_path_failure/case_0_parity/results.json": "f0beabae7d4560958a9183537c0ef4c209b9aaccac78e7c6de2c8a568d8a7ff0",
+    "first_attempt_path_failure/case_0_parity/summary.csv": "0d0ccd1c232744c9413c928fb42dc7924ac83f63dadcf92d82a38669b7f10730",
+    "first_attempt_path_failure/sensitivity_case_0_command.json": "a785fd0fbbb9c617a85f1babaca3464ed9c69a89885265ba44c4a4af758034d0",
+    "first_attempt_path_failure/sensitivity_case_1_command.json": "e916da527a25c938ae4535dc841039059afeaaa3c7ac0a48639bc75000a74d6d",
+    "first_attempt_path_failure/sensitivity_case_2_command.json": "8fc449bea9395b653de42791221dd4bddae84e669c7caedbecf6b4fac681440b",
+    "first_attempt_path_failure/sensitivity_completion.json": "51474fc70a82e539d651202912d30e9096965eb545c151b3c6ccaa75ebbefe60",
+    "protocol.json": "0d71efe030896fc09f080dee477b17d070275a77f21aca6a4b33b6ba48ced2ec",
+    "results/confirmation_summary.json": "7502b0bde2e3879b3ff82a6cbc5ea12e1799f2e182e4bc7f462e4f700ef3f76f",
+    "results/cross_case_summary.csv": "62ffe28cf6071b7a1548a6bc503110c4d042c3740fd22e2474e2b44a1dcce089",
+    "results/perturbations.csv": "636d66278e3328e0f91ee6374723517f7776b2313d8453ac14d25e56aafc7fbc",
+    "run_registration.json": "f8dd58d69ba50278f90d49238208f06a71a8503a0b0c8c8b995101f8d2320f58",
+    "sensitivity_verified_completion.json": "7470580311f55d8045211e66ee0b6d296fc383b6b2947fcb7ed4a94c9238f072"
+  },
+  "preexisting_file_preservation": {
+    "baseline_tracked_noncache_files": 473,
+    "all_unchanged_except_readme_index": true,
+    "permitted_index_file": "diagnostics/oracle_ekf_gap/README.md",
+    "index_original_sha256": "9f7afb30513a5e1c2c5fdab5319516284ccc4430af07c2477a1af88dd92fa9af",
+    "index_updated_sha256": "96a23ba8819d70fe30c53fbc6c9dbda23bebc4f3726f7903cbb79b3dccad0145",
+    "step2_directory_unchanged": true,
+    "no_production_dataset_or_historical_report_edits": true
+  }
+}

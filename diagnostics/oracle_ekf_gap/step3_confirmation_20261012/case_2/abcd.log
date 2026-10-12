@@ -1,0 +1,67 @@
+Dense-oracle and selected production EKF states saved.
+B_noiseless_sparse start 0 success True residual 0.0008857068379681927
+B_noiseless_sparse start 1 success True residual 0.0008857068379692073
+B_noiseless_sparse start 2 success True residual 0.0008857068379682245
+C_noisy_sparse start 0 success True residual 0.004902013952353851
+C_noisy_sparse start 1 success True residual 0.004902013952352144
+C_noisy_sparse start 2 success True residual 0.004902013952351379
+[
+  {
+    "method": "A_dense_oracle",
+    "sample_count": 1,
+    "fit_residual_noisy_norm_rad": 0.031993789187027,
+    "fit_residual_noiseless_norm_rad": 0.001176200945925989,
+    "shape_rms_all100_mm": 0.012210473634487708,
+    "historical_rms_field_mean20_mm": 0.0100470409953553,
+    "tip_mm": 0.015679929530246543,
+    "force_error_N": 0.0012311938450432125,
+    "force_direction_deg": 0.15492472484193048,
+    "force_error_over_F0": 0.004180279175316145,
+    "moment_error_world_tip_Nm": 1.8240011327855088e-05,
+    "moment_error_common_world_base_Nm": 4.8241191753629594e-06
+  },
+  {
+    "method": "B_noiseless_sparse",
+    "sample_count": 1,
+    "fit_residual_noisy_norm_rad": 0.0317984190035725,
+    "fit_residual_noiseless_norm_rad": 0.0008857068379681927,
+    "shape_rms_all100_mm": 0.009940061988051172,
+    "historical_rms_field_mean20_mm": 0.007070130990477528,
+    "tip_mm": 0.024115241286830458,
+    "force_error_N": 0.008869955184070922,
+    "force_direction_deg": 1.0870359475002354,
+    "force_error_over_F0": 0.030116207201034022,
+    "moment_error_world_tip_Nm": 0.00012252466488512422,
+    "moment_error_common_world_base_Nm": 7.423889370720767e-05
+  },
+  {
+    "method": "C_noisy_sparse",
+    "sample_count": 1,
+    "fit_residual_noisy_norm_rad": 0.004902013952351379,
+    "fit_residual_noiseless_norm_rad": 0.03143486125167184,
+    "shape_rms_all100_mm": 0.6835805244817971,
+    "historical_rms_field_mean20_mm": 0.5161553256901303,
+    "tip_mm": 1.6344909976571418,
+    "force_error_N": 0.406011040681353,
+    "force_direction_deg": 17.4001347844053,
+    "force_error_over_F0": 1.3785315002522014,
+    "moment_error_world_tip_Nm": 0.003639182034654429,
+    "moment_error_common_world_base_Nm": 0.0031777878489126165
+  },
+  {
+    "method": "D_production_ekf",
+    "sample_count": 1,
+    "fit_residual_noisy_norm_rad": 0.005065278874252727,
+    "fit_residual_noiseless_norm_rad": 0.031279744028961116,
+    "shape_rms_all100_mm": 0.6726490364963972,
+    "historical_rms_field_mean20_mm": 0.5027413987477649,
+    "tip_mm": 1.6174879017829398,
+    "force_error_N": 0.38834301200058585,
+    "force_direction_deg": 17.130911888163503,
+    "force_error_over_F0": 1.3185431461352206,
+    "moment_error_world_tip_Nm": 0.0034406903589582673,
+    "moment_error_common_world_base_Nm": 0.0030529550868756395
+  }
+]
+error: fsmonitor_ipc__send_query: unspecified error on '.git/fsmonitor--daemon.ipc'
+error: fsmonitor_ipc__send_query: unspecified error on '.git/fsmonitor--daemon.ipc'

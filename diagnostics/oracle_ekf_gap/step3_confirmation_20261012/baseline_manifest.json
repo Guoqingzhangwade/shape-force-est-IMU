@@ -1,0 +1,2200 @@
+{
+  "schema_version": 1,
+  "scope": "Read-only Step 3 baseline before outcome inspection; user-selected existing case IDs 1 and 2, noise0. No new data or estimator runs.",
+  "created_utc": "2026-10-12T19:49:15.106138+00:00",
+  "repo_root": "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU",
+  "head": "a33a6b8c03baaf2cb78f4c2f34f720dcc04c3d5a",
+  "branch": "diagnostic/oracle-ekf-gap",
+  "status_porcelain_v1_before": "",
+  "status_porcelain_v1_after": "",
+  "clean_before_and_after": true,
+  "git_tracked_path_count": 485,
+  "hashed_tracked_file_count": 473,
+  "total_hashed_bytes": 44377161,
+  "hash_algorithm": "SHA-256 of raw bytes; no line-ending normalization",
+  "tracked_files": {
+    ".gitattributes": {
+      "sha256": "099489145befcd9db0affd2d6f92a209587834360ebda3748645400f400ef8c3",
+      "size_bytes": 1316
+    },
+    ".gitignore": {
+      "sha256": "2fc5d6ad2e727ebb117d84dbd37b642ca69cd8fe398cc567496f7582c7b21ecd",
+      "size_bytes": 1407
+    },
+    "README.md": {
+      "sha256": "afaf92c2564f7274aa70f16cb5ed03ae1d5d0ce69bcd89703b089aee912e806b",
+      "size_bytes": 4751
+    },
+    "artifacts/data/dataset.npz": {
+      "sha256": "396df67640b685a7512687d7e5ed56bd5eff84fc74e2ab3aa7d0acd7aad87747",
+      "size_bytes": 17714
+    },
+    "artifacts/data/tdcr_gt_force_only.npz": {
+      "sha256": "c818eeb3a34722b755d7e551909bfe2a944feb3fde82545b0fe14f1c9da9b8a7",
+      "size_bytes": 37911
+    },
+    "artifacts/data/tdcr_gt_fx_fz_neg2.npz": {
+      "sha256": "8ce12e1e5e45dbc155f2fa7d724c5374e66ed76a9d933fe7d154127ac5479209",
+      "size_bytes": 4145
+    },
+    "artifacts/data/tdcr_gt_fx_neg05_tau10_inext.npz": {
+      "sha256": "9fcf388689cbf6821e15ed9b5f4ee1ec02b8c9279e0c81ffe51bdca472f933f9",
+      "size_bytes": 4142
+    },
+    "artifacts/data/tdcr_gt_fx_neg2.npz": {
+      "sha256": "a94a6d756f0739d64e6c8066c365cd084913939637fbf30c7b266bef97bf37b1",
+      "size_bytes": 4158
+    },
+    "artifacts/data/tdcr_gt_fx_neg2_inext.npz": {
+      "sha256": "7d67d42bd8a99c4daddaa50b4b2bdfe970e3a79866756397d63f4b746637a3d7",
+      "size_bytes": 4170
+    },
+    "artifacts/data/tdcr_gt_fx_neg2_tau10.npz": {
+      "sha256": "0c0c77c76656f05df7a1edbb09f76b559d4b96ddc6e53076b03620e04f412740",
+      "size_bytes": 4151
+    },
+    "artifacts/data/tdcr_gt_inext_1.npz": {
+      "sha256": "3121cab24e63c23d40002beed5fcc0a4e6516c9a817819c199eaa1fbd04c9cb7",
+      "size_bytes": 4846
+    },
+    "artifacts/data/tdcr_gt_inext_2.npz": {
+      "sha256": "a47d35b11e785023c73adcbe52d8078c9687de886415243e8b8cd815611de75a",
+      "size_bytes": 4915
+    },
+    "artifacts/data/tdcr_gt_inext_20.npz": {
+      "sha256": "db007cc26f1783eeb5e99ac4756e7d291f48af628b7e750d2f73de26a71e73fe",
+      "size_bytes": 19706
+    },
+    "artifacts/data/tdcr_gt_inext_5.npz": {
+      "sha256": "677f38c9702b7249c2882f5a8c96b25aea73029ca751289127a933e93dda69c9",
+      "size_bytes": 19692
+    },
+    "artifacts/data/tdcr_gt_inext_large.npz": {
+      "sha256": "a181c4afd47ddd2fe97b96665ff11d8afc253546194d8f2e81433d419f174708",
+      "size_bytes": 4851
+    },
+    "artifacts/data/tdcr_gt_inplane_xz_c02_n3.npz": {
+      "sha256": "8971753a53fdc868cbcbfb72e60d2543a2f3dabdcedc15095a9c3ed1c19c79fd",
+      "size_bytes": 10169
+    },
+    "artifacts/data/tdcr_gt_samples.npz": {
+      "sha256": "31fbc04b0299651e91806bc41ef94e7ce548d82f670987cbc57fefcbab68ab42",
+      "size_bytes": 38289
+    },
+    "artifacts/data/tdcr_gt_samples_10.npz": {
+      "sha256": "aaaa5b1ad51336503a1ca53f9397bfa4c8380c23637ef41b0b4c2e33ae1524a7",
+      "size_bytes": 38253
+    },
+    "artifacts/data/tdcr_gt_samples_100.npz": {
+      "sha256": "e683553adde5b01e1a93f6b3d315d53969f80021266aaba22c232f42ee9084cf",
+      "size_bytes": 371928
+    },
+    "artifacts/data/tdcr_inext_zero.npz": {
+      "sha256": "96853f5ab56d0ca96faf24f2dd6a1cc72b66642bff78c6fa0ff6629fdf189916",
+      "size_bytes": 4160
+    },
+    "artifacts/data/tdcr_meas_samples.npz": {
+      "sha256": "1031cd0963514d5e615ccd9df14a95b8cdb0d123e1139b9210675b78e70cd0fa",
+      "size_bytes": 2122
+    },
+    "artifacts/data/tdcr_meas_samples_10.npz": {
+      "sha256": "7fa2e693d51a0ecc754f6514fa5fada84e02639e4cb6c67fa72055b3e87d65aa",
+      "size_bytes": 2125
+    },
+    "artifacts/data/tdcr_meas_samples_100.npz": {
+      "sha256": "d38ed0a8c6d92cb611a0579dfb36c36950e572b0649de8a0965c8196aa8a9a71",
+      "size_bytes": 13165
+    },
+    "artifacts/figures/fig1_pose_error.pdf": {
+      "sha256": "46495800383315df448e8a83932a67078676182b32abad8b13b41dba3c5ba152",
+      "size_bytes": 17553
+    },
+    "artifacts/figures/fig1_pose_error_10.pdf": {
+      "sha256": "71da4773df1ec022d41eae5749c8d5cb1c4a03a246d408776984acb6b79d7d34",
+      "size_bytes": 17923
+    },
+    "artifacts/figures/fig1_pose_error_100.pdf": {
+      "sha256": "eebb661d282357390a05ca0041095d6bf041c42f7e22e92c19336c6b255a4a86",
+      "size_bytes": 18202
+    },
+    "diagnostics/oracle_ekf_gap/README.md": {
+      "sha256": "9f7afb30513a5e1c2c5fdab5319516284ccc4430af07c2477a1af88dd92fa9af",
+      "size_bytes": 10415
+    },
+    "diagnostics/oracle_ekf_gap/SYNC_WORKFLOW.md": {
+      "sha256": "0f295618088935a9c270b6ebce98656728f8ee96ad154f5a8ab341f71e91808d",
+      "size_bytes": 4489
+    },
+    "diagnostics/oracle_ekf_gap/after.json": {
+      "sha256": "9407ad2ba3c1843963aaa9428465ebcd8082ba0026f8302ff21c3441091f36ed",
+      "size_bytes": 9534
+    },
+    "diagnostics/oracle_ekf_gap/before.json": {
+      "sha256": "231ffecfa514a02bd48663573842c58b8977fb48ea6c3db63df50c6be7feb527",
+      "size_bytes": 9494
+    },
+    "diagnostics/oracle_ekf_gap/cli_command.json": {
+      "sha256": "1c6f77dbf73c0c708313f4903ad7286a08999e369247410f718edda7789c41ad",
+      "size_bytes": 939
+    },
+    "diagnostics/oracle_ekf_gap/cli_world_base.log": {
+      "sha256": "7ef3aabd1515d24bcfd332a9bd3f39ac32c5fba30afd4ea795ec33277740f296",
+      "size_bytes": 804
+    },
+    "diagnostics/oracle_ekf_gap/dataset_inventory.json": {
+      "sha256": "85e2752ef742397cbd9c45a8f35c91cb54b410b6cf7594263fd4c5b15bd00244",
+      "size_bytes": 10336
+    },
+    "diagnostics/oracle_ekf_gap/diagnose.py": {
+      "sha256": "8706654a80d1983b3499f1d60cd6da0e4f2fb2f12bb76ca6b275ac56fe4b454f",
+      "size_bytes": 10853
+    },
+    "diagnostics/oracle_ekf_gap/diagnosis.md": {
+      "sha256": "36bb9261c4bdb9078ddcbbacf6ccd0c21ff5c3f952bc5d705184863c99ad8c95",
+      "size_bytes": 14190
+    },
+    "diagnostics/oracle_ekf_gap/history_evidence.md": {
+      "sha256": "72b70b84c4670bc0ae87071ae767ca50abcaa419bf937e32168d3f9f90a2a4c1",
+      "size_bytes": 10060
+    },
+    "diagnostics/oracle_ekf_gap/manuscript_crosscheck.md": {
+      "sha256": "2e55504b304e076cb36348b0302a29e0c3b44f78ddb11bc98a5b790c2c962761",
+      "size_bytes": 13167
+    },
+    "diagnostics/oracle_ekf_gap/manuscript_reference.json": {
+      "sha256": "463b37b4db1b3b0e0fdd4a739977f05b63a28aa84e565e459fb30a76517e9c54",
+      "size_bytes": 4455
+    },
+    "diagnostics/oracle_ekf_gap/recovered_diagnosis.md": {
+      "sha256": "35fd3443c4377dd87dcf115b39cf53b2666042b7b4f129389ede47e0dd1257d5",
+      "size_bytes": 12175
+    },
+    "diagnostics/oracle_ekf_gap/recovered_manuscript_crosscheck.md": {
+      "sha256": "386be7ae7fe0f85713c514c9e30cb7868f50ffe234d023037eebe8cfd79e2ce0",
+      "size_bytes": 13834
+    },
+    "diagnostics/oracle_ekf_gap/recovered_pipeline_notes.md": {
+      "sha256": "dcf09a5e42072752fc21ed6bda8b323a5e2f7a01bcc317453946bf1f09b8af7d",
+      "size_bytes": 9158
+    },
+    "diagnostics/oracle_ekf_gap/recovered_run/check_jacobian.py": {
+      "sha256": "2a577ae72e50887d1fd95b87f43334ee061c3b6d4d5921acdf4fdeb1c9867959",
+      "size_bytes": 14996
+    },
+    "diagnostics/oracle_ekf_gap/recovered_run/diagnose_recovered.py": {
+      "sha256": "ec4e8da1c4ab9b01924f6d491da20f5fd2f16ef68fd5eff84feb34f95213be6e",
+      "size_bytes": 15669
+    },
+    "diagnostics/oracle_ekf_gap/recovered_run/jacobian_correction.json": {
+      "sha256": "eef2525fded22b3eb3ad23f71dcecbe7407ba24ae5975419872024ae1e6c4745",
+      "size_bytes": 20657
+    },
+    "diagnostics/oracle_ekf_gap/recovered_run/jacobian_correction.patch": {
+      "sha256": "f1fe01f7aeb093823894ad5c7afca999050b9d3890ba6efdd58267d2430c8efd",
+      "size_bytes": 827
+    },
+    "diagnostics/oracle_ekf_gap/recovered_run/original_states.npz": {
+      "sha256": "db010090d4331fa43bd760bfc146e7cca91de6093cf33b6d592d543ae6b62862",
+      "size_bytes": 520
+    },
+    "diagnostics/oracle_ekf_gap/recovered_run/results.csv": {
+      "sha256": "f97c53d4ce724498689c1daac42a7a3cfb41977407ea55b1ff6e5232f0f69909",
+      "size_bytes": 1515
+    },
+    "diagnostics/oracle_ekf_gap/recovered_run/results.json": {
+      "sha256": "d57cdd47ab73be3178ae00e208931a1420a9bd613c34bcc345bb7369e24ffe26",
+      "size_bytes": 19449
+    },
+    "diagnostics/oracle_ekf_gap/recovered_run/results_before_metric_index_fix.csv": {
+      "sha256": "5dc656bba42cb9ce81f3ca6fa8fef7ad30f75574d9095d26da6d543553a9a415",
+      "size_bytes": 1517
+    },
+    "diagnostics/oracle_ekf_gap/recovered_run/results_before_metric_index_fix.json": {
+      "sha256": "b9e29fa4b8fabdbe894a474144c18422619965ebfa0d797e58635e78cb483bda",
+      "size_bytes": 18683
+    },
+    "diagnostics/oracle_ekf_gap/recovered_run/verification.json": {
+      "sha256": "cb6a9f263bea584af935823c5f11546d1ea074801b49ded979f0f65ec9e08d08",
+      "size_bytes": 1844
+    },
+    "diagnostics/oracle_ekf_gap/repo_reconciliation_20261008/README.md": {
+      "sha256": "4d38293fb8adaa72c9d9bea6bfb7110af39b9e1d0f4eab38194ff5de022d1b97",
+      "size_bytes": 2597
+    },
+    "diagnostics/oracle_ekf_gap/repo_reconciliation_20261008/modified_source_snapshot/src/shape_force_est_imu/crt/cosserat_rod_model.py": {
+      "sha256": "150b3c27cadd35d9197fb6183e8e81c90b5eeb83b2689ba417a6d3f078114c81",
+      "size_bytes": 10627
+    },
+    "diagnostics/oracle_ekf_gap/repo_reconciliation_20261008/modified_source_snapshot/src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_constrained.py": {
+      "sha256": "9cdb3036db092f4afcc98effeb3f5fe578aeec5985fb2d52e968b01c394db109",
+      "size_bytes": 37834
+    },
+    "diagnostics/oracle_ekf_gap/repo_reconciliation_20261008/modified_source_snapshot/src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset_constrained.py": {
+      "sha256": "6a8eb4824a6d979dee4816f4b39f5083507a1b7fe355f797bc9f0aa8e9fcfe06",
+      "size_bytes": 28014
+    },
+    "diagnostics/oracle_ekf_gap/repo_reconciliation_20261008/new_repo_uncommitted.patch": {
+      "sha256": "787cbcae193d11b3ce2d0a169e47e2d18c32b9cdc689f00aaf4df0001cc0858f",
+      "size_bytes": 21107
+    },
+    "diagnostics/oracle_ekf_gap/repo_reconciliation_20261008/reconciliation.json": {
+      "sha256": "56c3f081a72c2740018431914200f1e7dac9442aaa1ef739b34d630229126904",
+      "size_bytes": 2508
+    },
+    "diagnostics/oracle_ekf_gap/results.csv": {
+      "sha256": "1f77cc5d88f16aad9963ad8c58d2a86ec27a41217969892fbdfc45c1d20d6022",
+      "size_bytes": 856
+    },
+    "diagnostics/oracle_ekf_gap/source_changes.patch": {
+      "sha256": "08275c0224a0f187d4848bff8c985492d15781e25ef46c02f801789bcc1e8c8c",
+      "size_bytes": 1983
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/README.md": {
+      "sha256": "6650a1cc7b826cc6fdad82284bc61d63ee1727d1901733b841d2c713dcda5af1",
+      "size_bytes": 3556
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/after_abcd.log": {
+      "sha256": "9a0db24e0290a713fc72a9fb936070f017789244db96731da67ff57559cddd9f",
+      "size_bytes": 2844
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/after_abcd/original_states.npz": {
+      "sha256": "43250030f7eb5e899da8261a024c274484310c38798334a12fb89f9634059414",
+      "size_bytes": 521
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/after_abcd/results.csv": {
+      "sha256": "5c056f6b467a3fbce082ead09265ce7b48ffeadebf1c456d131951353fc5b993",
+      "size_bytes": 1565
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/after_abcd/results.json": {
+      "sha256": "c32b2c216b33a0ae7bb81a18397f5544fb5e5bb57d2cd7b71c2231d908be849c",
+      "size_bytes": 19135
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/after_abcd_command.json": {
+      "sha256": "39eb6f6836e7737fab92887b683f75687a87a93d37e725a733911dbe4f7b6773",
+      "size_bytes": 544
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/after_jacobian.log": {
+      "sha256": "6ab3aec211c32de38fdc7deec0e6159afddbe4ed2edf9e23874c45785db1a33c",
+      "size_bytes": 3649
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/after_jacobian/jacobian_correction.json": {
+      "sha256": "73a9b66d0124ced0e2d4a208d14b2fb5e10e8715f814bb3f36cc2c9c9a95c597",
+      "size_bytes": 22001
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/after_jacobian/jacobian_correction.patch": {
+      "sha256": "f1fe01f7aeb093823894ad5c7afca999050b9d3890ba6efdd58267d2430c8efd",
+      "size_bytes": 827
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/after_jacobian_command.json": {
+      "sha256": "f24438aedc4f03714a290d1dcf7ec1c0d2da2779f7f617b2f8036d9925014fc7",
+      "size_bytes": 616
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/baseline_manifest.json": {
+      "sha256": "224a2db08bd2172a478d5838a73833936954266012b5da3c49edfb2e27e9ad4b",
+      "size_bytes": 4788
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/before_abcd.log": {
+      "sha256": "55b8fa9ee7a2afdcf7f1dddc3cfc0cec56543bb19b01bb4e6a8abb8d16e1e4eb",
+      "size_bytes": 2989
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/before_abcd/original_states.npz": {
+      "sha256": "db010090d4331fa43bd760bfc146e7cca91de6093cf33b6d592d543ae6b62862",
+      "size_bytes": 520
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/before_abcd/results.csv": {
+      "sha256": "f97c53d4ce724498689c1daac42a7a3cfb41977407ea55b1ff6e5232f0f69909",
+      "size_bytes": 1515
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/before_abcd/results.json": {
+      "sha256": "17f73cd5d867a362436c141352c1027afbe304d3c3d07b59b98e6a4aefd401f1",
+      "size_bytes": 18610
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/before_abcd_command.json": {
+      "sha256": "2036d39873fa99c4f879aef22ca4df82fc158318607b55c18dbc365cd470d0a3",
+      "size_bytes": 545
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/before_after.csv": {
+      "sha256": "768594eaa53b7c27e262a0470c6ea72725546114e0eadc21462b4bed818032a8",
+      "size_bytes": 817
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/before_jacobian.log": {
+      "sha256": "3bb42fcf92eefbe47ce2fe067e004e09f10caa41392f7bef4096e4c44e4fe000",
+      "size_bytes": 3644
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/before_jacobian/jacobian_correction.json": {
+      "sha256": "6e92a92bcd7a289c5aaef55ab08daf5cbc4f11357fa85bef043e1aa133ae5073",
+      "size_bytes": 21010
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/before_jacobian/jacobian_correction.patch": {
+      "sha256": "f1fe01f7aeb093823894ad5c7afca999050b9d3890ba6efdd58267d2430c8efd",
+      "size_bytes": 827
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/before_jacobian_command.json": {
+      "sha256": "f47c13338e768859c940194ed0401df3a6e140de4357a9b4c643e3f7a74b1a78",
+      "size_bytes": 545
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/regression_before.log": {
+      "sha256": "41b6ef506e85d508214ab08f8536698370b655d304fd9f2e74508d6139ce3aca",
+      "size_bytes": 885
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/regression_candidate.log": {
+      "sha256": "0920dacf3fb8d6aeb50fd943624bbc5a12bf70cdbe3b7e7c24d021cb806b395f",
+      "size_bytes": 463
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/regression_production.log": {
+      "sha256": "0920dacf3fb8d6aeb50fd943624bbc5a12bf70cdbe3b7e7c24d021cb806b395f",
+      "size_bytes": 463
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/regression_production_command.json": {
+      "sha256": "3823962ae44f4394b723148dbbf778dec31eafd5d137562ff2fb034b63e2aaa1",
+      "size_bytes": 305
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/regression_validation.json": {
+      "sha256": "7b41edac4332944779fe28a9f8a532a298bc012d7beb9daa2c2a05a4f179a838",
+      "size_bytes": 8622
+    },
+    "diagnostics/oracle_ekf_gap/step1_frechet_20261008/verification.json": {
+      "sha256": "5b915542be63eeb41a6cc0be2eea604e83c0deaf353746b0dfa08a469b953da5",
+      "size_bytes": 11073
+    },
+    "diagnostics/oracle_ekf_gap/step2_sensitivity_20261012/README.md": {
+      "sha256": "b57a04881b569361bf263682e40284d281e41ce51788130fa1c034a1a568b687",
+      "size_bytes": 10207
+    },
+    "diagnostics/oracle_ekf_gap/step2_sensitivity_20261012/baseline_manifest.json": {
+      "sha256": "5d9851d7c35c0b94a3ffb4d9bcc66a7438940af251ea28f54a4654a6921ec4d9",
+      "size_bytes": 107333
+    },
+    "diagnostics/oracle_ekf_gap/step2_sensitivity_20261012/diagnose_sensitivity.py": {
+      "sha256": "ddf75040d64f9ca5e749c32c47333768f527125c1eb3db8b96733de3e3b0a3e7",
+      "size_bytes": 16356
+    },
+    "diagnostics/oracle_ekf_gap/step2_sensitivity_20261012/pre_install_preservation.json": {
+      "sha256": "2a470d0be3dd10befd21a312b4aa0e1b15e3e60e265faac2cf27f42e09d31d6c",
+      "size_bytes": 5944
+    },
+    "diagnostics/oracle_ekf_gap/step2_sensitivity_20261012/render_figures.py": {
+      "sha256": "9837664eed4b392da2917cc23e991a776b7f746be38556def6b9317a53649028",
+      "size_bytes": 8946
+    },
+    "diagnostics/oracle_ekf_gap/step2_sensitivity_20261012/results/controlled_perturbations.png": {
+      "sha256": "077a8b696539cedfd9da95613685cb2745f0eed238ba8fa5c0194365d66498fd",
+      "size_bytes": 168827
+    },
+    "diagnostics/oracle_ekf_gap/step2_sensitivity_20261012/results/local_sensitivity_spectra.png": {
+      "sha256": "3ce169c1bfe62b32b011823a63d03e59a3fb5c7a7c2262aaaabf0dae8a2899ff",
+      "size_bytes": 196115
+    },
+    "diagnostics/oracle_ekf_gap/step2_sensitivity_20261012/results/perturbations.csv": {
+      "sha256": "f78e66cc396a8daae350fba0365d79541c3e8ae4074879dd6de1d91979bf22c1",
+      "size_bytes": 1114
+    },
+    "diagnostics/oracle_ekf_gap/step2_sensitivity_20261012/results/results.json": {
+      "sha256": "0925633e818a3fe7e71af5ab9d7545c2430c9f1f71e270b2a27b7c070c451d0b",
+      "size_bytes": 112400
+    },
+    "diagnostics/oracle_ekf_gap/step2_sensitivity_20261012/results/summary.csv": {
+      "sha256": "0d0ccd1c232744c9413c928fb42dc7924ac83f63dadcf92d82a38669b7f10730",
+      "size_bytes": 560
+    },
+    "diagnostics/oracle_ekf_gap/step2_sensitivity_20261012/sensitivity_math.py": {
+      "sha256": "750942aedc4940dbf2d3f83e09c208a8c0e731e54c559fd3539303b7666a6096",
+      "size_bytes": 5711
+    },
+    "diagnostics/oracle_ekf_gap/step2_sensitivity_20261012/verification.json": {
+      "sha256": "373e3e06b56def60aa0ce4e84a29985e7eb71543c9978c07b24856b3ac6cb2ed",
+      "size_bytes": 2134
+    },
+    "diagnostics/oracle_ekf_gap/sync_20261008_manifest.json": {
+      "sha256": "c1dd03d5850eb55d95d71c58196672274f856c95da1bef563262904fc2965359",
+      "size_bytes": 52971
+    },
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/abcd_validation.log": {
+      "sha256": "eb20be29378b2847801426a2807620cc97719a3943b80db42f8f5881e3c84a27",
+      "size_bytes": 3340
+    },
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/canonical_environment.json": {
+      "sha256": "ff2a885811730c14582132612e0d50a7cc293488162a6c96d53a349f698ab65a",
+      "size_bytes": 1849
+    },
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/cli_validation.log": {
+      "sha256": "7ef3aabd1515d24bcfd332a9bd3f39ac32c5fba30afd4ea795ec33277740f296",
+      "size_bytes": 804
+    },
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/jacobian_validation.log": {
+      "sha256": "3bb42fcf92eefbe47ce2fe067e004e09f10caa41392f7bef4096e4c44e4fe000",
+      "size_bytes": 3644
+    },
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/legacy_compatibility.json": {
+      "sha256": "98c7b9d860cef11c1fda1248ef4353dcf5296a7cca2adaf9b651258a5aa5a9f4",
+      "size_bytes": 9536
+    },
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/legacy_compatibility.log": {
+      "sha256": "85f081aa1d9044b04dc269e0ec72a790d4dcc2c21ea9c3f868b51fd4fb2eb2a5",
+      "size_bytes": 2130
+    },
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/mechanics_validation.json": {
+      "sha256": "f3e803ac3127946725f806b5449e5ed89bfaa6ff4b71cfb5ace1c6df9c3a5010",
+      "size_bytes": 5868
+    },
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/mechanics_validation.log": {
+      "sha256": "4564c66a06a37b17e7e5a8def1bffd591ab462d4f5b3860d2e5ec47b5725f71f",
+      "size_bytes": 2987
+    },
+    "diagnostics/oracle_ekf_gap/sync_validation_20261008/verification.json": {
+      "sha256": "d81be80d8a8962320e388645c6f14ebd41a987b0531b22eaab435dbf1d997fc3",
+      "size_bytes": 1564
+    },
+    "diagnostics/oracle_ekf_gap/synced_abcd_20261008/original_states.npz": {
+      "sha256": "db010090d4331fa43bd760bfc146e7cca91de6093cf33b6d592d543ae6b62862",
+      "size_bytes": 520
+    },
+    "diagnostics/oracle_ekf_gap/synced_abcd_20261008/results.csv": {
+      "sha256": "f97c53d4ce724498689c1daac42a7a3cfb41977407ea55b1ff6e5232f0f69909",
+      "size_bytes": 1515
+    },
+    "diagnostics/oracle_ekf_gap/synced_abcd_20261008/results.json": {
+      "sha256": "6f9e7bec7ee4b84da64a344f4f5a6f6732f58417c73d1bab809bc7f4495fe760",
+      "size_bytes": 18990
+    },
+    "diagnostics/oracle_ekf_gap/synced_jacobian_20261008/jacobian_correction.json": {
+      "sha256": "23429a6c5cf51433bc484a81d62dd84ceb601efd358e0f2a4c39f1e23798c934",
+      "size_bytes": 20909
+    },
+    "diagnostics/oracle_ekf_gap/synced_jacobian_20261008/jacobian_correction.patch": {
+      "sha256": "f1fe01f7aeb093823894ad5c7afca999050b9d3890ba6efdd58267d2430c8efd",
+      "size_bytes": 827
+    },
+    "diagnostics/oracle_ekf_gap/verification.json": {
+      "sha256": "0d4fd8440130172dbd809a1044bc3894d4d1cb13b8a07ec3ea203cd394e1f748",
+      "size_bytes": 1209
+    },
+    "docs/CONVENTIONS.md": {
+      "sha256": "47d9c408f65a28518c6259e40a023ccd0b4e78ae7ec41ff991d7c0154778a419",
+      "size_bytes": 1727
+    },
+    "meas_model_comparison_results.csv": {
+      "sha256": "ee5f0f916f71d587d8d880a16134609ebbcb9c923c9d0804d9cd1f4197effed7",
+      "size_bytes": 1579
+    },
+    "meas_model_comparison_results.json": {
+      "sha256": "4856c7e189e8d126e9727d5d790640d0e0cd1d95e3f1fd6ee369727c1b0d28b9",
+      "size_bytes": 2837
+    },
+    "notes/progress.md": {
+      "sha256": "3df1af0aeeb92dc9616c31ef5e73cd557e12a9c0f7209a183b689534444a17bb",
+      "size_bytes": 1566
+    },
+    "progress/2026-02-17_repo_cleanup_and_model_selection.md": {
+      "sha256": "3f30d643a0830ecf7072a3f1af3fec8389631f13176acc276020654107ad47e5",
+      "size_bytes": 3401
+    },
+    "progress/2026-04-17_sensor-placement-and-quat-jacobian.md": {
+      "sha256": "1c1f7250221da32e381cd2f8fb3b3ecf59800ec8e520950f75c9e1a7e14d2e7a",
+      "size_bytes": 1760
+    },
+    "progress/2026-04-19_formulation-compare-and-sensor-placement.md": {
+      "sha256": "01dbf1c1900d33a06f13fd90a8469948680f49d0beddd5fb4126fb58d5b9c95a",
+      "size_bytes": 4112
+    },
+    "progress/TEMPLATE.md": {
+      "sha256": "06a8971abbf95b205813fc6d91403d8bdbb9d930fe293650fa603ab9a45d832b",
+      "size_bytes": 194
+    },
+    "requirements.txt": {
+      "sha256": "6d90b0c973750cb328f74513eb82119d3954682a666e99376fa928ea784cbe15",
+      "size_bytes": 64
+    },
+    "results/meas_model_compare/fig1_comparison.pdf": {
+      "sha256": "78de507d97d8dcd347691a16f725a5662fb0ec44f6dea06956514204fadab601",
+      "size_bytes": 22318
+    },
+    "results/meas_model_compare/fig1_comparison.png": {
+      "sha256": "416d8fdcffa021f6e5c8ff0de4fee7a3b4717d07126b9eabd0ab0b5fb254f018",
+      "size_bytes": 125870
+    },
+    "results/meas_model_compare/fig1_main_convergence.pdf": {
+      "sha256": "5cb12b7993ee3d23eaf09befed6b6492fdaea182aff01031bf8f7da414bbe351",
+      "size_bytes": 25374
+    },
+    "results/meas_model_compare/fig1_main_convergence.png": {
+      "sha256": "92ee6cca1bbbade6e6e91b91002ac7014a90475ba60008f0e7aac333e89fff58",
+      "size_bytes": 74655
+    },
+    "results/meas_model_compare/fig2_main_shape_reconstruction.pdf": {
+      "sha256": "77efad8ec67470b6d57726925b392821f48b4aa7227860d5ed2d5ef804e6da69",
+      "size_bytes": 32666
+    },
+    "results/meas_model_compare/fig2_main_shape_reconstruction.png": {
+      "sha256": "a921d9820074fa5bca6772588dc15f187fe29fa8c02ea3306cd5795da554f66b",
+      "size_bytes": 193476
+    },
+    "results/meas_model_compare/fig2_shape_comparison.pdf": {
+      "sha256": "cc9e5669eb32e4927f8450a69b18aa4b16abe47d7d29839ddd4915001b875781",
+      "size_bytes": 44305
+    },
+    "results/meas_model_compare/fig2_shape_comparison.png": {
+      "sha256": "16a55da7af43f89fa56b413965d3ce25756f55e04ea041ebd292df84d388b5ca",
+      "size_bytes": 269145
+    },
+    "results/meas_model_compare/figA1_appendix_comparison.pdf": {
+      "sha256": "a3182a15ea86ff5e2e8e214b5cd45c923d5ff9414a2eb40343dcbb02c45d2b41",
+      "size_bytes": 21346
+    },
+    "results/meas_model_compare/figA1_appendix_comparison.png": {
+      "sha256": "53339523ace77d59436438857116779ad68074ad5f933cef802e7747a705eda5",
+      "size_bytes": 59879
+    },
+    "results/meas_model_compare/figA2_appendix_all_shapes.pdf": {
+      "sha256": "2d29fbd077a1fd292cbafb300d53b184cc68cee69d662fa22aa51522ddfa0cb8",
+      "size_bytes": 44161
+    },
+    "results/meas_model_compare/figA2_appendix_all_shapes.png": {
+      "sha256": "f3ed141167d0ee903a156a4cff9c883e1150cbc11db2f207b9a9cc48b193ec8a",
+      "size_bytes": 268347
+    },
+    "results/meas_model_compare/table1_comparison.tex": {
+      "sha256": "7105d32e5934c577b41477b70a2cf6adb2acf51cdedb4236028a56199258d2b1",
+      "size_bytes": 625
+    },
+    "results/meas_model_compare/table1_main_performance.tex": {
+      "sha256": "6b19aff30afd2868fd03b0fd7cf263a07baaa6b4aabad466048c83db4ce27c9d",
+      "size_bytes": 472
+    },
+    "results/meas_model_compare/tableA1_appendix_comparison.tex": {
+      "sha256": "875768095ab419f52d4a1d268c378ff2f6094b1879ba5bc471fe0707a65a178e",
+      "size_bytes": 625
+    },
+    "results/shape_est/fig1_pose_error_10.pdf": {
+      "sha256": "608ee55f9e71c020c77892a6097b48f371c1359547f10a42e72177743081980b",
+      "size_bytes": 17923
+    },
+    "scripts/README.md": {
+      "sha256": "e85631386387e53801397911a17a17a59d7ec1607c98a505e72e32385cec5ce9",
+      "size_bytes": 2555
+    },
+    "scripts/archive/crt/3d_CR_with_disc_tendon.py": {
+      "sha256": "6a2713a06bd33320bc4d0207bb6499a1cfff31a3f7fc62e526b949bdfd8acfd7",
+      "size_bytes": 6400
+    },
+    "scripts/archive/crt/3d_CR_with_disc_tendon_plot_true_est.py": {
+      "sha256": "97dabdb63504c5daf68a78167c5d83b1dad31b6c3bd3264fb04baaf8b976fe22",
+      "size_bytes": 23799
+    },
+    "scripts/archive/crt/3d_CR_with_disc_tendon_sample_shape_gen.py": {
+      "sha256": "d63516f69dd8a3b3751afa5b8625da619f5d6da6b38742abbc792e44e1037264",
+      "size_bytes": 30669
+    },
+    "scripts/archive/crt/3d_CR_with_disc_tendon_v2.py": {
+      "sha256": "0a2b017aaf734e6d3c54f102db213add56c40474624264ac04579eb8073aa789",
+      "size_bytes": 23386
+    },
+    "scripts/archive/curve/3d_curve_FK_Lie_group.py": {
+      "sha256": "20fc891da291f35f9b5717178a06a5593eb4cf2eefe4cad41c9e7ff1da62b447",
+      "size_bytes": 2009
+    },
+    "scripts/archive/curve/3d_curve_test.py": {
+      "sha256": "011850628fae8cc28657951eab09703c2aaea011609ca2abf7d0ca9102c551e4",
+      "size_bytes": 7771
+    },
+    "scripts/archive/curve/3d_curve_test_9meas.py": {
+      "sha256": "27e1b044ef4b10098c136cd992004500e7a671e70f05821eaa020339417e3c7b",
+      "size_bytes": 7031
+    },
+    "scripts/archive/curve/3d_curve_test_Magnus.py": {
+      "sha256": "048f5116bfc30122d08db802190115dfb365fe612aa76adef62e8602e9ed372f",
+      "size_bytes": 9423
+    },
+    "scripts/archive/curve/3d_curve_test_Magnus_v1.py": {
+      "sha256": "7402b703fe49742a1e35fbcc976fc0f1b380e83d1078a78507daa1070c4a2245",
+      "size_bytes": 10522
+    },
+    "scripts/archive/curve/3d_curve_test_Magnus_v2.py": {
+      "sha256": "bd7d1be73c681860f6a1f7177ef51946221ab7f4c70b8736723b3f523484740d",
+      "size_bytes": 14793
+    },
+    "scripts/archive/curve/3d_curve_test_Magnus_v3.py": {
+      "sha256": "d39e9cc8eede717d864618c8659653a771ab3fd7639645c4722fce3b38b804e5",
+      "size_bytes": 12433
+    },
+    "scripts/archive/curve/3d_curve_test_Magnus_v4_constant_strain.py": {
+      "sha256": "031523af610b7040f46c57f0790ffccebd0d72672ad284e5cd5d0795be9fba38",
+      "size_bytes": 11347
+    },
+    "scripts/archive/curve/3d_curve_test_Magnus_v5_linear.py": {
+      "sha256": "594b86abe67017334791a1d05b8d66c77e910bcd3ff6ad825dd4f5491f7c7f0d",
+      "size_bytes": 11861
+    },
+    "scripts/archive/curve/3d_curve_test_enhanced_inital.py": {
+      "sha256": "5dcb040ebe4da388b1531ba24bf8331cb0d32858a7781b1d066d25490ff8b8f3",
+      "size_bytes": 8328
+    },
+    "scripts/archive/curve/3d_curve_test_new.py": {
+      "sha256": "1cc1c63d08a223923e169135fe0fcaabca0b5817e6ba4c67b9591b134a89131a",
+      "size_bytes": 8825
+    },
+    "scripts/archive/curve/inplane_vw_debug.py": {
+      "sha256": "7cf1a3af9dae5b3cc0c71decc8a08780212e4ea0bfb2ff6c9e17332e38c1a7fb",
+      "size_bytes": 7200
+    },
+    "scripts/archive/ekf/EKF_shape_estimation_v0.py": {
+      "sha256": "4475345b4e577036b65beddf9ab0553b842de5a47d259f2bb922a2c194109eb3",
+      "size_bytes": 9991
+    },
+    "scripts/archive/ekf/EKF_shape_estimation_v1.py": {
+      "sha256": "28e2c21df40be392ffe5fbeec30ae496263d0e81e0e7ca52f4fe81e366d1c8c7",
+      "size_bytes": 8538
+    },
+    "scripts/archive/ekf/EKF_shape_estimation_v2.py": {
+      "sha256": "c30b5af091d55db6ab2fb7f68d0e6a865da86ef014e202c7c21656ced428f176",
+      "size_bytes": 7444
+    },
+    "scripts/archive/ekf/EKF_shape_estimation_v3.py": {
+      "sha256": "5bd21cdf71777cf6c5b7ad6ec2baad44fea0da7a616bbae8f5855651364f7af6",
+      "size_bytes": 6163
+    },
+    "scripts/archive/ekf/EKF_shape_estimation_v4.py": {
+      "sha256": "57b53dfad5f95ceff3407fdcf7d37a1ce2c32fce61c872c7cb5e77a62dd41a37",
+      "size_bytes": 2473
+    },
+    "scripts/archive/ekf/EKF_shape_estimation_v5.py": {
+      "sha256": "1873376321138ed205b80478ed729c20d2b4479c6077058761f2c32011d4f62c",
+      "size_bytes": 5088
+    },
+    "scripts/archive/ekf/curvature_estimation_commented.py": {
+      "sha256": "66910e4a45a9f731e38bb59a783ee7c5457b1afe13e012d636eafcb821128c98",
+      "size_bytes": 19898
+    },
+    "scripts/archive/ekf/ekf_jacobian_benchmark.py": {
+      "sha256": "489972e0390dadd421855eb232fe52995fcd54cfeba1c8f68ef3fc548cdb35be",
+      "size_bytes": 12662
+    },
+    "scripts/archive/ekf/ekf_measurement_compare.py": {
+      "sha256": "ec1c98d06e977bc8471246d4ff16621ce71f58a8669663a49fe38c0fcd1e4224",
+      "size_bytes": 21556
+    },
+    "scripts/archive/ekf/shape_EKF_5d.py": {
+      "sha256": "9fca415839719c44bc0c66d96fac1d2c0456f3b76440e4b36a26d0db9492b436",
+      "size_bytes": 3866
+    },
+    "scripts/archive/ekf/shape_EKF_6d.py": {
+      "sha256": "514af721e0bf0f5bbe0c9ab1947d06b692e774ff88ae8ab1c542c9cc7bf65ccf",
+      "size_bytes": 14400
+    },
+    "scripts/archive/ekf/shape_EKF_6d_plot.py": {
+      "sha256": "029766fa75c0506b243f0ee2497ce13aad417f696ab2f05b24aae1967ab9c473",
+      "size_bytes": 16670
+    },
+    "scripts/archive/ekf/shape_EKF_9d.py": {
+      "sha256": "49be5483450feee2c55a11e5e0701a31b5d5446d643bf2cb8340413d496641de",
+      "size_bytes": 4743
+    },
+    "scripts/archive/ekf/shape_IEKF_v0.py": {
+      "sha256": "667726f3a42a56e4406fde6dd3339bcf42b3ab0adfb22f13b6a4f1e67eb6ae24",
+      "size_bytes": 7484
+    },
+    "scripts/archive/ekf/shape_IEKF_v1.py": {
+      "sha256": "1ff0f081b6e8c2b49ea5b4d1cc09c17edbdbd3e0e9e8cdd56e533b28cebaac18",
+      "size_bytes": 5717
+    },
+    "scripts/archive/ekf/shape_est.py": {
+      "sha256": "e1a3e725baeb541cfd0f995fdc2d980ef67224e1260b58a99ce55b94b422f0ca",
+      "size_bytes": 23319
+    },
+    "scripts/archive/figures/make_fig1_hybrid_debug.py": {
+      "sha256": "f89fa197349a56176864af1fae565e5efdc6a2d28b5bbe23d4175127ef87860c",
+      "size_bytes": 6057
+    },
+    "scripts/archive/figures/make_fig1_hybrid_debug_plot.py": {
+      "sha256": "5645abd2feafe62b521202200e1e532fe34f9afd004453f45567f74f04110040",
+      "size_bytes": 8709
+    },
+    "scripts/archive/figures/make_fig1_hybrid_plot_all_debug.py": {
+      "sha256": "00ef901d0285ca12cc37b67a09e4c54767dc611baca93aa1a50d5744b5b498bd",
+      "size_bytes": 10229
+    },
+    "scripts/archive/figures/plot_example_est_shapes.py": {
+      "sha256": "48a43a0020f71ca49ebe5215b17ef49860d9f6887023f241bf412f38b4503c36",
+      "size_bytes": 8614
+    },
+    "scripts/archive/figures/plot_example_est_shapes_with_covariance.py": {
+      "sha256": "ef012267a3070b8c5f0518bea36f6076760bcc3ec3cb40a83b3de1b7217f9717",
+      "size_bytes": 9712
+    },
+    "scripts/archive/legacy/cosserat_rod_model.py": {
+      "sha256": "b42a53123ddb898111121e0e7db90306d29459018d2c2edb2f4b506a9feac294",
+      "size_bytes": 7654
+    },
+    "scripts/config/est_config.json": {
+      "sha256": "2a9ff8388dd8a4278cd0cf9d35ca847d9e2de6c8a1938bda0bdb0cb9b5310d4e",
+      "size_bytes": 391
+    },
+    "scripts/config/gt_config.json": {
+      "sha256": "6c6586eabdd4f7fab1d00ace9fe3a974f5012d8099ca0f69e19a2945190f8577",
+      "size_bytes": 456
+    },
+    "scripts/force_est/debug_followup_compare.py": {
+      "sha256": "7ee507e8e0b08bfc967a86aab4cc9c8af361afc402e9be48eba630222852d4cb",
+      "size_bytes": 8189
+    },
+    "scripts/force_est/debug_output/followup/FOLLOWUP_SUMMARY.md": {
+      "sha256": "aa4562c06192a8e25607de0ffd7ab4fa7ea1bc7b30ee5428005435d7b96e29b1",
+      "size_bytes": 3844
+    },
+    "scripts/force_est/debug_output/followup/followup_compare_results.json": {
+      "sha256": "56c01b87c8367d517bb73dbfd4c123950b04511e26be3e4cb8fc0c68e9946a02",
+      "size_bytes": 7655
+    },
+    "scripts/force_est/debug_output/followup/followup_compare_results_v2.json": {
+      "sha256": "ea7fa98d9139f4277a2ae2abb8db8129533b2574ea239d4f4e82140b88d249f0",
+      "size_bytes": 18511
+    },
+    "scripts/force_est/debug_output/followup/followup_compare_summary.md": {
+      "sha256": "ab9e3e820651f49b4d3a4848c41b84486b8793f65da62f48e0c115335c1bc309",
+      "size_bytes": 639
+    },
+    "scripts/force_est/debug_output/followup/followup_compare_summary_v2.md": {
+      "sha256": "d075b446fc9a4662483c66780e2b7756dd74f5f5bcbeb7d6c8bf7fff85d71c8d",
+      "size_bytes": 1410
+    },
+    "scripts/force_est/debug_output/followup/kirchhoff_compare_v2.txt": {
+      "sha256": "6f24efeb42d1019bc5e011a28390a29643a71de9d9e3fcb60e6776104d6dfb6c",
+      "size_bytes": 1988
+    },
+    "scripts/force_est/debug_output/followup/s10_fitted_o11_results.txt": {
+      "sha256": "5f0b18dc9186a51e123ad0d587e35c9fc347aa8e335ab014ccb678c270577b90",
+      "size_bytes": 2313
+    },
+    "scripts/force_est/debug_output/followup/s10_new_orders_results.txt": {
+      "sha256": "07d5fe22ff4632cb3b003d0ae3d8bc414a5a53032c791369dc5009f9e25e5bae",
+      "size_bytes": 4867
+    },
+    "scripts/force_est/force_est_curve_fit.py": {
+      "sha256": "08cc49ed102051508ccc96ed91c03b298dae5b25c93d420fc6d8a3de42e1cd0d",
+      "size_bytes": 24332
+    },
+    "scripts/force_est/generate_final_wrench_artifacts.py": {
+      "sha256": "eee037f1f260d8b3bf7e09d3dd9410a04ff070e92303f86a0e49d3850d77b3de",
+      "size_bytes": 35264
+    },
+    "scripts/force_est/plot_wrench_shape_overlays.py": {
+      "sha256": "de3d564c8ea7c6f77d9a6e00e07cc59a25c80e228bcb2931ae9d7e3a8b475382",
+      "size_bytes": 11136
+    },
+    "scripts/force_est/print_wrench_study_commands.py": {
+      "sha256": "e8b8b6d57e17a9584476614349c97710545a92c0dc9b7ea860b11e727568723f",
+      "size_bytes": 13579
+    },
+    "scripts/force_est/run_oracle_debug.py": {
+      "sha256": "b6fb12e133cc87357674716030387ad824d448086b5b23daa824fa955546beff",
+      "size_bytes": 1211
+    },
+    "scripts/notes/shape_ekf.txt": {
+      "sha256": "d4a9165e3d7fcaab3f94bf339f31fb199bae502bf3a11045acb84a074e8e4898",
+      "size_bytes": 3465
+    },
+    "scripts/robot_sim/tdcr_sim.py": {
+      "sha256": "1157aa06b80e7abb68e8312bc76e6f3bcbcd71822c511bc19168ee685a799473",
+      "size_bytes": 7175
+    },
+    "scripts/run_config.py": {
+      "sha256": "a4a245bc7e24f9959d88cb266d16e705bca48f634cef934c20af32020fc9efc2",
+      "size_bytes": 3982
+    },
+    "scripts/run_tasks.json": {
+      "sha256": "ad17464ff3f3e79abdc7167a8dbd69e9cb0c86b609dba3b7c1553f6985eba772",
+      "size_bytes": 2252
+    },
+    "scripts/run_tasks.py": {
+      "sha256": "20778bd3d8afb5e347102b4550f7c4a80b72c8c34f6df26d3a5c9a76a068fd68",
+      "size_bytes": 1650
+    },
+    "scripts/shape_est/README.md": {
+      "sha256": "e5e3aad6cb5a296a9331fd4d89fc1dad70063c0796919885c4c58481061a05d7",
+      "size_bytes": 6745
+    },
+    "scripts/shape_est/gen_comparison_figs.py": {
+      "sha256": "7d2e8ce9f64801595ed5282115046fc00adb3bc95872fcede2482842566180d2",
+      "size_bytes": 14613
+    },
+    "scripts/shape_est/meas_model_compare.py": {
+      "sha256": "98740bffd123e07eec36fdab212e69954197d79a2af2cbc866418e0d52fdd6fe",
+      "size_bytes": 97086
+    },
+    "scripts/shape_est/meas_model_compare_consistency_done_backup.py": {
+      "sha256": "2d9b981221e302fcc1872fef902c9c26648b0c365a76a22b78667ed6e4c3f7fe",
+      "size_bytes": 81676
+    },
+    "scripts/shape_est/meas_model_comparison_results.csv": {
+      "sha256": "e191b7b025b7b8fad1d14debf358c7dd4cb5ed5c913a6862dde7a3f83ef3de0b",
+      "size_bytes": 1435
+    },
+    "scripts/shape_est/meas_model_comparison_results.json": {
+      "sha256": "225b2c5e7504a375ed082ae72a578f45b27a196b9a1b06abe1cd73a11358d97e",
+      "size_bytes": 2832
+    },
+    "scripts/shape_est/plot_sensor_placement_results.py": {
+      "sha256": "d617f1f09c1e5f1897eaf36a3be494fddf96e88206720ca880f1208258dc7bce",
+      "size_bytes": 20527
+    },
+    "scripts/shape_est/sensor_best_by_count.csv": {
+      "sha256": "05189f4559cdd21308ebfae3c28aff18da07a46f96a26ae60251402312559bc4",
+      "size_bytes": 639
+    },
+    "scripts/shape_est/sensor_placement_results.csv": {
+      "sha256": "d8b1fdd0df4a0f8c251e12febdf19b0d1ed8017ca10d782d33f689fcd7b6fa79",
+      "size_bytes": 3263
+    },
+    "scripts/shape_est/sensor_placement_results.json": {
+      "sha256": "36de6ef943b47108a3f8ba149d3ea9b6d223683a061330ac2e8ff452973a0491",
+      "size_bytes": 9929
+    },
+    "scripts/shape_est/sensor_placement_study.py": {
+      "sha256": "be9ac30b8a64565223d2b71d93bd3a044ac1c40e5c63e8e4c7509b78dd326065",
+      "size_bytes": 22020
+    },
+    "scripts/shape_est/sensor_placement_study_final.py": {
+      "sha256": "70a9ab6a3b40d3ae320b1edbfc1493565a96774d5b873129b3357a48aee4733c",
+      "size_bytes": 37343
+    },
+    "scripts/shape_est/shape_ekf_5d.py": {
+      "sha256": "4d7183dbf33fd146de34a179c44214e21e7d42bfccd54f265220d7e0dc8bf964",
+      "size_bytes": 13774
+    },
+    "scripts/shape_est/shape_ekf_so3_demo.py": {
+      "sha256": "d2b1139fe05bcf704f4ede80cb432c5f9199aeba36de18f3c22308ea26badab2",
+      "size_bytes": 5646
+    },
+    "scripts/shape_est/so3_alpha_sweep_results.csv": {
+      "sha256": "92f6c26734183f20a2df6c55012a8a84e1c6fb83f7d211b09a6e599902ff8acb",
+      "size_bytes": 2844
+    },
+    "scripts/shape_est/so3_alpha_sweep_results.json": {
+      "sha256": "9548b377e8cba0a27de1b5b8dbf85d6b402c8b8853145def4a4995f9130ab8fb",
+      "size_bytes": 7988
+    },
+    "scripts/tools/check_encoding.py": {
+      "sha256": "04ab5f1e717a4d53f00ecdf94745321c0de20cd909fb61561d0812b97f295065",
+      "size_bytes": 539
+    },
+    "scripts/viz/fig1_shape_ekf_error.py": {
+      "sha256": "fb23a5d8a8e5ee14330df18077a93e85e2b47ec544e9a77881e50901f2f50e54",
+      "size_bytes": 8090
+    },
+    "scripts/viz/plot_shape_with_cov.py": {
+      "sha256": "f369df085a5e0810f0f9e6d5efb27da3dcc7d7913ecf02abea9e663c8e8bada7",
+      "size_bytes": 9926
+    },
+    "sensor_best_by_count.csv": {
+      "sha256": "e65519475569ffadcac71b26675b4455a4899d55755587f51a8c6f9c1abe14a9",
+      "size_bytes": 819
+    },
+    "sensor_placement_results.csv": {
+      "sha256": "ded80314c60b6c94dfe0542c288d18be4728066c76ab07a68e050baa400b5b1e",
+      "size_bytes": 3739
+    },
+    "sensor_placement_results.json": {
+      "sha256": "0e0dc0ca30a7cea4d4aada7ddad71244bca557e9d07106020da4bc0ccfb86f20",
+      "size_bytes": 9918
+    },
+    "so3_alpha_sweep_results.csv": {
+      "sha256": "9acff597543d5de0091fbc71f30f91c0c509e5bacca4bb7d1efb9710739223c7",
+      "size_bytes": 1044
+    },
+    "so3_alpha_sweep_results.json": {
+      "sha256": "1562902118bb1975b7f6047fd3820490a187a33e6b6b3a326fadd8bd119230cd",
+      "size_bytes": 2347
+    },
+    "src/shape_force_est_imu/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "src/shape_force_est_imu/core/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "src/shape_force_est_imu/crt/README.md": {
+      "sha256": "3d5d51c0232b18a5f78758cbbac170e858000cae710959b38ea55ff6e5e579fa",
+      "size_bytes": 9131
+    },
+    "src/shape_force_est_imu/crt/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "src/shape_force_est_imu/crt/archive/CRT_time_comparison.py": {
+      "sha256": "baf1bbe03126681bc0a853279b1111d0a4f755f956ebcc1221b99923af116f96",
+      "size_bytes": 6143
+    },
+    "src/shape_force_est_imu/crt/archive/CRT_time_comparison_6D_for_CRT_v2.py": {
+      "sha256": "23309f2c4dc5e6636d7e6d9377e509022ee67259044be42478c1f4cdb4deb18e",
+      "size_bytes": 6446
+    },
+    "src/shape_force_est_imu/crt/archive/CRT_time_comparison_in_plane_assumption.py": {
+      "sha256": "799553a24cddc465883b26493b0dc7d346d853b8a0e23fc40060ff504bda83eb",
+      "size_bytes": 23144
+    },
+    "src/shape_force_est_imu/crt/archive/CRT_time_comparison_relax_assumption.py": {
+      "sha256": "96ec64971a12e0546f901ed293025eb3274f6184050cdc8cd21ec77de3528738",
+      "size_bytes": 6858
+    },
+    "src/shape_force_est_imu/crt/archive/cosserat_rod_model_extensible_only.py": {
+      "sha256": "159178de973cba72643a6130c09d63227a34043df250baa12c1f9adb82bac4bb",
+      "size_bytes": 8418
+    },
+    "src/shape_force_est_imu/crt/archive/pck_models_compute_time.py": {
+      "sha256": "1bdaace033d0228997df0cfec1625887aa32e20bc465308b5f4b7c446304390e",
+      "size_bytes": 23115
+    },
+    "src/shape_force_est_imu/crt/compare_oracle_vs_ekf_wrench_estimation.py": {
+      "sha256": "d9bc7f626defa26023c8a2ec43a2123f17c9f2ad247d1e8e62741e87582b73db",
+      "size_bytes": 56882
+    },
+    "src/shape_force_est_imu/crt/cosserat_rod_model.py": {
+      "sha256": "150b3c27cadd35d9197fb6183e8e81c90b5eeb83b2689ba417a6d3f078114c81",
+      "size_bytes": 10627
+    },
+    "src/shape_force_est_imu/crt/crt_gt_gen.py": {
+      "sha256": "562b783e0041a16bec64138b03b696c8a4897c9078210e0b24f465e245c19feb",
+      "size_bytes": 3828
+    },
+    "src/shape_force_est_imu/crt/crt_gt_gen_output_file.py": {
+      "sha256": "d3336d385bcd45089f6e430babdf481eeab0857826e404fcc9ccdc80dd08ca22",
+      "size_bytes": 12739
+    },
+    "src/shape_force_est_imu/crt/crt_gt_gen_plot.py": {
+      "sha256": "4eed9300ba52737ad3e2a36aab867ac05ee24129d6b0d89f2a7a69b30270a214",
+      "size_bytes": 4476
+    },
+    "src/shape_force_est_imu/crt/crt_meas_gen_output_file.py": {
+      "sha256": "8848598464588e152b6cfd1c34905a7c4f9bc377361b4a852ad697c0543ed093",
+      "size_bytes": 6642
+    },
+    "src/shape_force_est_imu/crt/debug_constrained/debug_constrained_results.csv": {
+      "sha256": "9f1b5452109858e2248c50d856acd90e3919692ed9fc05383031c2d5ce89e8d8",
+      "size_bytes": 8500
+    },
+    "src/shape_force_est_imu/crt/debug_wrench_tip_constrained.py": {
+      "sha256": "5203f594f8652b792b8f448f9fc3d9526b01ead74729bbaa3bbfda097393f41b",
+      "size_bytes": 18058
+    },
+    "src/shape_force_est_imu/crt/diagnose_modal_order_continuation.py": {
+      "sha256": "87b8ef41a743dff08fc240a127de9d2a5987b1182bb1d264f58ae23518567b3f",
+      "size_bytes": 35738
+    },
+    "src/shape_force_est_imu/crt/diagnose_wrench_observability_vs_order.py": {
+      "sha256": "191dfee3463a1bb8a19bd205ea94a7bbf2d4ebfe229841ab734f4aa2b06e8c2f",
+      "size_bytes": 36602
+    },
+    "src/shape_force_est_imu/crt/evaluate_kirchhoff_shape_estimation.py": {
+      "sha256": "90f89487f18a23d0cfb65919451378e33d86e5187b04d4ae5ed8ee8a46cb1826",
+      "size_bytes": 32116
+    },
+    "src/shape_force_est_imu/crt/evaluate_kirchhoff_shape_estimation_sequences.py": {
+      "sha256": "cbcd2b6c67980133eedf4c5ad6c38520d2f056d047f90890348836c42500ef48",
+      "size_bytes": 14657
+    },
+    "src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_constrained.py": {
+      "sha256": "9cdb3036db092f4afcc98effeb3f5fe578aeec5985fb2d52e968b01c394db109",
+      "size_bytes": 37834
+    },
+    "src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_estimation.py": {
+      "sha256": "d4447814603789e2385f319677d7dc74f16ce2b6fb4b4344afd2084ab82a639f",
+      "size_bytes": 23540
+    },
+    "src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_estimation_methods.py": {
+      "sha256": "ff1d0d72e3b30ba9939c6116746e2ecdf74139c3a5a05eb599f15b456c61fc31",
+      "size_bytes": 28777
+    },
+    "src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset.py": {
+      "sha256": "6e8a2362788f769d88c4aa46864334235bb3ad4f269299a25a5d2570692ff090",
+      "size_bytes": 19315
+    },
+    "src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset_constrained.py": {
+      "sha256": "6a8eb4824a6d979dee4816f4b39f5083507a1b7fe355f797bc9f0aa8e9fcfe06",
+      "size_bytes": 28014
+    },
+    "src/shape_force_est_imu/crt/generate_kirchhoff_imu_measurement_sequences.py": {
+      "sha256": "1795b0ee888da5e39a3924363e72f35ea286349479fc14e594fac38296b75526",
+      "size_bytes": 15680
+    },
+    "src/shape_force_est_imu/crt/generate_kirchhoff_imu_measurements.py": {
+      "sha256": "497ad1774b2318a6bc25e81933e073846aa6054a889f5494de4c33da589b09b5",
+      "size_bytes": 16604
+    },
+    "src/shape_force_est_imu/crt/generator.py": {
+      "sha256": "7421d56659db0035679f79d8e152133ee43b1bd6ec3803b97a31550ca47aadfd",
+      "size_bytes": 1246
+    },
+    "src/shape_force_est_imu/crt/gt_data/kirchhoff_gt_dataset.json": {
+      "sha256": "d1d7101b86b71eb3e46885284853c488dacf2a9c469223711921c99ac54ec123",
+      "size_bytes": 830
+    },
+    "src/shape_force_est_imu/crt/gt_data/kirchhoff_gt_dataset.npz": {
+      "sha256": "ae8ec9a3629a136e02b7919bb47eabe537e80e448457295fe9465494a608ba3a",
+      "size_bytes": 464957
+    },
+    "src/shape_force_est_imu/crt/gt_data/kirchhoff_gt_dataset_overview.png": {
+      "sha256": "2c216657078b6f58ef6e04ed4958a0316e8da87820aa5cdfbaf46394917047cf",
+      "size_bytes": 329340
+    },
+    "src/shape_force_est_imu/crt/gt_data/kirchhoff_gt_dataset_overview_clean.pdf": {
+      "sha256": "b58921b13f3c9d06d83d4bfa5fffa66924caf42ed445d7bb6180d568bef4e1bd",
+      "size_bytes": 66648
+    },
+    "src/shape_force_est_imu/crt/gt_data/kirchhoff_gt_dataset_overview_clean.png": {
+      "sha256": "8f427eb58129709039f12da8a74bbffa900c189788bca15e5f4dd79dea85ce22",
+      "size_bytes": 233490
+    },
+    "src/shape_force_est_imu/crt/gt_data/kirchhoff_imu_2imu.npz": {
+      "sha256": "c0f47dc6d509d6d68d47796ccc6a2acb8c99762e0cd26d75ba1815f157c16e4b",
+      "size_bytes": 43310
+    },
+    "src/shape_force_est_imu/crt/gt_data/kirchhoff_imu_3imu.npz": {
+      "sha256": "ef709d85eb766e58dd8cf1358fd089a1623931c576ed857ecfcfdd7f026fd6e3",
+      "size_bytes": 63986
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1640/run_log.txt": {
+      "sha256": "b12d56745c3f18decbbedfaaef739f64d6ad1923b8a70abef9e1bba45f83c98f",
+      "size_bytes": 24175
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/constrained_force_only_full/constrained_results.csv": {
+      "sha256": "910fe8c0c6364bfca817bf5cb3f24cec7197b09ef6b5249b9c15ae5518f0e961",
+      "size_bytes": 234190
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/constrained_force_only_full/constrained_results.json": {
+      "sha256": "be7f9a3575f9cb5a7f69b3e5aab84f0bd95603eddaf8a2337b8db64d04922fe5",
+      "size_bytes": 812418
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/constrained_force_only_full/constrained_study_summary.md": {
+      "sha256": "dbb2559c2e757a2a5aff739578a09f61831d30bfad0294c7c37cefa00f40411b",
+      "size_bytes": 3790
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/constrained_force_only_full/constrained_summary.csv": {
+      "sha256": "47a5bad6cefc3e2275183d9e372770b49b73a8a0f261af1a3d6cadebcb498575",
+      "size_bytes": 2515
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/constrained_force_only_full/constrained_wrench_est_data.npz": {
+      "sha256": "b97631c44c4d4b499f9fdb6afa117ad2d7bc7283ead634173fa7708ad9df60d1",
+      "size_bytes": 31622
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/constrained_transverse_force_full/constrained_results.csv": {
+      "sha256": "4d84099ede54294228bdce19f12f01d3e6b253d77a574e8ed0c6c2cd46f11678",
+      "size_bytes": 247066
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/constrained_transverse_force_full/constrained_results.json": {
+      "sha256": "a4f5eaf35a4ca5c38bb8fba2fc4787b778ada861d51a10ccd90d3368cbf54e46",
+      "size_bytes": 825375
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/constrained_transverse_force_full/constrained_study_summary.md": {
+      "sha256": "c37b3d05c83e880d67bebf66b59f5ac8c4ea6c56a892b85939fa11b08c687c14",
+      "size_bytes": 3790
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/constrained_transverse_force_full/constrained_summary.csv": {
+      "sha256": "77b903d5f791c1be171128129fe7a5b1d2ad92e5764248314bc4ab1166f44400",
+      "size_bytes": 2590
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/constrained_transverse_force_full/constrained_wrench_est_data.npz": {
+      "sha256": "3f2aa669f309ca92ceba1a00adbe4d37e785dcbafa3bd7594fbcf3e81c766bcb",
+      "size_bytes": 31775
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/final_wrench_committee/conclusions.md": {
+      "sha256": "c59aeb9e4edbe366216bf30ed73bdb2b19fc151d3dc0d4eb77ba5e821c1ee750",
+      "size_bytes": 1643
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/final_wrench_committee/constrained_force_only_3d_known_direction_1d_oracle_direction.csv": {
+      "sha256": "d4bef40cf7e9acb423f3c01cdb5e359e5b0c558c6dfc66a42a5dac2a2a50b113",
+      "size_bytes": 1327
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/final_wrench_committee/constrained_force_only_3d_known_direction_1d_oracle_direction.md": {
+      "sha256": "65a6b6543764c2b8ecc855ef0c9150c854bad6b801406562b380df40ac5d36bb",
+      "size_bytes": 1127
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/final_wrench_committee/oracle_order_summary.csv": {
+      "sha256": "451986a236f233f2557e9d3b82e6eb6a151257aa0b99a86b5f2777892f5e9e31",
+      "size_bytes": 535
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/final_wrench_committee/oracle_order_summary.md": {
+      "sha256": "5ee5dbfcf9b7d7d2331d5fe5403975b015feee0b2f558a9aaf112d620f582c87",
+      "size_bytes": 494
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/final_wrench_committee/oracle_vs_ekf_table.csv": {
+      "sha256": "2f15da9e7e7b4d659d306718b636cfb563cbb52d125a6bbbd832872932c421a2",
+      "size_bytes": 1699
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/final_wrench_committee/oracle_vs_ekf_table.md": {
+      "sha256": "eed44d9edee8090544817e879bbb0f0f37a1cd5740d1bf308a1063911396a91c",
+      "size_bytes": 1222
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/final_wrench_committee/trend_force_direction.pdf": {
+      "sha256": "ad3ffc92d252e6a7edfd2c4af669bc9c77872efb82afdb83c2b851ba5efe1026",
+      "size_bytes": 22994
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1647/final_wrench_committee/trend_force_direction.png": {
+      "sha256": "3f2f517283660167ad447228e9bde3f3e45aa1f7016925534747f4f2eeeabb96",
+      "size_bytes": 48027
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1737/observability_full/kirchhoff_wrench_observability_per_case.csv": {
+      "sha256": "40f7e1620fd887bf364233671e75edaf4ff6703b0e5a53c8e6f20b8d6e33e390",
+      "size_bytes": 81648
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1737/observability_full/kirchhoff_wrench_observability_results.json": {
+      "sha256": "7db4d255766dedb8b27f4314bfa7c3cf6273a05bfaaff1c3f40a3565d5f1b07f",
+      "size_bytes": 240388
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1737/observability_full/kirchhoff_wrench_observability_summary.csv": {
+      "sha256": "077152c548831c75df8e448da79e298eeeb34d0dfd4ab036a862b3b5d20ea56f",
+      "size_bytes": 1636
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1737/observability_full/kirchhoff_wrench_observability_svd.npz": {
+      "sha256": "a1e990d810993db4867531f3d766dc8f2e1cc5635bd4257ff3d2f8097ed9b62c",
+      "size_bytes": 50235
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1737/observability_full/kirchhoff_wrench_observability_vs_order.pdf": {
+      "sha256": "43f8b25182a08fcbbe7d7dc76eabb63f930b7d7a587a52f3b5a20ca13eb942f7",
+      "size_bytes": 41136
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1737/observability_full/kirchhoff_wrench_observability_vs_order.png": {
+      "sha256": "102c36f72094fc39b23ba815a2ecde629c981374980989144f9b9a36622e5084",
+      "size_bytes": 217328
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1737/observability_full/wrench_component_observability_per_case.csv": {
+      "sha256": "13cedc3f67e9fcf1e8b6ef867d54537f7d9ab8827c20b5f30ca6dabd11bb4b05",
+      "size_bytes": 167980
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1737/observability_full/wrench_component_observability_summary.csv": {
+      "sha256": "5d7806996312aff7ee1e403ce255f1971ba43e2ad2215949e091c1c50fb03b13",
+      "size_bytes": 4636
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1737/observability_full/wrench_observability_interpretation.md": {
+      "sha256": "edebb434a019cc1a9e7be938b296f1fc7bbcce6483ce6442c827889548742b0d",
+      "size_bytes": 1868
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1737/observability_full/wrench_subspace_observability_per_case.csv": {
+      "sha256": "5dfdfc52a501089980105ab2d6c8d3442b73b73476590a30d47e78abfcfd0ab8",
+      "size_bytes": 117428
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/committee_20260426_1737/observability_full/wrench_subspace_observability_summary.csv": {
+      "sha256": "9b5da22c9af721943622d3da4a88b1fc06f657b3656ddc7096fa274a750d9853",
+      "size_bytes": 2996
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/final_wrench/conclusions.md": {
+      "sha256": "975c5b82216597b414b2f0b6dd2c73c574cb9c77037e518792e808c89dc6f760",
+      "size_bytes": 1621
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/final_wrench/constrained_force_only.csv": {
+      "sha256": "c35d545b757fd8a5ca0b04e3b24cfc2c3abfc53f2c88ad00529769326fa6c82d",
+      "size_bytes": 741
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/final_wrench/constrained_force_only.md": {
+      "sha256": "a209b5d49798a2cba103c5e1003d48d81db8a285d050395b97dfdc90fafeb862",
+      "size_bytes": 739
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/final_wrench/oracle_order_summary.csv": {
+      "sha256": "474d0a6b24cbbde4a6ba9b137e0003a4b4cf9eab7304190f2c90bba079a67e54",
+      "size_bytes": 527
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/final_wrench/oracle_order_summary.md": {
+      "sha256": "ad0e2f87fea300a4c985795626e9222f0c3c76ed4049b9bd93d64a145dd44fbb",
+      "size_bytes": 494
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/final_wrench/oracle_vs_ekf_table.csv": {
+      "sha256": "6a6cdb14cd15e6dbf1214064e5b86f19b5f31e071ac81ce5183e1a97b1523e64",
+      "size_bytes": 1700
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/final_wrench/oracle_vs_ekf_table.md": {
+      "sha256": "7a92579a5f1d2b2a57bf54876adcdc615f6192f38b7adffb0dffc01a6b650f4b",
+      "size_bytes": 1216
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/final_wrench/trend_force_direction.pdf": {
+      "sha256": "4cebd1e85e9418deaa0ca82616e9a17f9c6ac5c96542797eeb4a08270b9e875d",
+      "size_bytes": 22741
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/final_wrench/trend_force_direction.png": {
+      "sha256": "589897d639c9f79447abdab8f5dba97171eda07ab92d6adbc0015dc44e603a18",
+      "size_bytes": 48363
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_arclength_ori.pdf": {
+      "sha256": "7cc29775883f4b001397ef39086724a9d3c514667fa72ee7be32eca550813881",
+      "size_bytes": 20888
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_arclength_ori.png": {
+      "sha256": "f638639fce6d7a6b59e4eb5b51802fa98453ce49435aac563d3d7e876acd4038",
+      "size_bytes": 79577
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_arclength_pos.pdf": {
+      "sha256": "2f9189ba4180b10342de347335c8a9e8017498d41de1e8826094f8b9b017ab5c",
+      "size_bytes": 20506
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_arclength_pos.png": {
+      "sha256": "d35044c3fd8cd2d81a9d14b4905bc0631a3f6a4768ffa891a194e6d0660f6a6f",
+      "size_bytes": 68278
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite.pdf": {
+      "sha256": "6adbf05649ac6ae6dd19c3ac346862fcb7cb34f9943477de5e4dfbff8ecffe2f",
+      "size_bytes": 66463
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite.png": {
+      "sha256": "bc86a0dba92ad2fb2cf58e15a8fdf3d1e3b4f4a19bb929343a43b837350003ff",
+      "size_bytes": 632082
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_cases.json": {
+      "sha256": "e3eb875dcf399e03a225f585e5578b17aed70fdabc75cccfb59500090eb96c5a",
+      "size_bytes": 2704
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_maintext_v2.pdf": {
+      "sha256": "c7dc88c78c05751f40d0f40fd0b7c3e02ff6bfeda5ca71ba9910edeae58ffd8f",
+      "size_bytes": 82417
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_maintext_v2.png": {
+      "sha256": "c854a5fd074b9799235803cd4cba681550d104e3f78b6c0c9bcc1907969c473b",
+      "size_bytes": 482049
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_maintext_v3.pdf": {
+      "sha256": "40f79fe5b3ce3cc4d0e8eaebf9ff2e55148c4711be747978bb70fdfdcaa13470",
+      "size_bytes": 82786
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_maintext_v3.png": {
+      "sha256": "f9f0aec2cb44774b7e1344fcac67bff734a643a296728cee35e5100c050d9129",
+      "size_bytes": 483955
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_maintext_v4.pdf": {
+      "sha256": "04082791a0e270c2ba7c7fc9ebf9201ce817af6f8eb5bcb5711ee124a85c3660",
+      "size_bytes": 82466
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_maintext_v4.png": {
+      "sha256": "4c1e536110ab5116b2bb15b5ac3b90125ff589fa8b40ec3c8248cadd7c1f124e",
+      "size_bytes": 448566
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_nonplanar.pdf": {
+      "sha256": "b1ab70635559bb39d4c2f050ff0624aacb8bb1c2df96e1b80b5db9cdd800d7b8",
+      "size_bytes": 67866
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_nonplanar.png": {
+      "sha256": "e1cebade8fad5538de2da5b34bc29f8b971848e76a6043b79efe338e39136a71",
+      "size_bytes": 657935
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_nonplanar_cases.json": {
+      "sha256": "a60ecc4d1e9e00f8e52c645e45ead93208c292070a66eecd4c8b04fa1b247f88",
+      "size_bytes": 6255
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_nonplanar_clean.pdf": {
+      "sha256": "082d144d4c9142f9de133a21a00523238608ca5261ebe35438609e4a12ef5b4d",
+      "size_bytes": 84181
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_nonplanar_clean.png": {
+      "sha256": "d3874607fe0a207450c4e4df767aed645293eec75e50c800f041518c5cdc6108",
+      "size_bytes": 561045
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_nonplanar_clean_cases.json": {
+      "sha256": "a60ecc4d1e9e00f8e52c645e45ead93208c292070a66eecd4c8b04fa1b247f88",
+      "size_bytes": 6255
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_nonplanar_clean_zoom.pdf": {
+      "sha256": "77fd042b7b4aee05d3eeaa212d45257396afab5dfed6342ef86d440f42abf288",
+      "size_bytes": 62132
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_nonplanar_clean_zoom.png": {
+      "sha256": "6322683b1b4fa2df1e7ca041900bf6782bf5497f9aa122209aeb2b593d87fa02",
+      "size_bytes": 415606
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_nonplanar_clean_zoom_cases.json": {
+      "sha256": "a60ecc4d1e9e00f8e52c645e45ead93208c292070a66eecd4c8b04fa1b247f88",
+      "size_bytes": 6255
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_nonplanar_polished.pdf": {
+      "sha256": "bc6d1a523f50c1fb939a5d05a3f017fe2f5502b3c694adf20fe18338db4629ac",
+      "size_bytes": 63411
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_nonplanar_polished.png": {
+      "sha256": "6941c3e8db5b1aeae508580347bf917340d0e1b5ba33a7605405907aef4bb93b",
+      "size_bytes": 438949
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_composite_nonplanar_polished_cases.json": {
+      "sha256": "a60ecc4d1e9e00f8e52c645e45ead93208c292070a66eecd4c8b04fa1b247f88",
+      "size_bytes": 6255
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_main_aggregate_violin.pdf": {
+      "sha256": "85ae2d01239cfa3203b07fccdb0dfa37d9a27c503a3af6d77f6d9736275fc12f",
+      "size_bytes": 53403
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_main_aggregate_violin.png": {
+      "sha256": "5dd25ded634c8892751aa838bc45afd914cd54a2ed7332d5aed3d0d1b8b62aa5",
+      "size_bytes": 210560
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_main_aggregate_violin_transparent.png": {
+      "sha256": "2eb22e7ea425b5814ff11fc551154939f7045fed2e7842d87215661d3406b9ae",
+      "size_bytes": 207517
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_main_aggregate_violin_v2.pdf": {
+      "sha256": "9fa89592d27ec3592291f1422f27b10f0fb054cfe9167c7eb683829970328fcc",
+      "size_bytes": 53369
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_main_aggregate_violin_v2.png": {
+      "sha256": "ab8709bb182f7a8bdbbf858385f605b46e94ef0777c907ee994a091769cdc2e6",
+      "size_bytes": 234908
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_metrics.pdf": {
+      "sha256": "49d4645fbf3260991451c3eeb2f6e5c61777ee3c3b71d6701ccb81a8c5353a2d",
+      "size_bytes": 36853
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_metrics.png": {
+      "sha256": "37e0985ef25f426a66c1e7018809f43f9e69a4d9b68f3ddc21b3bd9a36ebcb37",
+      "size_bytes": 122771
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_overlays.pdf": {
+      "sha256": "7601573e9dc8939ad1d658ae84adc47b69f8617437a7b7c5e652abdd4490779f",
+      "size_bytes": 32500
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_overlays.png": {
+      "sha256": "dcc189868f53b36946d4e9225bb2d2c6e55969c353a95a458a23b0b55d064dd0",
+      "size_bytes": 338589
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_overlays_complexity.pdf": {
+      "sha256": "6839a9185c7d0d353c484a30e67e66c14c296c42e26c6d5979d300b266198ef8",
+      "size_bytes": 64736
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_overlays_complexity.png": {
+      "sha256": "478a0638068942e99997e5f71067c5f3432f20ddf7a8501bc699f7c426776ce3",
+      "size_bytes": 473411
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_results.csv": {
+      "sha256": "fdb32be7b51c0b092d3b537d3b8ca69861de1fe92e253158d00bf34a82a17abc",
+      "size_bytes": 58607
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_results.json": {
+      "sha256": "41e694673cbf5fc9efa64ef78631a555a1a1e46dfd4b9200b32bdb7b7bcd99cd",
+      "size_bytes": 198932
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_shapes.npz": {
+      "sha256": "17b58edff6edad55b2405ec8767a5c647cb0f4c0b9d5a6fc40ac42657f0ad165",
+      "size_bytes": 4810507
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_summary.pdf": {
+      "sha256": "30a9c6a0e0227e0bf2c81f7993e81c8516c373b97df78d10c09008cf57e1e0f9",
+      "size_bytes": 15776
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_summary.png": {
+      "sha256": "bc3bf65c72e823f747a3fce76a270281ed3cee78602ad0074f6e9bee25b91fa2",
+      "size_bytes": 54464
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_shape_est_summary_by_layout.csv": {
+      "sha256": "82ce8ca4907050dff29175ef5883ce9d16cbcb98eed1e6f654a7e535538837f2",
+      "size_bytes": 1080
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_wrench_est_bars.pdf": {
+      "sha256": "2a7ee58a60b6cdb8d81739d8286bce5423c7bdcf6a8f12308d0346fa5b1d25d7",
+      "size_bytes": 23644
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_wrench_est_bars.png": {
+      "sha256": "7a0a30eb1461bd52cc42782a15f721f34df8872812478c2995709ed79d015ede",
+      "size_bytes": 64067
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_wrench_est_data.npz": {
+      "sha256": "5b3371d62376565a4c1a460e784d05a52cd6fe20b6e8dd408610657a065662d8",
+      "size_bytes": 62267
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_wrench_est_direction.pdf": {
+      "sha256": "2d56787da2e3777eae7bca68f55f760ab774b3611241a3d6915de990e17cf06a",
+      "size_bytes": 34708
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_wrench_est_direction.png": {
+      "sha256": "5922586cc8328a40e8dd31aa58ff6e088d59412ad17fa4b939353eec3b463e39",
+      "size_bytes": 127779
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_wrench_est_results.csv": {
+      "sha256": "0de7206869986e39f5e99ab7090d3772243fea16b4a81a45e320d040b314746b",
+      "size_bytes": 180700
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_wrench_est_results.json": {
+      "sha256": "a57fdeccaa6ba5e3075fd184520274cb741414302bd893da94846ccaff743f47",
+      "size_bytes": 531460
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_wrench_est_scatter.pdf": {
+      "sha256": "4521f4da655be3332d8d118d76ac79c5ddca5141aaa4abe4bfec1b4b439e305b",
+      "size_bytes": 45050
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_wrench_est_scatter.png": {
+      "sha256": "6784e75aa89258a84ce55c4fe2ee037f35b156126d955e349548595f28b1d009",
+      "size_bytes": 321851
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_wrench_est_summary.csv": {
+      "sha256": "75c05754ab5dfb43ab45a9f8afd764d35ca93229af4f95a18b55e67fadc0ca2b",
+      "size_bytes": 1836
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_wrench_est_violin.pdf": {
+      "sha256": "93215a11926d39b50fc6fed02b8c3b5a2d59b1ebaf293c09fd58205131580789",
+      "size_bytes": 40347
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/kirchhoff_wrench_est_violin.png": {
+      "sha256": "ffc574f02bdf64cb84c02f37da48c1f3a307c68fd3faa629ec66987bafc57353",
+      "size_bytes": 167053
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/oracle_vs_ekf_bars.pdf": {
+      "sha256": "c7ad9aef96a04fbed5bb0b401cfb4a8ab79c954b4e6bb79e3e43963cd9be4714",
+      "size_bytes": 27221
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/oracle_vs_ekf_bars.png": {
+      "sha256": "cb3567fff3da54bbbc9371d1d74417bde8f08be61e82a295a682b08664d0531c",
+      "size_bytes": 90626
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/oracle_vs_ekf_force.pdf": {
+      "sha256": "7e26dc7989fd2ee6e70ff7d4d7aaa833ef456ef660a349991d5a7a26a55696e6",
+      "size_bytes": 46427
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/oracle_vs_ekf_force.png": {
+      "sha256": "a47d6599401d4364715d9c7845543afcb321318a6ed5cdaa2f1a569c4f42dec9",
+      "size_bytes": 150091
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/oracle_vs_ekf_moment.pdf": {
+      "sha256": "46ba664f5190661a0501cb45724344480293eb74805fb8b75da41184c098ee92",
+      "size_bytes": 46893
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/oracle_vs_ekf_moment.png": {
+      "sha256": "b92963801ac2ebb385580e3dc7b74ef8e65ae650dc5628d23647e176d3452a56",
+      "size_bytes": 149632
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/oracle_vs_ekf_nrmse.pdf": {
+      "sha256": "7c73044d06daad78affe6af4bb2f985a57c9c58ae703e359b305d3b9540e3ea8",
+      "size_bytes": 27884
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/oracle_vs_ekf_nrmse.png": {
+      "sha256": "bba0acc45ae693e7ef14938803dac26cec84833aaabe8c43c8f2cb1c8d764460",
+      "size_bytes": 92429
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/oracle_vs_ekf_results.csv": {
+      "sha256": "e61ac5cde3065421351850216076baeea48778bc4dd4d03b8a89976dc2c5bdc6",
+      "size_bytes": 405873
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/oracle_vs_ekf_results.json": {
+      "sha256": "c021256fb7736ea5934e15a28f91d6c59c9fc3aae003dd6f444e4ba92def0c28",
+      "size_bytes": 1185846
+    },
+    "src/shape_force_est_imu/crt/gt_data/results/oracle_vs_ekf_summary.csv": {
+      "sha256": "432d684943d16d54a2238b9ec166a26070330ab6562bd99480976bc8027352fa",
+      "size_bytes": 4781
+    },
+    "src/shape_force_est_imu/crt/gt_data/results_wrench_diagnostics/kirchhoff_wrench_estimator_compare.pdf": {
+      "sha256": "03d744b7cddd3880f5f68e0c9211c474cd387a08ac684a2ab5ebb2be32051b28",
+      "size_bytes": 29742
+    },
+    "src/shape_force_est_imu/crt/gt_data/results_wrench_diagnostics/kirchhoff_wrench_estimator_compare.png": {
+      "sha256": "8bae381f8140f258246e686a2ae84b37aee45c05225fa28a37dea00c6cabd076",
+      "size_bytes": 281169
+    },
+    "src/shape_force_est_imu/crt/gt_data/results_wrench_diagnostics/kirchhoff_wrench_estimator_compare_results.csv": {
+      "sha256": "c1821227c17b62fbb5a62bf75987261ed3b23374483b7b9680e5bb6603c95f87",
+      "size_bytes": 372743
+    },
+    "src/shape_force_est_imu/crt/gt_data/results_wrench_diagnostics/kirchhoff_wrench_estimator_compare_results.json": {
+      "sha256": "306c25c7dac8e611806d61b6cf24b93d6f9794995b21010f978df464ffe19295",
+      "size_bytes": 1240132
+    },
+    "src/shape_force_est_imu/crt/gt_data/results_wrench_diagnostics/kirchhoff_wrench_estimator_compare_stepwise.npz": {
+      "sha256": "c285b48e725abfe0ebcd203d95497746365b56a5a465a43c6225a6c608e03a74",
+      "size_bytes": 17034
+    },
+    "src/shape_force_est_imu/crt/gt_data/results_wrench_diagnostics/kirchhoff_wrench_estimator_compare_summary.csv": {
+      "sha256": "7c8d3e726ecbb55366353750e3179b48eadb6bf7dfbe519b6683b28b3cde02c5",
+      "size_bytes": 3250
+    },
+    "src/shape_force_est_imu/crt/gt_data/results_wrench_diagnostics/kirchhoff_wrench_observability_per_case.csv": {
+      "sha256": "5fe0fa225a9633c67b5b892c6e0cb09ccfb17007ea3ddbf6115015d5bf61cee4",
+      "size_bytes": 98062
+    },
+    "src/shape_force_est_imu/crt/gt_data/results_wrench_diagnostics/kirchhoff_wrench_observability_results.json": {
+      "sha256": "71c5a5ecea4562dfaa3f3e35908fb65159e5500c40f9cd0feada88be0b28a4b3",
+      "size_bytes": 261077
+    },
+    "src/shape_force_est_imu/crt/gt_data/results_wrench_diagnostics/kirchhoff_wrench_observability_summary.csv": {
+      "sha256": "fb9d60830728fe44aa90870d907e74757e87859926602e22da67f9939e070320",
+      "size_bytes": 1892
+    },
+    "src/shape_force_est_imu/crt/gt_data/results_wrench_diagnostics/kirchhoff_wrench_observability_svd.npz": {
+      "sha256": "1336c9c8b59b7fdac2e9b92d6de9cbdd1752c4ed7549538e77770128bb478d75",
+      "size_bytes": 59303
+    },
+    "src/shape_force_est_imu/crt/gt_data/results_wrench_diagnostics/kirchhoff_wrench_observability_vs_order.pdf": {
+      "sha256": "649b873c75b9afebc54f5817a146adcc12b1a8f65779a93f98ce69a7fafdeada",
+      "size_bytes": 40472
+    },
+    "src/shape_force_est_imu/crt/gt_data/results_wrench_diagnostics/kirchhoff_wrench_observability_vs_order.png": {
+      "sha256": "2559873bb57fd44dc987012f6f15f0140ce4b16884d0b0b6d8f46d4a4a7baf16",
+      "size_bytes": 254290
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_force_only.json": {
+      "sha256": "0a1e81cf8d1623aafe3e071f2bcd32d2f429e6c4528209a20f1572c55e599a40",
+      "size_bytes": 1192
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_force_only.npz": {
+      "sha256": "74c7d453c2329fca09e9b17d8f707e836662af10eaa3a7c87124ccd21b510c8b",
+      "size_bytes": 463587
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_force_only_overview.png": {
+      "sha256": "62a58e5b4a0498d7715eb829b3194c452866ec0e0c2d39f64a26e3bc4c37ca26",
+      "size_bytes": 183489
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_local_moment_only.json": {
+      "sha256": "ef636b8ec0b57eb3478b40c4d07a0b4db8806466b5258bb29a53d56a82519d4d",
+      "size_bytes": 1841
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_local_moment_only.npz": {
+      "sha256": "361e4fb4b01385373726d55b203cae581e7578f2c9a45aeda4358460e3788199",
+      "size_bytes": 464428
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_local_transverse_force.json": {
+      "sha256": "b1df052173779b76d7fdc4b8acf98943a2af37d86af205feca32a9d1fcbdc4f4",
+      "size_bytes": 1610
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_local_transverse_force.npz": {
+      "sha256": "441986a80b252c3d65eb2a72b9ea88e1668c360fc9910536c7d19f6be4f2893e",
+      "size_bytes": 464932
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_moment_only.json": {
+      "sha256": "b13bed5eef1d15644aee44def639f50335376cd2844f4279a2c47f32ec10f99a",
+      "size_bytes": 1194
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_moment_only.npz": {
+      "sha256": "87c3930edccf322d32bfd52e13d5f164d0c9846b223894f3ee71004c6bf178aa",
+      "size_bytes": 463779
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_moment_only_overview.png": {
+      "sha256": "d5bb459dcd581e529302bbe6e38cbb1cc04f9354451ee5758b2bd0f1b27cc912",
+      "size_bytes": 182822
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_transverse_force.json": {
+      "sha256": "dc69dcff793baa12497757c1af83c460e75c8c68117992296ae74179ee859b06",
+      "size_bytes": 1204
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_transverse_force.npz": {
+      "sha256": "abf9a9a91ee731efcf498c8e5ea1bf8a09a43e1dcad4f6f57e8f9e470a997908",
+      "size_bytes": 462808
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/kirchhoff_gt_transverse_force_overview.png": {
+      "sha256": "afe566f419800b8da881d94e07730da830e3a76c304a9293725c26de10ed06c8",
+      "size_bytes": 186676
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_results.csv": {
+      "sha256": "2806117e0c5c614ae2ffd5ae602f65705cd2bf11c5485235cd684e64b3e853e1",
+      "size_bytes": 468721
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_results.json": {
+      "sha256": "20d9a1b9ba8c22ce9c537cf476962fc2fdbd3334a9e96a521ec461b1af05eb14",
+      "size_bytes": 1605268
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_study_summary.md": {
+      "sha256": "3fbd0f4654b92a7be6d3949a7577f1fea9becdc67e9c327b6210dcd0b9548814",
+      "size_bytes": 4254
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_summary.csv": {
+      "sha256": "c76535966323144662289e4182a3b72291633b3f21129901722018d96024874b",
+      "size_bytes": 4463
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_wrench_est_data.npz": {
+      "sha256": "3b2f03d22e2cfba36c37e1445426f97c001b21c080c90087ef5c6895743f6bc5",
+      "size_bytes": 69474
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_wrench_est_direction.pdf": {
+      "sha256": "64cf8441d2380ed7ce069661fb627489b0d72fb97bf632772d82c5f2ef41e709",
+      "size_bytes": 50923
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_wrench_est_direction.png": {
+      "sha256": "8c50b9fd6f171c78891fe193993b2fd2148209bc6efb8183fd7340f9b746183f",
+      "size_bytes": 146153
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_wrench_est_improvement.pdf": {
+      "sha256": "7a8054546a3bbe5499f1ad0f3fbdb4303b4e20cbf6edea521ff075dc95d7ab01",
+      "size_bytes": 30819
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_wrench_est_improvement.png": {
+      "sha256": "33b8d0361e1448124ce0043d2e098a2c31728bbee346e783d2999d4d9767a4d2",
+      "size_bytes": 75199
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_wrench_est_nrmse.pdf": {
+      "sha256": "3a074da8db10b77bb197caee1f4bfe59e608ffc9a624753c4cd1f30d55a0fdd0",
+      "size_bytes": 28740
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_wrench_est_nrmse.png": {
+      "sha256": "a6a7ceebd02d9a7ad334f5652181cbc1be83060f95bb5dcbda3ee6283445c6aa",
+      "size_bytes": 104376
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_wrench_est_violin.pdf": {
+      "sha256": "5f9f771289713051f7f8d84c49165c624c1f23f29d30a1219263a446443b3538",
+      "size_bytes": 52343
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/constrained_wrench_est_violin.png": {
+      "sha256": "8ea93cc0d6b38fa6dccf7fe696a9e3acb3bc7c1ebb5daeaf78738f8ea31cd0dc",
+      "size_bytes": 182837
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/final_constrained_subspace_20260427/combined_constrained_subspace_summary.csv": {
+      "sha256": "da8332650475bf649746b0ebf1c6e9ab0db14631e77eb33298a4b85d84d507b0",
+      "size_bytes": 1513
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/final_constrained_subspace_20260427/combined_constrained_subspace_summary.md": {
+      "sha256": "33a3398c65fe2558fc2d10a9041a4f84e17d50dcd265b5468bbfa8d7c429d5fc",
+      "size_bytes": 1660
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/final_constrained_subspace_20260427/local_moment_only_summary.csv": {
+      "sha256": "195f9eb086e2dc6df3eeecb009ee1f30f1db0b437105f3a425ce65b77f7b3c25",
+      "size_bytes": 824
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/final_constrained_subspace_20260427/local_moment_only_summary.md": {
+      "sha256": "543217ff2d95c14c7201fa3a3acf2d742639cfc377bac5c67332992a5edf50c0",
+      "size_bytes": 1057
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/final_constrained_subspace_20260427/local_transverse_summary.csv": {
+      "sha256": "5648f847bc28b91691fa4df3a72df69132e5c589783dfaafca5df721936b4378",
+      "size_bytes": 888
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/final_constrained_subspace_20260427/local_transverse_summary.md": {
+      "sha256": "89f26e5a827ad3ca12227f463e9f000fbd397bbf290d753cbb5bf69b4984bb13",
+      "size_bytes": 987
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_gt_20260427/constrained_results.csv": {
+      "sha256": "85aacec98524b1c0fa3455d3228a6951c62e6b61bed0040ef23bfd4af5fcf5ec",
+      "size_bytes": 13433
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_gt_20260427/constrained_results.json": {
+      "sha256": "62f8cc9b0ba1549861492b416b8c6a38d5a0c7b98d2a3b74d9f7606e5070b6df",
+      "size_bytes": 52057
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_gt_20260427/constrained_study_summary.md": {
+      "sha256": "87e50c730363429c24ac597aceed88aa7dcedd85ea6f7a1cab5aafc432dfffdc",
+      "size_bytes": 3099
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_gt_20260427/constrained_summary.csv": {
+      "sha256": "88dbdb3e33fd64624641081b97145e7f1ef035431f24cd886436a6e570241173",
+      "size_bytes": 781
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_gt_20260427/constrained_wrench_est_data.npz": {
+      "sha256": "5b0ec62989aaf98276c4ba3d47b12f55357cd547f486b563a996aae18e333981",
+      "size_bytes": 3192
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_only_20260427_20steps_5noise/constrained_results.csv": {
+      "sha256": "73ec27246056fa59576ead174ceb93e1fdcaa953705642c651a9f57e2b6e9cd1",
+      "size_bytes": 230951
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_only_20260427_20steps_5noise/constrained_results.json": {
+      "sha256": "c10a3b011442d2ff862c7ec24a615687513c13b7296ae14ec1e5b42d60b9b866",
+      "size_bytes": 808876
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_only_20260427_20steps_5noise/constrained_study_summary.md": {
+      "sha256": "5f9ca2c013ea3f5e9b6f821b894ac748ee46ff9ab63a17d1d8abc304e4b51701",
+      "size_bytes": 3786
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_only_20260427_20steps_5noise/constrained_summary.csv": {
+      "sha256": "f4bce655101778000eaa50acd285af7cb7bcdb5db04db73aa0e0254ee6648d29",
+      "size_bytes": 2205
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_only_20260427_20steps_5noise/constrained_wrench_est_data.npz": {
+      "sha256": "aa803f4bb0d7528ec92bc3fb6aafc3a56203f45b5ede7cb424501b4c0b8c3456",
+      "size_bytes": 23477
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_smoke_20260427/constrained_results.csv": {
+      "sha256": "3fee6caddf17bc4f3790bbe1e3ce85f7cb7d654857de16558a674e04d6455a12",
+      "size_bytes": 2432
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_smoke_20260427/constrained_results.json": {
+      "sha256": "6b1e76a726de15e7f9ad9e1ea6a1561870a047f2fe84c32188152828ea27e281",
+      "size_bytes": 16438
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_smoke_20260427/constrained_study_summary.md": {
+      "sha256": "4a4837935c19fd7267e4606cbbe0914053e4a134b283d86e60d78de5486e87e5",
+      "size_bytes": 3786
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_smoke_20260427/constrained_summary.csv": {
+      "sha256": "d2cca43f493f743eaff16ebaaf8f3468244dee831d965f18be2b4ab649977b92",
+      "size_bytes": 2191
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_moment_smoke_20260427/constrained_wrench_est_data.npz": {
+      "sha256": "629559879eed6b1379094bf5862a30b25239693f73bbd8bb4ba141ff7fe30cd1",
+      "size_bytes": 3632
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_force_20260427_20steps_5noise/constrained_results.csv": {
+      "sha256": "a49e97c6b1197a8818712777f92f3119e75e3e8d973968eb7fca4c716a35623a",
+      "size_bytes": 258853
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_force_20260427_20steps_5noise/constrained_results.json": {
+      "sha256": "f6321e833ff3ae192b3c73d907a425a4bd46856338eec0e6599c179fd6e6b273",
+      "size_bytes": 837237
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_force_20260427_20steps_5noise/constrained_study_summary.md": {
+      "sha256": "4761fadbeaf7e4d259a02b4944ef265d5df6538fd02068f2e21caca9b2894272",
+      "size_bytes": 3799
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_force_20260427_20steps_5noise/constrained_summary.csv": {
+      "sha256": "e634ba0c8e5416fb75ff15332df7646c0b4cef2b872fef42ff4a3e7160fc0d89",
+      "size_bytes": 2659
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_force_20260427_20steps_5noise/constrained_wrench_est_data.npz": {
+      "sha256": "cdfb1b1eff04b4f2a1717d009ee76a6c2f787f10d7f650004f08033407ade5b6",
+      "size_bytes": 31950
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_gt_20260427/constrained_results.csv": {
+      "sha256": "c50c7335664a3231b94a146b5b22c9500872b66428b414e0c6192658fa89b9e7",
+      "size_bytes": 16074
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_gt_20260427/constrained_results.json": {
+      "sha256": "f329d54690df4e66d4b4cbb24af447de9d481def1feb47c58ebd09d6eced43c8",
+      "size_bytes": 54858
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_gt_20260427/constrained_study_summary.md": {
+      "sha256": "a743c5e052d174d6885ae5d892060a9bed6f6848cfa642282a96e3617fe0806d",
+      "size_bytes": 3087
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_gt_20260427/constrained_summary.csv": {
+      "sha256": "b62f717085df4a84f26a419591ae0627567d908e0129004f45fcf018f725d8a8",
+      "size_bytes": 936
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_gt_20260427/constrained_wrench_est_data.npz": {
+      "sha256": "442ca69ea3995ab79ada3e9120f147a79b00cef2c22925d0f2adfd3b1b854458",
+      "size_bytes": 4126
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_smoke_20260427/constrained_results.csv": {
+      "sha256": "a37643cbb373c1f615a662a74f4f00f63bc0eacf5f9edf8a18f9c1dfd81a7fcd",
+      "size_bytes": 2733
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_smoke_20260427/constrained_results.json": {
+      "sha256": "853fd3d8081a1f733fa9c90b8d6ea3b0b521dce29337f0a7d0a966207b747e14",
+      "size_bytes": 17105
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_smoke_20260427/constrained_study_summary.md": {
+      "sha256": "0a10f14ffa8ce32112bbf94e63035f6b651925c69f4e6f6084619e46169bcadd",
+      "size_bytes": 3795
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_smoke_20260427/constrained_summary.csv": {
+      "sha256": "a6e80ee44b682db7ef8079c43996e5fa5f305f4fc2393e02b0fd2211e343cafe",
+      "size_bytes": 2552
+    },
+    "src/shape_force_est_imu/crt/gt_data_constrained/results/local_transverse_smoke_20260427/constrained_wrench_est_data.npz": {
+      "sha256": "d567eb42aca924ae6e664bcce75e64b650b1453a4456496d630196ee67c6f252",
+      "size_bytes": 3876
+    },
+    "src/shape_force_est_imu/crt/gt_data_seq/kirchhoff_imu_seq_2imu.npz": {
+      "sha256": "bc98daea1ed9cd3c4ea050191b8de5e4a3a393c0475eecd6295c57b63b880d67",
+      "size_bytes": 1035152
+    },
+    "src/shape_force_est_imu/crt/gt_data_seq/kirchhoff_imu_seq_3imu.npz": {
+      "sha256": "5772c840b83a99e08c3ffe82d89462567c04c9a18609acd693e8c44d04398338",
+      "size_bytes": 1555057
+    },
+    "src/shape_force_est_imu/crt/gt_data_seq/results_seq/kirchhoff_shape_est_composite_maintext_v3.pdf": {
+      "sha256": "9b7de4989f88e9bc42d63045671b5f37a369d5bacd29d66828c9b98ec7995ad6",
+      "size_bytes": 80500
+    },
+    "src/shape_force_est_imu/crt/gt_data_seq/results_seq/kirchhoff_shape_est_composite_maintext_v3.png": {
+      "sha256": "9402c54cd8bc2f8b7120238a822fb761c54425553daac291a4573757907c59cd",
+      "size_bytes": 486974
+    },
+    "src/shape_force_est_imu/crt/gt_data_seq/results_seq/kirchhoff_shape_est_main_aggregate_violin_v2.pdf": {
+      "sha256": "50329348d48b53d893fc6f1a57c1d896dd5dbd83b17018869600ba92df4550a1",
+      "size_bytes": 52890
+    },
+    "src/shape_force_est_imu/crt/gt_data_seq/results_seq/kirchhoff_shape_est_main_aggregate_violin_v2.png": {
+      "sha256": "f6f4178d66bfa9ad37ba4a1288686749721cdf6ee3b138fd14a5ebbd52424d5d",
+      "size_bytes": 253203
+    },
+    "src/shape_force_est_imu/crt/gt_data_seq/results_seq/kirchhoff_shape_est_results_seq.csv": {
+      "sha256": "71f4907484d9cb7d6f4f98fd4d68fbeefba925f6b5d991f58616fe0d0b5e4105",
+      "size_bytes": 58963
+    },
+    "src/shape_force_est_imu/crt/gt_data_seq/results_seq/kirchhoff_shape_est_results_seq.json": {
+      "sha256": "b3f20f4b884ddd3ad2d9d5c7d91c2af96212707a2da01451dd66288db48d8496",
+      "size_bytes": 211931
+    },
+    "src/shape_force_est_imu/crt/gt_data_seq/results_seq/kirchhoff_shape_est_shapes_seq.npz": {
+      "sha256": "6309fea04d9380c135f375e3733e8b44448419b418d42864194d47205f3f207a",
+      "size_bytes": 4810507
+    },
+    "src/shape_force_est_imu/crt/gt_data_seq/results_seq/kirchhoff_shape_est_summary_by_layout_seq.csv": {
+      "sha256": "e76a5e629d8c2fbe3704be4ae2436847b0b5987146fda5abc728385f083730e7",
+      "size_bytes": 1079
+    },
+    "src/shape_force_est_imu/crt/plot_kirchhoff_gt.py": {
+      "sha256": "c2b3c4bc333e69bd19f6abf971354f0058fe3f1deada1c761e5a3854dd519a8b",
+      "size_bytes": 8914
+    },
+    "src/shape_force_est_imu/crt/plot_kirchhoff_shape_est.py": {
+      "sha256": "6ee48f138b9cbc2d3f0063d66ac9e2a7376d847c7ff9a63eabb4c557cb2d92f5",
+      "size_bytes": 40656
+    },
+    "src/shape_force_est_imu/crt/plot_kirchhoff_shape_est_composite.py": {
+      "sha256": "f92c986ede5f45637b1af6e0d09838f00424ac042cae6f4cf861b73684cefa68",
+      "size_bytes": 31363
+    },
+    "src/shape_force_est_imu/crt/plot_kirchhoff_shape_est_maintext_figures_v2.py": {
+      "sha256": "7bf514cc0a885deac6de9738f7ab31eab0c98ecadebdacfeb865ef8dc9bb26aa",
+      "size_bytes": 41401
+    },
+    "src/shape_force_est_imu/crt/plot_kirchhoff_wrench_constrained_summary.py": {
+      "sha256": "46c6ae398841b076f359494469a011222231eef100ba5d743a32a3890bae967c",
+      "size_bytes": 18314
+    },
+    "src/shape_force_est_imu/crt/plot_kirchhoff_wrench_estimation_summary.py": {
+      "sha256": "1047c2d5578dc92eb36fcbe1178c58435a4011a662fcfdcc39b7b87280b09b68",
+      "size_bytes": 15057
+    },
+    "src/shape_force_est_imu/crt/sweep_ekf_wrench_convergence.py": {
+      "sha256": "378c94027e02839b6dd9bfd963eb1a496e9f2885447c2da8291229e1089cd855",
+      "size_bytes": 37566
+    },
+    "src/shape_force_est_imu/crt/utils.py": {
+      "sha256": "cd17f627ad05d2c6c320d066050b455a0f15b6983e2eef7b4aadc05ee5558f11",
+      "size_bytes": 864
+    },
+    "src/shape_force_est_imu/crt/virtual_work.py": {
+      "sha256": "10dd7179bd42013e6303a31cd7291ae17cfe638ab40cd950c71811aeae2a8cb5",
+      "size_bytes": 9908
+    },
+    "src/shape_force_est_imu/crt/wrench_study_utils.py": {
+      "sha256": "ca92826ba93a21e4abd474761b04f7d5bc01a29eb6cde91414c6a4b1c852ce45",
+      "size_bytes": 20638
+    },
+    "src/shape_force_est_imu/crt/wrench_tip_constrained_solver.py": {
+      "sha256": "632ef8d5e76b44c980b57c5f0b18123a3976af251ac0cbd3652a0d184e72a195",
+      "size_bytes": 9305
+    },
+    "src/shape_force_est_imu/ekf/__init__.py": {
+      "sha256": "3f8c7151050e5ed917f0ff54ed830ca99702ac71218ce90e42e3cae8d08a44c5",
+      "size_bytes": 1135
+    },
+    "src/shape_force_est_imu/ekf/common.py": {
+      "sha256": "b143d1f9edea22ff81d27bee720c4638039c14c7b9ba530fc6e1c85dde8dc371",
+      "size_bytes": 294
+    },
+    "src/shape_force_est_imu/ekf/ekf.py": {
+      "sha256": "fbe69611adee125718a16e44a62aeb7a2d418a7d899a0e0856cd15e57dfaa6a7",
+      "size_bytes": 2931
+    },
+    "src/shape_force_est_imu/ekf/jacobians.py": {
+      "sha256": "a5d39945bc77c7f1b8d346f2dbaef4424c9b3e7bcc4c203b380386d18495e56b",
+      "size_bytes": 4296
+    },
+    "src/shape_force_est_imu/ekf/kinematics.py": {
+      "sha256": "02dd9bbd25d18f0b559f295ee4da4fa76a3b3e248c19b71aa72ca9b3230f9739",
+      "size_bytes": 2912
+    },
+    "src/shape_force_est_imu/ekf/quat.py": {
+      "sha256": "f35dd6cf5f044d6f6b301964b92861b9da568479e4cae8d4561aaf41d5020b70",
+      "size_bytes": 2478
+    },
+    "src/shape_force_est_imu/io/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "src/shape_force_est_imu/utils/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "src/shape_force_est_imu/utils/utils.py": {
+      "sha256": "cd17f627ad05d2c6c320d066050b455a0f15b6983e2eef7b4aadc05ee5558f11",
+      "size_bytes": 864
+    },
+    "src/shape_force_est_imu/viz/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "tests/check_conventions.py": {
+      "sha256": "895f27e71e0f7af3ddb7fb329bfa2d455d0f00c6d7897fd7db532e2abcd8f15b",
+      "size_bytes": 4296
+    },
+    "tests/check_variable_order_ekf_jacobian.py": {
+      "sha256": "1c164a0c366d96998cdcab16ba47f9ca68d3d17496da0442f46c4e6478aa51bb",
+      "size_bytes": 5355
+    },
+    "tests/check_wrench_covariance.py": {
+      "sha256": "d9cc00ec3e59ec4f9f3f2a7ad264f66040c4c2c4ada409d5df526c7efb11b4de",
+      "size_bytes": 1423
+    }
+  },
+  "excluded_tracked_cache_files": [
+    "src/shape_force_est_imu/__pycache__/__init__.cpython-310.pyc",
+    "src/shape_force_est_imu/crt/__pycache__/__init__.cpython-310.pyc",
+    "src/shape_force_est_imu/crt/__pycache__/cosserat_rod_model.cpython-310.pyc",
+    "src/shape_force_est_imu/crt/__pycache__/cosserat_rod_model_inextensible.cpython-310.pyc",
+    "src/shape_force_est_imu/crt/__pycache__/utils.cpython-310.pyc",
+    "src/shape_force_est_imu/crt/__pycache__/virtual_work.cpython-310.pyc",
+    "src/shape_force_est_imu/ekf/__pycache__/__init__.cpython-310.pyc",
+    "src/shape_force_est_imu/ekf/__pycache__/common.cpython-310.pyc",
+    "src/shape_force_est_imu/ekf/__pycache__/ekf.cpython-310.pyc",
+    "src/shape_force_est_imu/ekf/__pycache__/jacobians.cpython-310.pyc",
+    "src/shape_force_est_imu/ekf/__pycache__/kinematics.cpython-310.pyc",
+    "src/shape_force_est_imu/ekf/__pycache__/quat.cpython-310.pyc"
+  ],
+  "production_files": {
+    "src/shape_force_est_imu/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "src/shape_force_est_imu/core/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "src/shape_force_est_imu/crt/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "src/shape_force_est_imu/crt/archive/CRT_time_comparison.py": {
+      "sha256": "baf1bbe03126681bc0a853279b1111d0a4f755f956ebcc1221b99923af116f96",
+      "size_bytes": 6143
+    },
+    "src/shape_force_est_imu/crt/archive/CRT_time_comparison_6D_for_CRT_v2.py": {
+      "sha256": "23309f2c4dc5e6636d7e6d9377e509022ee67259044be42478c1f4cdb4deb18e",
+      "size_bytes": 6446
+    },
+    "src/shape_force_est_imu/crt/archive/CRT_time_comparison_in_plane_assumption.py": {
+      "sha256": "799553a24cddc465883b26493b0dc7d346d853b8a0e23fc40060ff504bda83eb",
+      "size_bytes": 23144
+    },
+    "src/shape_force_est_imu/crt/archive/CRT_time_comparison_relax_assumption.py": {
+      "sha256": "96ec64971a12e0546f901ed293025eb3274f6184050cdc8cd21ec77de3528738",
+      "size_bytes": 6858
+    },
+    "src/shape_force_est_imu/crt/archive/cosserat_rod_model_extensible_only.py": {
+      "sha256": "159178de973cba72643a6130c09d63227a34043df250baa12c1f9adb82bac4bb",
+      "size_bytes": 8418
+    },
+    "src/shape_force_est_imu/crt/archive/pck_models_compute_time.py": {
+      "sha256": "1bdaace033d0228997df0cfec1625887aa32e20bc465308b5f4b7c446304390e",
+      "size_bytes": 23115
+    },
+    "src/shape_force_est_imu/crt/compare_oracle_vs_ekf_wrench_estimation.py": {
+      "sha256": "d9bc7f626defa26023c8a2ec43a2123f17c9f2ad247d1e8e62741e87582b73db",
+      "size_bytes": 56882
+    },
+    "src/shape_force_est_imu/crt/cosserat_rod_model.py": {
+      "sha256": "150b3c27cadd35d9197fb6183e8e81c90b5eeb83b2689ba417a6d3f078114c81",
+      "size_bytes": 10627
+    },
+    "src/shape_force_est_imu/crt/crt_gt_gen.py": {
+      "sha256": "562b783e0041a16bec64138b03b696c8a4897c9078210e0b24f465e245c19feb",
+      "size_bytes": 3828
+    },
+    "src/shape_force_est_imu/crt/crt_gt_gen_output_file.py": {
+      "sha256": "d3336d385bcd45089f6e430babdf481eeab0857826e404fcc9ccdc80dd08ca22",
+      "size_bytes": 12739
+    },
+    "src/shape_force_est_imu/crt/crt_gt_gen_plot.py": {
+      "sha256": "4eed9300ba52737ad3e2a36aab867ac05ee24129d6b0d89f2a7a69b30270a214",
+      "size_bytes": 4476
+    },
+    "src/shape_force_est_imu/crt/crt_meas_gen_output_file.py": {
+      "sha256": "8848598464588e152b6cfd1c34905a7c4f9bc377361b4a852ad697c0543ed093",
+      "size_bytes": 6642
+    },
+    "src/shape_force_est_imu/crt/debug_wrench_tip_constrained.py": {
+      "sha256": "5203f594f8652b792b8f448f9fc3d9526b01ead74729bbaa3bbfda097393f41b",
+      "size_bytes": 18058
+    },
+    "src/shape_force_est_imu/crt/diagnose_modal_order_continuation.py": {
+      "sha256": "87b8ef41a743dff08fc240a127de9d2a5987b1182bb1d264f58ae23518567b3f",
+      "size_bytes": 35738
+    },
+    "src/shape_force_est_imu/crt/diagnose_wrench_observability_vs_order.py": {
+      "sha256": "191dfee3463a1bb8a19bd205ea94a7bbf2d4ebfe229841ab734f4aa2b06e8c2f",
+      "size_bytes": 36602
+    },
+    "src/shape_force_est_imu/crt/evaluate_kirchhoff_shape_estimation.py": {
+      "sha256": "90f89487f18a23d0cfb65919451378e33d86e5187b04d4ae5ed8ee8a46cb1826",
+      "size_bytes": 32116
+    },
+    "src/shape_force_est_imu/crt/evaluate_kirchhoff_shape_estimation_sequences.py": {
+      "sha256": "cbcd2b6c67980133eedf4c5ad6c38520d2f056d047f90890348836c42500ef48",
+      "size_bytes": 14657
+    },
+    "src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_constrained.py": {
+      "sha256": "9cdb3036db092f4afcc98effeb3f5fe578aeec5985fb2d52e968b01c394db109",
+      "size_bytes": 37834
+    },
+    "src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_estimation.py": {
+      "sha256": "d4447814603789e2385f319677d7dc74f16ce2b6fb4b4344afd2084ab82a639f",
+      "size_bytes": 23540
+    },
+    "src/shape_force_est_imu/crt/evaluate_kirchhoff_wrench_estimation_methods.py": {
+      "sha256": "ff1d0d72e3b30ba9939c6116746e2ecdf74139c3a5a05eb599f15b456c61fc31",
+      "size_bytes": 28777
+    },
+    "src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset.py": {
+      "sha256": "6e8a2362788f769d88c4aa46864334235bb3ad4f269299a25a5d2570692ff090",
+      "size_bytes": 19315
+    },
+    "src/shape_force_est_imu/crt/generate_kirchhoff_gt_dataset_constrained.py": {
+      "sha256": "6a8eb4824a6d979dee4816f4b39f5083507a1b7fe355f797bc9f0aa8e9fcfe06",
+      "size_bytes": 28014
+    },
+    "src/shape_force_est_imu/crt/generate_kirchhoff_imu_measurement_sequences.py": {
+      "sha256": "1795b0ee888da5e39a3924363e72f35ea286349479fc14e594fac38296b75526",
+      "size_bytes": 15680
+    },
+    "src/shape_force_est_imu/crt/generate_kirchhoff_imu_measurements.py": {
+      "sha256": "497ad1774b2318a6bc25e81933e073846aa6054a889f5494de4c33da589b09b5",
+      "size_bytes": 16604
+    },
+    "src/shape_force_est_imu/crt/generator.py": {
+      "sha256": "7421d56659db0035679f79d8e152133ee43b1bd6ec3803b97a31550ca47aadfd",
+      "size_bytes": 1246
+    },
+    "src/shape_force_est_imu/crt/plot_kirchhoff_gt.py": {
+      "sha256": "c2b3c4bc333e69bd19f6abf971354f0058fe3f1deada1c761e5a3854dd519a8b",
+      "size_bytes": 8914
+    },
+    "src/shape_force_est_imu/crt/plot_kirchhoff_shape_est.py": {
+      "sha256": "6ee48f138b9cbc2d3f0063d66ac9e2a7376d847c7ff9a63eabb4c557cb2d92f5",
+      "size_bytes": 40656
+    },
+    "src/shape_force_est_imu/crt/plot_kirchhoff_shape_est_composite.py": {
+      "sha256": "f92c986ede5f45637b1af6e0d09838f00424ac042cae6f4cf861b73684cefa68",
+      "size_bytes": 31363
+    },
+    "src/shape_force_est_imu/crt/plot_kirchhoff_shape_est_maintext_figures_v2.py": {
+      "sha256": "7bf514cc0a885deac6de9738f7ab31eab0c98ecadebdacfeb865ef8dc9bb26aa",
+      "size_bytes": 41401
+    },
+    "src/shape_force_est_imu/crt/plot_kirchhoff_wrench_constrained_summary.py": {
+      "sha256": "46c6ae398841b076f359494469a011222231eef100ba5d743a32a3890bae967c",
+      "size_bytes": 18314
+    },
+    "src/shape_force_est_imu/crt/plot_kirchhoff_wrench_estimation_summary.py": {
+      "sha256": "1047c2d5578dc92eb36fcbe1178c58435a4011a662fcfdcc39b7b87280b09b68",
+      "size_bytes": 15057
+    },
+    "src/shape_force_est_imu/crt/sweep_ekf_wrench_convergence.py": {
+      "sha256": "378c94027e02839b6dd9bfd963eb1a496e9f2885447c2da8291229e1089cd855",
+      "size_bytes": 37566
+    },
+    "src/shape_force_est_imu/crt/utils.py": {
+      "sha256": "cd17f627ad05d2c6c320d066050b455a0f15b6983e2eef7b4aadc05ee5558f11",
+      "size_bytes": 864
+    },
+    "src/shape_force_est_imu/crt/virtual_work.py": {
+      "sha256": "10dd7179bd42013e6303a31cd7291ae17cfe638ab40cd950c71811aeae2a8cb5",
+      "size_bytes": 9908
+    },
+    "src/shape_force_est_imu/crt/wrench_study_utils.py": {
+      "sha256": "ca92826ba93a21e4abd474761b04f7d5bc01a29eb6cde91414c6a4b1c852ce45",
+      "size_bytes": 20638
+    },
+    "src/shape_force_est_imu/crt/wrench_tip_constrained_solver.py": {
+      "sha256": "632ef8d5e76b44c980b57c5f0b18123a3976af251ac0cbd3652a0d184e72a195",
+      "size_bytes": 9305
+    },
+    "src/shape_force_est_imu/ekf/__init__.py": {
+      "sha256": "3f8c7151050e5ed917f0ff54ed830ca99702ac71218ce90e42e3cae8d08a44c5",
+      "size_bytes": 1135
+    },
+    "src/shape_force_est_imu/ekf/common.py": {
+      "sha256": "b143d1f9edea22ff81d27bee720c4638039c14c7b9ba530fc6e1c85dde8dc371",
+      "size_bytes": 294
+    },
+    "src/shape_force_est_imu/ekf/ekf.py": {
+      "sha256": "fbe69611adee125718a16e44a62aeb7a2d418a7d899a0e0856cd15e57dfaa6a7",
+      "size_bytes": 2931
+    },
+    "src/shape_force_est_imu/ekf/jacobians.py": {
+      "sha256": "a5d39945bc77c7f1b8d346f2dbaef4424c9b3e7bcc4c203b380386d18495e56b",
+      "size_bytes": 4296
+    },
+    "src/shape_force_est_imu/ekf/kinematics.py": {
+      "sha256": "02dd9bbd25d18f0b559f295ee4da4fa76a3b3e248c19b71aa72ca9b3230f9739",
+      "size_bytes": 2912
+    },
+    "src/shape_force_est_imu/ekf/quat.py": {
+      "sha256": "f35dd6cf5f044d6f6b301964b92861b9da568479e4cae8d4561aaf41d5020b70",
+      "size_bytes": 2478
+    },
+    "src/shape_force_est_imu/io/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "src/shape_force_est_imu/utils/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "src/shape_force_est_imu/utils/utils.py": {
+      "sha256": "cd17f627ad05d2c6c320d066050b455a0f15b6983e2eef7b4aadc05ee5558f11",
+      "size_bytes": 864
+    },
+    "src/shape_force_est_imu/viz/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    }
+  },
+  "source_and_input_files": {
+    "src/shape_force_est_imu/crt/compare_oracle_vs_ekf_wrench_estimation.py": {
+      "sha256": "d9bc7f626defa26023c8a2ec43a2123f17c9f2ad247d1e8e62741e87582b73db",
+      "size_bytes": 56882
+    },
+    "src/shape_force_est_imu/crt/evaluate_kirchhoff_shape_estimation.py": {
+      "sha256": "90f89487f18a23d0cfb65919451378e33d86e5187b04d4ae5ed8ee8a46cb1826",
+      "size_bytes": 32116
+    },
+    "src/shape_force_est_imu/crt/virtual_work.py": {
+      "sha256": "10dd7179bd42013e6303a31cd7291ae17cfe638ab40cd950c71811aeae2a8cb5",
+      "size_bytes": 9908
+    },
+    "src/shape_force_est_imu/crt/generate_kirchhoff_imu_measurements.py": {
+      "sha256": "497ad1774b2318a6bc25e81933e073846aa6054a889f5494de4c33da589b09b5",
+      "size_bytes": 16604
+    },
+    "src/shape_force_est_imu/crt/gt_data/kirchhoff_gt_dataset.npz": {
+      "sha256": "ae8ec9a3629a136e02b7919bb47eabe537e80e448457295fe9465494a608ba3a",
+      "size_bytes": 464957
+    },
+    "src/shape_force_est_imu/crt/gt_data/kirchhoff_imu_3imu.npz": {
+      "sha256": "ef709d85eb766e58dd8cf1358fd089a1623931c576ed857ecfcfdd7f026fd6e3",
+      "size_bytes": 63986
+    }
+  },
+  "selection_metadata_only": {
+    "selected_case_ids": [
+      1,
+      2
+    ],
+    "mappings": {
+      "1": {
+        "gt_case_index": 1,
+        "imu_case_index": 1,
+        "noise_realization": 0
+      },
+      "2": {
+        "gt_case_index": 2,
+        "imu_case_index": 2,
+        "noise_realization": 0
+      }
+    },
+    "all_gt_and_imu_ids_equal": true,
+    "dataset_case_count": 50,
+    "stored_R_meas_shape": [
+      50,
+      5,
+      3,
+      3,
+      3
+    ],
+    "stored_R_true_shape": [
+      50,
+      3,
+      3,
+      3
+    ],
+    "noise_realization": 0,
+    "rng_seed": 1234,
+    "measurement_std_deg": 0.5,
+    "actual_sensor_s": [
+      0.25252525252525254,
+      0.5050505050505051,
+      1.0
+    ],
+    "noise_draws_independent_across_selected_cases": false,
+    "same_left_noise_rotation_max_abs_difference_cases_1_2": 2.220446049250313e-16,
+    "numerical_check_definition": "For each sensor recover left perturbation as R_meas[case,0] @ inv(R_true[case]); compare case IDs 1 and 2. This is not an estimator outcome.",
+    "source_evidence": "generate_kirchhoff_imu_measurements.py:161-171 samples one rotation per realization/sensor and broadcasts it to all cases.",
+    "statistical_interpretation": "Two distinct physical cases under one shared saved three-sensor noise realization; not independent noise Monte Carlo replicates.",
+    "case_estimator_outcomes_inspected": false
+  },
+  "final_comparison_requirements": [
+    "Pre-existing tracked non-cache file path set and raw hashes unchanged, except any explicitly authorized documentation index edit.",
+    "Preserve production files, original datasets and historical diagnostics exactly.",
+    "Allowlist only explicit newly authorized Step 3 paths; record baseline raw copy before any README index edit.",
+    "Report shared noise across cases; do not label the two cases as independent noise replicates."
+  ]
+}

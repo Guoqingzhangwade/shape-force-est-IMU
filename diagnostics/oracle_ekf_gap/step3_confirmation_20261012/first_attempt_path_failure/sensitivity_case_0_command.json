@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\.venv\\Scripts\\python.exe",
+    "-B",
+    "C:\\Users\\guoqi\\AppData\\Local\\Temp\\ekf_confirmation_step3_20261012\\candidate\\diagnostics\\oracle_ekf_gap\\step2_sensitivity_20261012\\diagnose_sensitivity.py",
+    "--repo-root",
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU",
+    "--state-results",
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\diagnostics\\oracle_ekf_gap\\step1_frechet_20261008\\after_abcd\\results.json",
+    "--output-dir",
+    "C:\\Users\\guoqi\\AppData\\Local\\Temp\\ekf_confirmation_step3_20261012\\case_0_parity"
+  ],
+  "returncode": 0
+}

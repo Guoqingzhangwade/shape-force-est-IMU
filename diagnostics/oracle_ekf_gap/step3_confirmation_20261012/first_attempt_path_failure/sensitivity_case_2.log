@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "C:\Users\guoqi\AppData\Local\Temp\ekf_confirmation_step3_20261012\candidate\diagnostics\oracle_ekf_gap\step2_sensitivity_20261012\diagnose_sensitivity.py", line 263, in <module>
+    main()
+  File "C:\Users\guoqi\AppData\Local\Temp\ekf_confirmation_step3_20261012\candidate\diagnostics\oracle_ekf_gap\step2_sensitivity_20261012\diagnose_sensitivity.py", line 96, in main
+    hashes_before = {p.relative_to(root).as_posix(): digest(p) for p in protected}
+  File "C:\Users\guoqi\AppData\Local\Temp\ekf_confirmation_step3_20261012\candidate\diagnostics\oracle_ekf_gap\step2_sensitivity_20261012\diagnose_sensitivity.py", line 96, in <dictcomp>
+    hashes_before = {p.relative_to(root).as_posix(): digest(p) for p in protected}
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\pathlib.py", line 818, in relative_to
+    raise ValueError("{!r} is not in the subpath of {!r}"
+ValueError: 'C:\\Users\\guoqi\\AppData\\Local\\Temp\\ekf_confirmation_step3_20261012\\case_2\\abcd\\results.json' is not in the subpath of 'C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU' OR one path is relative and the other is absolute.

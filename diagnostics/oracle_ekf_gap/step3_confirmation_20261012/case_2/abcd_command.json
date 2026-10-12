@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU\\.venv\\Scripts\\python.exe",
+    "-B",
+    "C:\\Users\\guoqi\\AppData\\Local\\Temp\\ekf_confirmation_step3_20261012\\candidate\\diagnostics\\oracle_ekf_gap\\recovered_run\\diagnose_recovered.py",
+    "--repo-root",
+    "C:\\Users\\guoqi\\OneDrive - stevens.edu\\Documents\\GitHub\\shape-force-est-IMU",
+    "--case-id",
+    "2",
+    "--noise-realization",
+    "0",
+    "--output-dir",
+    "C:\\Users\\guoqi\\AppData\\Local\\Temp\\ekf_confirmation_step3_20261012\\case_2\\abcd"
+  ],
+  "returncode": 0
+}

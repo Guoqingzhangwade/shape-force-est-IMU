@@ -1,0 +1,652 @@
+{
+  "scope": "Two preselected additional cases plus the case-0 baseline; saved results only; no population claim.",
+  "protocol_sha256": "0d71efe030896fc09f080dee477b17d070275a77f21aca6a4b33b6ba48ced2ec",
+  "descriptive_recurrence_threshold": 10.0,
+  "new_cases_meeting_recurrence_rule": [
+    1,
+    2
+  ],
+  "case_0_parity_with_committed_step2_max_relative_difference": 0.0,
+  "noise_dependence": "Existing generator broadcasts each realization/sensor perturbation across cases; these are distinct physical cases with shared noise, not independent noise replicates",
+  "cases": {
+    "0": {
+      "inputs": {
+        "fit_results_sha256": "c32b2c216b33a0ae7bb81a18397f5544fb5e5bb57d2cd7b71c2231d908be849c",
+        "sensitivity_results_sha256": "94772238f5ebd10d5d631c530e877be1cdb34ed3b6ede6c71b61f7d5a4b46cda",
+        "diagnostic_script_sha256": "e0862a307322a01e33cade75ba35388805d28b3880b4aade84d7558bc9098f5f"
+      },
+      "tau_N": [
+        0.0,
+        1.8584180048511385,
+        0.0,
+        0.0
+      ],
+      "gt_force_norm_N": 0.28330615258522635,
+      "actual_saved_noise_whitened_norm": 3.6609196102765975,
+      "fit_metrics": {
+        "A": {
+          "shape_rms_all100_mm": 0.014392438953909955,
+          "force_error_N": 0.0009898345951409682,
+          "force_direction_deg": 0.20004873050107758,
+          "force_error_over_F0": 0.003360790798081068
+        },
+        "B": {
+          "shape_rms_all100_mm": 0.020299473893196748,
+          "force_error_N": 0.0322490660054157,
+          "force_direction_deg": 5.3857636532209545,
+          "force_error_over_F0": 0.1094954296503192
+        },
+        "C": {
+          "shape_rms_all100_mm": 0.6619000505254643,
+          "force_error_N": 0.7786971064308691,
+          "force_direction_deg": 94.03072217868696,
+          "force_error_over_F0": 2.6439145314096755
+        },
+        "D": {
+          "shape_rms_all100_mm": 0.5525488953030083,
+          "force_error_N": 0.646809855642192,
+          "force_direction_deg": 89.287950640059,
+          "force_error_over_F0": 2.196117029674882
+        }
+      },
+      "per_state": {
+        "A": {
+          "H_raw_condition": 137.7938686667332,
+          "H_scaled_condition": 7.361827321865126,
+          "wrench_scaled_condition_common_world_base": 798.4113968517411,
+          "largest_gain_among_H_directions": 1.7174553315617795,
+          "largest_gain_direction_1_based": 7,
+          "J_fd_relative_error": 1.5100315534332033e-09,
+          "drop_residual_term_relative_error": 0.0005127609276947965
+        },
+        "B": {
+          "H_raw_condition": 137.79131156428699,
+          "H_scaled_condition": 7.361841334200246,
+          "wrench_scaled_condition_common_world_base": 800.6133676499492,
+          "largest_gain_among_H_directions": 1.7262683648062875,
+          "largest_gain_direction_1_based": 7,
+          "J_fd_relative_error": 1.752488178982229e-09,
+          "drop_residual_term_relative_error": 0.002178509471661447
+        },
+        "C": {
+          "H_raw_condition": 137.85001781735465,
+          "H_scaled_condition": 7.360869968807076,
+          "wrench_scaled_condition_common_world_base": 749.333327286823,
+          "largest_gain_among_H_directions": 1.4321134263035702,
+          "largest_gain_direction_1_based": 7,
+          "J_fd_relative_error": 3.734383309499543e-09,
+          "drop_residual_term_relative_error": 0.13578023173569373
+        },
+        "D": {
+          "H_raw_condition": 137.86509222389182,
+          "H_scaled_condition": 7.361106572025336,
+          "wrench_scaled_condition_common_world_base": 753.5546669707663,
+          "largest_gain_among_H_directions": 1.474028331879597,
+          "largest_gain_direction_1_based": 7,
+          "J_fd_relative_error": 2.903494833563185e-09,
+          "drop_residual_term_relative_error": 0.11560466300191267
+        }
+      },
+      "A_per_noise_gains": [
+        0.013777320814899787,
+        0.016282347092883464,
+        0.01573826757998993,
+        0.13663398477690494,
+        0.12028759022829977,
+        0.1218620270927669,
+        1.7174553315617795,
+        0.2547518456139117
+      ],
+      "A_H_singular_values": [
+        135.75474335153265,
+        135.69403337783623,
+        135.56781981954998,
+        54.24996599188587,
+        53.959874544082496,
+        51.95864086237842,
+        18.536659359002783,
+        18.440359630323286
+      ],
+      "A_weakest_body_direction_force_fraction": 0.9963689764794812,
+      "A_weakest_body_direction_body_Fz_fraction": 0.8532089019900294,
+      "checks": {
+        "body_rank_six_all_states": true,
+        "measurement_rank_eight_all_states": true,
+        "H_fd_max_relative_error": 3.7163906344937564e-10,
+        "full_wrench_derivative_max_relative_error": 3.734383309499543e-09,
+        "A_half_step_relative_change": 4.566079831912962e-09,
+        "derivative_checks_pass": true
+      },
+      "all_targets_achieved": true,
+      "any_curvature_cap_active": false,
+      "largest_gain_direction_1_based_at_A": 7,
+      "ratios_by_sign": {
+        "-1": {
+          "scaled_wrench_ratio": 124.1280149626391,
+          "force_ratio": 173.71908850876594,
+          "largest_gain_force_change_mN": 50.32628357166028,
+          "strongest_H_force_change_mN": 0.28969921500089374,
+          "largest_gain_shape_change_rms_mm": 0.019038678334888388,
+          "strongest_H_shape_change_rms_mm": 0.016364285086491778
+        },
+        "1": {
+          "scaled_wrench_ratio": 125.19214652657634,
+          "force_ratio": 175.4213502478379,
+          "largest_gain_force_change_mN": 50.686761172266706,
+          "strongest_H_force_change_mN": 0.2889429428097304,
+          "largest_gain_shape_change_rms_mm": 0.019028592547386862,
+          "strongest_H_shape_change_rms_mm": 0.016363821455572934
+        }
+      },
+      "preregistered_recurrence_rule_met": true,
+      "post_hoc_saved_state_decomposition": {
+        "C": {
+          "delta_q_norm": 0.12926299029337876,
+          "actual_scaled_wrench_change_norm": 2.6506172132836956,
+          "actual_force_change_mN": 779.4278569373934,
+          "linear_at_A_relative_error": 0.0730822230870244,
+          "coefficients_along_A_directions": [
+            0.0006120996007318979,
+            -0.010944717686241862,
+            -0.01460869755145594,
+            -0.00223415939164019,
+            -0.006177770241780673,
+            0.021736541122416523,
+            -0.06543929942590254,
+            0.10759837202121861
+          ],
+          "linearized_whitened_residual_per_direction": [
+            0.0830954242029344,
+            -1.4851328870278977,
+            -1.98046927745408,
+            -0.12120307101693274,
+            -0.33335170720865126,
+            1.1294011337699599,
+            -1.2130260021497419,
+            1.984152675708586
+          ],
+          "share_of_linear_prediction_per_direction": [
+            -0.0002888915064498481,
+            0.0006086780808654661,
+            0.006129782810051683,
+            -0.005892692994366508,
+            0.014038119822414222,
+            -0.05373095094337453,
+            0.8424275330256856,
+            0.19670842170517452
+          ],
+          "largest_gain_direction_share_of_delta_q_squared_norm": 0.25628836216276574,
+          "largest_gain_direction_share_of_linear_prediction": 0.8424275330256856,
+          "largest_gain_direction_only_relative_error_vs_actual": 0.21709366975459976,
+          "largest_gain_direction_only_cosine_vs_actual": 0.9991584861210879
+        },
+        "D": {
+          "delta_q_norm": 0.1089323043886592,
+          "actual_scaled_wrench_change_norm": 2.2021125535287482,
+          "actual_force_change_mN": 647.5385487843699,
+          "linear_at_A_relative_error": 0.06215606705741321,
+          "coefficients_along_A_directions": [
+            0.0018168121669178351,
+            -0.012315836641497102,
+            -0.012984228170275607,
+            -0.0003843331218986359,
+            -0.012379722585584169,
+            0.019454674984157917,
+            -0.053650870355872175,
+            0.09017965739394553
+          ],
+          "linearized_whitened_residual_per_direction": [
+            0.2466408694378726,
+            -1.6711855483072864,
+            -1.7602435050838485,
+            -0.020850058792556324,
+            -0.6680082776086663,
+            1.0108384705961586,
+            -0.9945079081008229,
+            1.6629453136836978
+          ],
+          "share_of_linear_prediction_per_direction": [
+            -0.0010269827801049941,
+            0.0007252676996749891,
+            0.00648970400595094,
+            -0.0012099357016203361,
+            0.03365190707666603,
+            -0.05721586185727403,
+            0.8226566460072139,
+            0.19592925554949409
+          ],
+          "largest_gain_direction_share_of_delta_q_squared_norm": 0.2425717166208279,
+          "largest_gain_direction_share_of_linear_prediction": 0.8226566460072139,
+          "largest_gain_direction_only_relative_error_vs_actual": 0.22712240569081987,
+          "largest_gain_direction_only_cosine_vs_actual": 0.9991991316332631
+        }
+      }
+    },
+    "1": {
+      "inputs": {
+        "fit_results_sha256": "8c0abfee264c25dd5f051b03ae2248cd1a293920cfb4bd84800360db7352f790",
+        "sensitivity_results_sha256": "4545560d00ed51c78e0e72a40b7997e5b2d30a29fc45c5385ceec45944f2210e",
+        "diagnostic_script_sha256": "e0862a307322a01e33cade75ba35388805d28b3880b4aade84d7558bc9098f5f"
+      },
+      "tau_N": [
+        0.0,
+        0.0,
+        0.0,
+        2.1763525545824516
+      ],
+      "gt_force_norm_N": 0.2274453213514556,
+      "actual_saved_noise_whitened_norm": 3.660919610276643,
+      "fit_metrics": {
+        "A": {
+          "shape_rms_all100_mm": 0.058070174727665944,
+          "force_error_N": 0.005979600064760579,
+          "force_direction_deg": 1.461667803208121,
+          "force_error_over_F0": 0.020302568704410957
+        },
+        "B": {
+          "shape_rms_all100_mm": 0.01784745281074176,
+          "force_error_N": 0.00908151576152665,
+          "force_direction_deg": 2.2820107435421595,
+          "force_error_over_F0": 0.030834519983230394
+        },
+        "C": {
+          "shape_rms_all100_mm": 0.7808178786256459,
+          "force_error_N": 0.9797009426973627,
+          "force_direction_deg": 94.43168914272299,
+          "force_error_over_F0": 3.3263839526842665
+        },
+        "D": {
+          "shape_rms_all100_mm": 0.7493057386711632,
+          "force_error_N": 0.9204578691041749,
+          "force_direction_deg": 93.78312741016813,
+          "force_error_over_F0": 3.1252356218829274
+        }
+      },
+      "per_state": {
+        "A": {
+          "H_raw_condition": 138.94419435389275,
+          "H_scaled_condition": 7.319139351021624,
+          "wrench_scaled_condition_common_world_base": 739.8478927121099,
+          "largest_gain_among_H_directions": 1.558668166309962,
+          "largest_gain_direction_1_based": 7,
+          "J_fd_relative_error": 3.7071176003576063e-09,
+          "drop_residual_term_relative_error": 0.00041873562803028565
+        },
+        "B": {
+          "H_raw_condition": 138.9440892696296,
+          "H_scaled_condition": 7.319532801123133,
+          "wrench_scaled_condition_common_world_base": 738.2253349218555,
+          "largest_gain_among_H_directions": 1.5507911577186426,
+          "largest_gain_direction_1_based": 7,
+          "J_fd_relative_error": 3.3600414092990196e-09,
+          "drop_residual_term_relative_error": 0.011114120711479903
+        },
+        "C": {
+          "H_raw_condition": 139.03943232772505,
+          "H_scaled_condition": 7.317291739046425,
+          "wrench_scaled_condition_common_world_base": 667.0133556309577,
+          "largest_gain_among_H_directions": 1.3112883915746558,
+          "largest_gain_direction_1_based": 7,
+          "J_fd_relative_error": 4.97445375141659e-09,
+          "drop_residual_term_relative_error": 0.039889950930397565
+        },
+        "D": {
+          "H_raw_condition": 139.05305705713286,
+          "H_scaled_condition": 7.317411150382542,
+          "wrench_scaled_condition_common_world_base": 669.3090590134669,
+          "largest_gain_among_H_directions": 1.3224354720177094,
+          "largest_gain_direction_1_based": 7,
+          "J_fd_relative_error": 2.1773540649845623e-09,
+          "drop_residual_term_relative_error": 0.034504752272480496
+        }
+      },
+      "A_per_noise_gains": [
+        0.01243313713312961,
+        0.01898416730393677,
+        0.03303532335020034,
+        0.11823194819472813,
+        0.1249434601725777,
+        0.14311111461046766,
+        1.558668166309962,
+        0.26026165861542766
+      ],
+      "A_H_singular_values": [
+        135.77604844961775,
+        135.6023355411097,
+        135.2534177832153,
+        54.325663948997885,
+        53.9833239426439,
+        51.9127866445256,
+        18.63464915244389,
+        18.550821611377824
+      ],
+      "A_weakest_body_direction_force_fraction": 0.9963362454465678,
+      "A_weakest_body_direction_body_Fz_fraction": 0.8701251614399697,
+      "checks": {
+        "body_rank_six_all_states": true,
+        "measurement_rank_eight_all_states": true,
+        "H_fd_max_relative_error": 3.060917876582536e-10,
+        "full_wrench_derivative_max_relative_error": 4.97445375141659e-09,
+        "A_half_step_relative_change": 6.414946341900302e-09,
+        "derivative_checks_pass": true
+      },
+      "all_targets_achieved": true,
+      "any_curvature_cap_active": false,
+      "largest_gain_direction_1_based_at_A": 7,
+      "ratios_by_sign": {
+        "-1": {
+          "scaled_wrench_ratio": 125.76776644728898,
+          "force_ratio": 196.1667076677038,
+          "largest_gain_force_change_mN": 45.95814130563023,
+          "strongest_H_force_change_mN": 0.2342810451989689,
+          "largest_gain_shape_change_rms_mm": 0.019227002587939995,
+          "strongest_H_shape_change_rms_mm": 0.0169084784951014
+        },
+        "1": {
+          "scaled_wrench_ratio": 124.96297224209009,
+          "force_ratio": 195.01817562121957,
+          "largest_gain_force_change_mN": 45.65192633764212,
+          "strongest_H_force_change_mN": 0.23409062356480592,
+          "largest_gain_shape_change_rms_mm": 0.019238476307389323,
+          "strongest_H_shape_change_rms_mm": 0.016908978064155793
+        }
+      },
+      "preregistered_recurrence_rule_met": true,
+      "post_hoc_saved_state_decomposition": {
+        "C": {
+          "delta_q_norm": 0.13972118747355522,
+          "actual_scaled_wrench_change_norm": 3.3482326885838356,
+          "actual_force_change_mN": 983.8568965367808,
+          "linear_at_A_relative_error": 0.11712670712665595,
+          "coefficients_along_A_directions": [
+            -0.016158463914755807,
+            -0.00777473513581578,
+            0.00025285527047577694,
+            -0.006825608172064244,
+            -0.008147496184342063,
+            0.023907866646541463,
+            0.13470161800027453,
+            -0.019269697201640002
+          ],
+          "linearized_whitened_residual_per_direction": [
+            -2.1939323793612844,
+            -1.0542722426301465,
+            0.03419953953634816,
+            -0.37080569580309586,
+            -0.4398289258407927,
+            1.2411239803476768,
+            2.5101173917016366,
+            -0.35746871529289015
+          ],
+          "share_of_linear_prediction_per_direction": [
+            0.0017203010617134306,
+            -0.0037499169058931594,
+            -0.0002665867452075034,
+            0.009760795703446288,
+            0.013725184601528693,
+            -0.044708163463534595,
+            1.046952408483321,
+            -0.02343402273537408
+          ],
+          "largest_gain_direction_share_of_delta_q_squared_norm": 0.9294394214033967,
+          "largest_gain_direction_share_of_linear_prediction": 1.046952408483321,
+          "largest_gain_direction_only_relative_error_vs_actual": 0.17086520138117836,
+          "largest_gain_direction_only_cosine_vs_actual": 0.9996578418385296
+        },
+        "D": {
+          "delta_q_norm": 0.129343169213831,
+          "actual_scaled_wrench_change_norm": 3.146959968646256,
+          "actual_force_change_mN": 924.611119625883,
+          "linear_at_A_relative_error": 0.10991977797729761,
+          "coefficients_along_A_directions": [
+            -0.016672310633320017,
+            -0.0090659995567262,
+            0.00290402585515164,
+            -0.009865956187790062,
+            -0.013503280710617335,
+            0.01929123370556695,
+            0.12381162035938743,
+            -0.019491512279575664
+          ],
+          "linearized_whitened_residual_per_direction": [
+            -2.263700456316736,
+            -1.229370713906738,
+            0.39277942224008383,
+            -0.5359746203934191,
+            -0.7289519768897104,
+            1.0014616994667782,
+            2.307186106392764,
+            -0.36158356723438845
+          ],
+          "share_of_linear_prediction_per_direction": [
+            0.0018705579383444136,
+            -0.00469616015025082,
+            -0.003280130480170068,
+            0.01515223087621833,
+            0.02440063179398985,
+            -0.03862483795954663,
+            1.0305427065488866,
+            -0.025364998567471167
+          ],
+          "largest_gain_direction_share_of_delta_q_squared_norm": 0.9162960592484227,
+          "largest_gain_direction_share_of_linear_prediction": 1.0305427065488866,
+          "largest_gain_direction_only_relative_error_vs_actual": 0.14612649387374643,
+          "largest_gain_direction_only_cosine_vs_actual": 0.9995711979281069
+        }
+      }
+    },
+    "2": {
+      "inputs": {
+        "fit_results_sha256": "920b22292a4d19cc6dcb2d4dd6a422f098d1491820f29ca72c2b7f5b0812e123",
+        "sensitivity_results_sha256": "0a445d4f2782dea5b6a1075bb490d62ffacbadd4bb723ddacd2382da282a7b03",
+        "diagnostic_script_sha256": "e0862a307322a01e33cade75ba35388805d28b3880b4aade84d7558bc9098f5f"
+      },
+      "tau_N": [
+        2.5946541215255152,
+        0.0,
+        0.0,
+        1.5263552684424777
+      ],
+      "gt_force_norm_N": 0.3005905565221585,
+      "actual_saved_noise_whitened_norm": 3.6609196102766406,
+      "fit_metrics": {
+        "A": {
+          "shape_rms_all100_mm": 0.012210473634487708,
+          "force_error_N": 0.0012311938450432125,
+          "force_direction_deg": 0.15492472484193048,
+          "force_error_over_F0": 0.004180279175316145
+        },
+        "B": {
+          "shape_rms_all100_mm": 0.009940061988051172,
+          "force_error_N": 0.008869955184070922,
+          "force_direction_deg": 1.0870359475002354,
+          "force_error_over_F0": 0.030116207201034022
+        },
+        "C": {
+          "shape_rms_all100_mm": 0.6835805244817971,
+          "force_error_N": 0.406011040681353,
+          "force_direction_deg": 17.4001347844053,
+          "force_error_over_F0": 1.3785315002522014
+        },
+        "D": {
+          "shape_rms_all100_mm": 0.6726490364963972,
+          "force_error_N": 0.38834301200058585,
+          "force_direction_deg": 17.130911888163503,
+          "force_error_over_F0": 1.3185431461352206
+        }
+      },
+      "per_state": {
+        "A": {
+          "H_raw_condition": 139.00493563522164,
+          "H_scaled_condition": 7.355776568914505,
+          "wrench_scaled_condition_common_world_base": 670.314988230654,
+          "largest_gain_among_H_directions": 1.4278266961417316,
+          "largest_gain_direction_1_based": 7,
+          "J_fd_relative_error": 1.0516648360589653e-09,
+          "drop_residual_term_relative_error": 0.00010477037194608944
+        },
+        "B": {
+          "H_raw_condition": 139.00397643775892,
+          "H_scaled_condition": 7.355973529678861,
+          "wrench_scaled_condition_common_world_base": 670.8174332246598,
+          "largest_gain_among_H_directions": 1.429695995923717,
+          "largest_gain_direction_1_based": 7,
+          "J_fd_relative_error": 1.1693923856676574e-09,
+          "drop_residual_term_relative_error": 0.0018746131619635465
+        },
+        "C": {
+          "H_raw_condition": 138.92313882629566,
+          "H_scaled_condition": 7.359548876385766,
+          "wrench_scaled_condition_common_world_base": 705.5008605032876,
+          "largest_gain_among_H_directions": 1.5359379629921834,
+          "largest_gain_direction_1_based": 7,
+          "J_fd_relative_error": 2.8308498401796534e-09,
+          "drop_residual_term_relative_error": 0.18850723698210217
+        },
+        "D": {
+          "H_raw_condition": 138.92397118341026,
+          "H_scaled_condition": 7.35939139379141,
+          "wrench_scaled_condition_common_world_base": 704.4833221900544,
+          "largest_gain_among_H_directions": 1.5337079379940375,
+          "largest_gain_direction_1_based": 7,
+          "J_fd_relative_error": 2.151546777137983e-09,
+          "drop_residual_term_relative_error": 0.18326394228903023
+        }
+      },
+      "A_per_noise_gains": [
+        0.01399234218560189,
+        0.014426881098476237,
+        0.015323705350843242,
+        0.13994751979122405,
+        0.07871128577140514,
+        0.05440322231514686,
+        1.4278266961417316,
+        0.12910692511293648
+      ],
+      "A_H_singular_values": [
+        135.76481808545952,
+        135.7000179579961,
+        135.51411681047765,
+        54.33710082981391,
+        53.98503624822729,
+        51.59062985273777,
+        18.632336314930168,
+        18.456898032928468
+      ],
+      "A_weakest_body_direction_force_fraction": 0.9942592121732234,
+      "A_weakest_body_direction_body_Fz_fraction": 0.7514735575203441,
+      "checks": {
+        "body_rank_six_all_states": true,
+        "measurement_rank_eight_all_states": true,
+        "H_fd_max_relative_error": 3.2090111720934405e-10,
+        "full_wrench_derivative_max_relative_error": 2.8308498401796534e-09,
+        "A_half_step_relative_change": 2.247696818835267e-09,
+        "derivative_checks_pass": true
+      },
+      "all_targets_achieved": true,
+      "any_curvature_cap_active": false,
+      "largest_gain_direction_1_based_at_A": 7,
+      "ratios_by_sign": {
+        "-1": {
+          "scaled_wrench_ratio": 101.71058490579448,
+          "force_ratio": 134.3101101355796,
+          "largest_gain_force_change_mN": 41.84525275854283,
+          "strongest_H_force_change_mN": 0.31155698343409927,
+          "largest_gain_shape_change_rms_mm": 0.019315614095483255,
+          "strongest_H_shape_change_rms_mm": 0.010862170795531662
+        },
+        "1": {
+          "scaled_wrench_ratio": 102.37839069652962,
+          "force_ratio": 135.23942014964078,
+          "largest_gain_force_change_mN": 42.100284756711055,
+          "strongest_H_force_change_mN": 0.3113018727093595,
+          "largest_gain_shape_change_rms_mm": 0.019304329177757606,
+          "strongest_H_shape_change_rms_mm": 0.010861809291097296
+        }
+      },
+      "preregistered_recurrence_rule_met": true,
+      "post_hoc_saved_state_decomposition": {
+        "C": {
+          "delta_q_norm": 0.12961870297550507,
+          "actual_scaled_wrench_change_norm": 1.3867663471008491,
+          "actual_force_change_mN": 407.2004325368985,
+          "linear_at_A_relative_error": 0.33590693035657604,
+          "coefficients_along_A_directions": [
+            -0.012560610115736746,
+            -0.012904808679421781,
+            0.000514295797685688,
+            -0.0032893018805629937,
+            -0.004483662842798795,
+            0.02534351163679341,
+            0.05938991045811267,
+            0.11079739555466266
+          ],
+          "linearized_whitened_residual_per_direction": [
+            -1.705288947405382,
+            -1.7511827695420397,
+            0.06969434080271611,
+            -0.1787311279438479,
+            -0.24205070109332277,
+            1.3074877280223611,
+            1.1065727853691436,
+            2.0449762320664506
+          ],
+          "share_of_linear_prediction_per_direction": [
+            -0.007008103075767716,
+            -0.002712960082055401,
+            9.120107836839963e-05,
+            0.011745080107614657,
+            0.007540080902915585,
+            0.024233597108647222,
+            0.8535826139418234,
+            0.11252849001845402
+          ],
+          "largest_gain_direction_share_of_delta_q_squared_norm": 0.20993748889422256,
+          "largest_gain_direction_share_of_linear_prediction": 0.8535826139418236,
+          "largest_gain_direction_only_relative_error_vs_actual": 0.19512291688215358,
+          "largest_gain_direction_only_cosine_vs_actual": 0.9918118332021353
+        },
+        "D": {
+          "delta_q_norm": 0.12373949267173974,
+          "actual_scaled_wrench_change_norm": 1.326631366710818,
+          "actual_force_change_mN": 389.53276798234583,
+          "linear_at_A_relative_error": 0.3280649547860857,
+          "coefficients_along_A_directions": [
+            -0.012681084148819306,
+            -0.01338945562013949,
+            0.0007309388299181858,
+            -0.00342247961681693,
+            -0.005201273757440818,
+            0.02591483712913244,
+            0.056227650885344836,
+            0.10535153646317783
+          ],
+          "linearized_whitened_residual_per_direction": [
+            -1.7216450825908574,
+            -1.8169493681007205,
+            0.09905252997884688,
+            -0.1859676200269644,
+            -0.28079095233239587,
+            1.3369627700230573,
+            1.047652501494226,
+            1.9444625661132184
+          ],
+          "share_of_linear_prediction_per_direction": [
+            -0.007443364289361552,
+            -0.002962208203791914,
+            0.00013631121512724552,
+            0.012853544186333573,
+            0.009198253574895654,
+            0.02606979911195786,
+            0.8496643395192479,
+            0.1124833248855919
+          ],
+          "largest_gain_direction_share_of_delta_q_squared_norm": 0.2064824844583648,
+          "largest_gain_direction_share_of_linear_prediction": 0.8496643395192477,
+          "largest_gain_direction_only_relative_error_vs_actual": 0.1854518562435798,
+          "largest_gain_direction_only_cosine_vs_actual": 0.9919654630146671
+        }
+      }
+    }
+  }
+}

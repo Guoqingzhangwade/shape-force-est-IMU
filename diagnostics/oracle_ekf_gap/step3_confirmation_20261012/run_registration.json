@@ -1,0 +1,8 @@
+{
+  "protocol_sha256": "0d71efe030896fc09f080dee477b17d070275a77f21aca6a4b33b6ba48ced2ec",
+  "driver_sha256": "fce4a1cc485eef280223bc5f083f69c28aae7f09ac25e1dc108a55fecd172273",
+  "selected_case_ids_before_runs": [
+    1,
+    2
+  ]
+}
